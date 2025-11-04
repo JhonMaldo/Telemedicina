@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Paciente - Sistema Médico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <!-- Menu orientado a la izquierda -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Panel de Paciente</h2>
+            <p>Bienvenido, Juan Pérez</p>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" data-section="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="menu-item" data-section="appointments">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Notificaciones</span>
+            </div>
+            <div class="menu-item" data-section="schedule">
+                <i class="fas fa-plus-circle"></i>
+                <span>Agendar Cita</span>
+            </div>
+            <div class="menu-item" data-section="chatbot">
+                <i class="fas fa-robot"></i>
+                <span>Asistente Virtual</span>
+            </div>
+            <div class="menu-item" data-section="video-consultation">
+                <i class="fas fa-video"></i>
+                <span>Videoconsulta</span>
+            </div>
+            <div class="menu-item" data-section="prescriptions">
+                <i class="fas fa-file-prescription"></i>
+                <span>Mis Recetas</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content - Menu de acciones rapidas -->
+    <div class="main-content">
+        <div class="header">
+            <h1 id="section-title">Dashboard</h1>
+            <div class="user-info">
+                <img src="#" alt="Usuario">
+                <div>
+                    <div>Juan Pérez</div>
+                    <small>Paciente</small>
+                </div>
+            </div>
+        </div>
+
+            <h2 class="section-title">Acciones Rápidas</h2>
+            <div class="dashboard-cards">
+                <div class="card" onclick="showSection('schedule')">
+                    <i class="fas fa-plus-circle"></i>
+                    <h3>Agendar Cita</h3>
+                    <p>Solicitar una nueva cita médica</p>
+                </div>
+                <div class="card" onclick="showSection('chatbot')">
+                    <i class="fas fa-robot"></i>
+                    <h3>Asistente Virtual</h3>
+                    <p>Obtener ayuda inmediata</p>
+                </div>
+                <div class="card" onclick="showSection('video-consultation')">
+                    <i class="fas fa-video"></i>
+                    <h3>Videoconsulta</h3>
+                    <p>Consulta virtual con especialista</p>
+                </div>
+                <div class="card" onclick="showSection('prescriptions')">
+                    <i class="fas fa-file-prescription"></i>
+                    <h3>Mis Recetas</h3>
+                    <p>Ver y descargar recetas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Section - Menu orientado a la derecha -->
+        <div id="appointments" class="content-section">
+            <h2 class="section-title">Modulo de notificaciones</h2>
+            <div class="appointments-list">
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Consulta General</h4>
+                        <p><i class="far fa-calendar"></i> 15 Oct, 2023 - 10:00 AM</p>
+                        <p><i class="fas fa-user-md"></i> Dr. María González</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 204</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Confirmar</button>
+                        <button class="btn btn-warning">Reagendar</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Control Cardiológico</h4>
+                        <p><i class="far fa-calendar"></i> 20 Oct, 2023 - 3:30 PM</p>
+                        <p><i class="fas fa-user-md"></i> Dr. Carlos Rodríguez</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 105</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Confirmar</button>
+                        <button class="btn btn-warning">Reagendar</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Dermatología</h4>
+                        <p><i class="far fa-calendar"></i> 25 Oct, 2023 - 11:15 AM</p>
+                        <p><i class="fas fa-user-md"></i> Dra. Laura Martínez</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 312</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Confirmar</button>
+                        <button class="btn btn-warning">Reagendar</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Appointment Section -->
+        <div id="schedule" class="content-section">
+            <h2 class="section-title">Agendar Nueva Cita</h2>
+            <form id="schedule-form">
+                <div class="form-group">
+                    <label for="appointment-type">Tipo de Consulta</label>
+                    <select id="appointment-type" required>
+                        <option value="">Selecciona el tipo de consulta</option>
+                        <option value="general">Consulta General</option>
+                        <option value="specialist">Especialista</option>
+                        <option value="follow-up">Control</option>
+                        <option value="emergency">Urgencia</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialty">Especialidad (si aplica)</label>
+                    <select id="specialty">
+                        <option value="">Selecciona especialidad</option>
+                        <option value="cardiology">Cardiología</option>
+                        <option value="dermatology">Dermatología</option>
+                        <option value="pediatrics">Pediatría</option>
+                        <option value="neurology">Neurología</option>
+                        <option value="orthopedics">Ortopedia</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctor">Médico (opcional)</label>
+                    <select id="doctor">
+                        <option value="">Selecciona médico</option>
+                        <option value="1">Dr. María González</option>
+                        <option value="2">Dr. Carlos Rodríguez</option>
+                        <option value="3">Dra. Laura Martínez</option>
+                        <option value="4">Dr. Javier López</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointment-date">Fecha Preferida</label>
+                    <input type="date" id="appointment-date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointment-time">Hora Preferida</label>
+                    <select id="appointment-time" required>
+                        <option value="">Selecciona hora</option>
+                        <option value="08:00">8:00 AM</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="symptoms">Síntomas o Motivo de Consulta</label>
+                    <textarea id="symptoms" rows="4" placeholder="Describe brevemente tus síntomas o el motivo de tu consulta"></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Solicitar Cita</button>
+            </form>
+        </div>
+
+        <!-- Chatbot Section -->
+        <div id="chatbot" class="content-section">
+            <h2 class="section-title">Asistente Virtual de Salud</h2>
+            <div class="chatbot-container">
+                <div class="chatbot-header">
+                    <h3>Asistente Médico Virtual</h3>
+                    <p>Estoy aquí para ayudarte con tus consultas de salud</p>
+                </div>
+                <div class="chatbot-messages" id="chatbot-messages">
+                    <div class="message bot">
+                        <p>¡Hola! Soy tu asistente virtual de salud. ¿En qué puedo ayudarte hoy?</p>
+                    </div>
+                </div>
+                <div class="chatbot-input">
+                    <input type="text" id="chat-input" placeholder="Escribe tu mensaje...">
+                    <button class="btn" id="send-message">Enviar</button>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <div class="quick-action" data-message="Tengo fiebre y dolor de cabeza">Síntomas: Fiebre y dolor de cabeza</div>
+                <div class="quick-action" data-message="Necesito una receta médica">Solicitar receta médica</div>
+                <div class="quick-action" data-message="Quiero agendar una cita">Agendar cita médica</div>
+                <div class="quick-action" data-message="Necesito una videoconsulta">Solicitar videoconsulta</div>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="btn" id="start-video-call">
+                    <i class="fas fa-video"></i> Iniciar Videollamada con Especialista
+                </button>
+            </div>
+        </div>
+
+        <!-- Video Consultation Section -->
+        <div id="video-consultation" class="content-section">
+            <h2 class="section-title">Videoconsulta</h2>
+            
+            <div class="dashboard-cards">
+                <div class="card">
+                    <i class="fas fa-video"></i>
+                    <h3>Consulta General</h3>
+                    <p>Consulta virtual con médico general</p>
+                    <p style="margin-top: 10px; font-weight: bold;">$25.000</p>
+                    <button class="btn" style="margin-top: 15px;" onclick="showPaymentModal('general')">Solicitar</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-stethoscope"></i>
+                    <h3>Especialista</h3>
+                    <p>Consulta con médico especialista</p>
+                    <p style="margin-top: 10px; font-weight: bold;">$40.000</p>
+                    <button class="btn" style="margin-top: 15px;" onclick="showPaymentModal('specialist')">Solicitar</button>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">Próximas Videoconsultas</h3>
+            <div class="appointments-list">
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Consulta General - Videollamada</h4>
+                        <p><i class="far fa-calendar"></i> 18 Oct, 2023 - 2:00 PM</p>
+                        <p><i class="fas fa-user-md"></i> Dr. Javier López</p>
+                        <p><i class="fas fa-video"></i> Enlace: <a href="#">Unirse a la videollamada</a></p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Unirse</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions Section -->
+        <div id="prescriptions" class="content-section">
+            <h2 class="section-title">Mis Recetas Médicas</h2>
+            
+            <div class="prescriptions-list">
+                <div class="prescription-item">
+                    <div class="prescription-info">
+                        <h4>Paracetamol 500mg</h4>
+                        <p><i class="fas fa-user-md"></i> Dr. María González</p>
+                        <p><i class="far fa-calendar"></i> Emitida: 10 Oct, 2023</p>
+                        <p><i class="fas fa-prescription-bottle-alt"></i> Tomar 1 comprimido cada 8 horas por 5 días</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn" onclick="downloadPrescription(1)">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="prescription-item">
+                    <div class="prescription-info">
+                        <h4>Ibuprofeno 400mg</h4>
+                        <p><i class="fas fa-user-md"></i> Dr. Carlos Rodríguez</p>
+                        <p><i class="far fa-calendar"></i> Emitida: 5 Oct, 2023</p>
+                        <p><i class="fas fa-prescription-bottle-alt"></i> Tomar 1 comprimido cada 12 horas por 3 días</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn" onclick="downloadPrescription(2)">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="prescription-item">
+                    <div class="prescription-info">
+                        <h4>Amoxicilina 500mg</h4>
+                        <p><i class="fas fa-user-md"></i> Dra. Laura Martínez</p>
+                        <p><i class="far fa-calendar"></i> Emitida: 1 Oct, 2023</p>
+                        <p><i class="fas fa-prescription-bottle-alt"></i> Tomar 1 comprimido cada 8 horas por 7 días</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn" onclick="downloadPrescription(3)">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn" onclick="requestNewPrescription()">
+                    <i class="fas fa-plus"></i> Solicitar Nueva Receta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Pago de Videoconsulta</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="consultation-type">Tipo de Consulta</label>
+                <input type="text" id="consultation-type" readonly>
+            </div>
+            <div class="form-group">
+                <label for="consultation-price">Precio</label>
+                <input type="text" id="consultation-price" readonly>
+            </div>
+            
+            <h4 style="margin: 20px 0 10px;">Método de Pago</h4>
+            <div class="payment-methods">
+                <div class="payment-method" data-method="credit-card">
+                    <i class="far fa-credit-card"></i>
+                    <p>Tarjeta de Crédito</p>
+                </div>
+                <div class="payment-method" data-method="debit-card">
+                    <i class="fas fa-credit-card"></i>
+                    <p>Tarjeta de Débito</p>
+                </div>
+                <div class="payment-method" data-method="paypal">
+                    <i class="fab fa-paypal"></i>
+                    <p>PayPal</p>
+                </div>
+            </div>
+            
+            <div id="credit-card-form" style="display: none;">
+                <div class="form-group">
+                    <label for="card-number">Número de Tarjeta</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456">
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="card-expiry">Fecha de Vencimiento</label>
+                        <input type="text" id="card-expiry" placeholder="MM/AA">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="card-cvc">CVC</label>
+                        <input type="text" id="card-cvc" placeholder="123">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-name">Nombre en la Tarjeta</label>
+                    <input type="text" id="card-name" placeholder="Juan Pérez">
+                </div>
+            </div>
+            
+            <button class="btn" style="width: 100%; margin-top: 20px;" id="confirm-payment">Confirmar Pago</button>
+        </div>
+    </div>
+
+    <script src="js/index.js">
+    </script>
+</body>
+</html>

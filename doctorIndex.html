@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Doctor - Sistema Médico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/doctorIndex.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Panel de Doctor</h2>
+            <p>Bienvenido, Dr. Martínez</p>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" data-section="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="menu-item" data-section="patients">
+                <i class="fas fa-user-injured"></i>
+                <span>Mis Pacientes</span>
+            </div>
+            <div class="menu-item" data-section="consultations">
+                <i class="fas fa-stethoscope"></i>
+                <span>Consultas</span>
+            </div>
+            <div class="menu-item" data-section="medical-records">
+                <i class="fas fa-notes-medical"></i>
+                <span>Expedientes</span>
+            </div>
+            <div class="menu-item" data-section="prescriptions">
+                <i class="fas fa-file-prescription"></i>
+                <span>Recetas</span>
+            </div>
+            <div class="menu-item" data-section="notifications">
+                <i class="fas fa-bell"></i>
+                <span>Notificaciones</span>
+                <div class="notification-badge">3</div>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1 id="section-title">Dashboard</h1>
+            <div class="user-info">
+                <img src="#" alt="Doctor">
+                <div>
+                    <div>Dr. Laura Martínez</div>
+                    <small>Cardióloga</small>
+                </div>
+                <div class="notification-badge">3</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+
+            <h2 class="section-title">Citas del Día</h2>
+            <div class="appointments-list">
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Juan Pérez - Control Cardiológico</h4>
+                        <p><i class="far fa-clock"></i> 9:00 AM - 9:30 AM</p>
+                        <p><i class="fas fa-info-circle"></i> Seguimiento post-tratamiento</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Iniciar Consulta</button>
+                        <button class="btn">Ver Expediente</button>
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>María González - Consulta General</h4>
+                        <p><i class="far fa-clock"></i> 10:15 AM - 10:45 AM</p>
+                        <p><i class="fas fa-info-circle"></i> Dolor torácico leve</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Iniciar Consulta</button>
+                        <button class="btn">Ver Expediente</button>
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Carlos Rodríguez - Primera Vez</h4>
+                        <p><i class="far fa-clock"></i> 11:30 AM - 12:00 PM</p>
+                        <p><i class="fas fa-info-circle"></i> Evaluación cardiológica inicial</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Iniciar Consulta</button>
+                        <button class="btn">Ver Expediente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div id="appointments" class="content-section">
+            <h2 class="section-title">Mis Citas Programadas</h2>
+            <div class="appointments-list">
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Juan Pérez - Control Cardiológico</h4>
+                        <p><i class="far fa-calendar"></i> 15 Oct, 2023 - 9:00 AM</p>
+                        <p><i class="fas fa-info-circle"></i> Seguimiento post-tratamiento</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Confirmar</button>
+                        <button class="btn btn-warning">Reagendar</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Ana López - Evaluación Cardiológica</h4>
+                        <p><i class="far fa-calendar"></i> 16 Oct, 2023 - 10:30 AM</p>
+                        <p><i class="fas fa-info-circle"></i> Primera consulta, antecedentes familiares</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Confirmar</button>
+                        <button class="btn btn-warning">Reagendar</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <h4>Roberto Sánchez - Control de Medicación</h4>
+                        <p><i class="far fa-calendar"></i> 17 Oct, 2023 - 11:15 AM</p>
+                        <p><i class="fas fa-info-circle"></i> Ajuste de dosis de anticoagulantes</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-success">Confirmar</button>
+                        <button class="btn btn-warning">Reagendar</button>
+                        <button class="btn">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients Section -->
+        <div id="patients" class="content-section">
+            <h2 class="section-title">Mis Pacientes</h2>
+            <div class="patients-list">
+                <div class="patient-item">
+                    <div class="patient-info">
+                        <img src="#" alt="Paciente">
+                        <div class="patient-details">
+                            <h4>Juan Pérez</h4>
+                            <p><i class="fas fa-birthday-cake"></i> 45 años</p>
+                            <p><i class="fas fa-phone"></i> +57 300 123 4567</p>
+                            <p><i class="fas fa-stethoscope"></i> Hipertensión arterial</p>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn">Ver Expediente</button>
+                        <button class="btn btn-success">Agendar Cita</button>
+                    </div>
+                </div>
+                <div class="patient-item">
+                    <div class="patient-info">
+                        <img src="#" alt="Paciente">
+                        <div class="patient-details">
+                            <h4>María González</h4>
+                            <p><i class="fas fa-birthday-cake"></i> 52 años</p>
+                            <p><i class="fas fa-phone"></i> +57 301 234 5678</p>
+                            <p><i class="fas fa-stethoscope"></i> Cardiopatía isquémica</p>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn">Ver Expediente</button>
+                        <button class="btn btn-success">Agendar Cita</button>
+                    </div>
+                </div>
+                <div class="patient-item">
+                    <div class="patient-info">
+                        <img src="#" alt="Paciente">
+                        <div class="patient-details">
+                            <h4>Carlos Rodríguez</h4>
+                            <p><i class="fas fa-birthday-cake"></i> 38 años</p>
+                            <p><i class="fas fa-phone"></i> +57 302 345 6789</p>
+                            <p><i class="fas fa-stethoscope"></i> Arritmia cardíaca</p>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn">Ver Expediente</button>
+                        <button class="btn btn-success">Agendar Cita</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultations Section -->
+        <div id="consultations" class="content-section">
+            <h2 class="section-title">Consultas y Videollamadas</h2>
+            
+            <div class="dashboard-cards">
+                <div class="card">
+                    <i class="fas fa-video"></i>
+                    <h3>Consultas Programadas</h3>
+                    <p>5 consultas virtuales esta semana</p>
+                    <button class="btn" style="margin-top: 15px;">Ver Todas</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-calendar-plus"></i>
+                    <h3>Agendar Consulta</h3>
+                    <p>Programar nueva consulta con paciente</p>
+                    <button class="btn" style="margin-top: 15px;">Nueva Consulta</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Medical Records Section -->
+        <div id="medical-records" class="content-section">
+            <h2 class="section-title">Expedientes Médicos</h2>
+            
+            <div class="records-container">
+                <div class="records-sidebar">
+                    <h3>Pacientes</h3>
+                    <div class="record-item active" data-patient="1">
+                        <h4>Juan Pérez</h4>
+                        <p>45 años · Hipertensión</p>
+                    </div>
+                    <div class="record-item" data-patient="2">
+                        <h4>María González</h4>
+                        <p>52 años · Cardiopatía</p>
+                    </div>
+                    <div class="record-item" data-patient="3">
+                        <h4>Carlos Rodríguez</h4>
+                        <p>38 años · Arritmia</p>
+                    </div>
+                    <div class="record-item" data-patient="4">
+                        <h4>Ana López</h4>
+                        <p>61 años · Diabetes</p>
+                    </div>
+                </div>
+                
+                <div class="records-content">
+                    <h3>Expediente de Juan Pérez</h3>
+                    <div class="form-group">
+                        <label for="patient-history">Historial Médico</label>
+                        <textarea id="patient-history" rows="6">Paciente con diagnóstico de hipertensión arterial desde 2018. Control regular con medicación. Última consulta: 15/09/2023 - PA: 130/85 mmHg. Sin eventos adversos recientes.</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="current-medication">Medicación Actual</label>
+                        <textarea id="current-medication" rows="4">- Losartán 50 mg: 1 tableta cada 24 horas
+- Atorvastatina 20 mg: 1 tableta cada 24 horas
+- Ácido acetilsalicílico 100 mg: 1 tableta cada 24 horas</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="allergies">Alergias</label>
+                        <input type="text" id="allergies" value="Penicilina (rash cutáneo)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="next-appointment">Próxima Cita</label>
+                        <input type="date" id="next-appointment" value="2023-11-15">
+                    </div>
+                    
+                    <button class="btn">Actualizar Expediente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions Section -->
+        <div id="prescriptions" class="content-section">
+            <h2 class="section-title">Gestión de Recetas Médicas</h2>
+            
+            <div class="dashboard-cards">
+                <div class="card">
+                    <i class="fas fa-plus-circle"></i>
+                    <h3>Nueva Receta</h3>
+                    <p>Crear nueva receta médica</p>
+                    <button class="btn" style="margin-top: 15px;">Crear Receta</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications" class="content-section">
+            <h2 class="section-title">Notificaciones</h2>
+            
+            <div class="notifications-list">
+                <div class="notification-item unread">
+                    <div class="notification-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>Nueva Cita Programada</h4>
+                        <p>Ana López ha agendado una cita para el 18 de octubre a las 11:00 AM</p>
+                        <p class="notification-time">Hace 2 horas</p>
+                    </div>
+                </div>
+                <div class="notification-item unread">
+                    <div class="notification-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>Resultados de Laboratorio Disponibles</h4>
+                        <p>Los resultados de Juan Pérez están disponibles para revisión</p>
+                        <p class="notification-time">Hace 5 horas</p>
+                    </div>
+                </div>
+                <div class="notification-item unread">
+                    <div class="notification-icon">
+                        <i class="fas fa-prescription-bottle-alt"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>Solicitud de Receta</h4>
+                        <p>María González ha solicitado la renovación de su medicación</p>
+                        <p class="notification-time">Ayer, 14:30</p>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-icon">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>Recordatorio de Cita</h4>
+                        <p>Tienes una cita con Carlos Rodríguez mañana a las 10:00 AM</p>
+                        <p class="notification-time">Ayer, 09:15</p>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>Videoconsulta Programada</h4>
+                        <p>Videoconsulta con Roberto Sánchez confirmada para el 17 de octubre</p>
+                        <p class="notification-time">15 Oct, 2023</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/doctorIndex.js">
+    </script>
+</body>
+</html>
