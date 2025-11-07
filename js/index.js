@@ -1,4 +1,4 @@
-// Navigation
+// -------------------- NAVEGACIÓN --------------------
 document.querySelectorAll('.menu-item').forEach(item => {
     if (item.dataset.section) {
         item.addEventListener('click', function() {
@@ -15,7 +15,6 @@ function showSection(sectionId) {
     });
     document.getElementById(sectionId).classList.add('active');
     
-    // Update section title
     const titles = {
         'dashboard': 'Dashboard',
         'appointments': 'Notificaciones',
@@ -28,11 +27,10 @@ function showSection(sectionId) {
     document.getElementById('section-title').textContent = titles[sectionId] || 'Dashboard';
 }
 
-// --- CHATBOT MEJORADO ---
+// -------------------- CHATBOT --------------------
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-message');
 const chatMessages = document.getElementById('chatbot-messages');
-
 let chatHistory = [];
 
 // Enviar mensaje con Enter o botón
@@ -51,12 +49,13 @@ document.querySelectorAll('.quick-action').forEach(action => {
 
 // Enviar mensaje del usuario
 function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const message = input.value.trim();
+    const message = chatInput.value.trim();
     if (message === '') return;
 
     addMessage(message, 'user');
-    input.value = '';
+    chatInput.value = '';
+
+    showTypingIndicator();
 
     fetch('bd/chatbot.php', {
         method: 'POST',
@@ -65,15 +64,17 @@ function sendMessage() {
     })
     .then(res => res.json())
     .then(data => {
+        hideTypingIndicator();
         addMessage(data.response, 'bot');
     })
     .catch(err => {
+        hideTypingIndicator();
         console.error('Error:', err);
-        addMessage("Hubo un problema al conectar con el asistente.", 'bot');
+        addMessage("⚠️ No se pudo conectar con el asistente.", 'bot');
     });
 }
 
-// Agregar mensaje al chat
+// Agregar mensajes al chat
 function addMessage(text, sender) {
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message', sender);
@@ -88,11 +89,10 @@ function addMessage(text, sender) {
     chatMessages.appendChild(messageContainer);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Guardar historial
     chatHistory.push({ sender, text, time });
 }
 
-// Simular “escribiendo...”
+// Indicador de “escribiendo...”
 function showTypingIndicator() {
     const typing = document.createElement('div');
     typing.id = 'typing';
@@ -101,39 +101,10 @@ function showTypingIndicator() {
     chatMessages.appendChild(typing);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 function hideTypingIndicator() {
     const typing = document.getElementById('typing');
     if (typing) typing.remove();
-}
-
-// Respuestas más inteligentes
-function getBotResponse(input) {
-    input = input.toLowerCase();
-
-    if (input.includes('hola') || input.includes('buenas')) {
-        return '¡Hola! 😊 ¿En qué puedo ayudarte hoy?';
-    } 
-    if (input.includes('fiebre') || input.includes('dolor')) {
-        return 'Parece que tienes síntomas. ¿Quieres que te ayude a agendar una cita médica?';
-    }
-    if (input.includes('receta')) {
-        return 'Para solicitar una receta médica, por favor agenda una cita con tu médico.';
-    }
-    if (input.includes('cita') || input.includes('agendar')) {
-        return 'Puedes agendar una cita en la sección "Agendar Cita" del menú. ¿Deseas que te lleve allí?';
-    }
-    if (input.includes('videoconsulta')) {
-        return 'Puedes acceder a las videoconsultas desde la sección "Videoconsulta".';
-    }
-    if (input.includes('contacto') || input.includes('ayuda')) {
-        return 'Puedes escribirnos al correo soporte@clinicavirtual.com o usar este chat para orientación básica.';
-    }
-    if (input.includes('limpiar') || input.includes('borrar')) {
-        clearChat();
-        return 'He limpiado el chat 🧹';
-    }
-
-    return 'No estoy seguro de entender. ¿Podrías reformular tu pregunta o escribir “ayuda”?';
 }
 
 // Limpiar chat
@@ -142,7 +113,7 @@ function clearChat() {
     chatHistory = [];
 }
 
-// Payment Modal
+// -------------------- PAGOS --------------------
 const paymentModal = document.getElementById('payment-modal');
 const closeModalBtn = document.querySelector('.close-modal');
 const paymentMethods = document.querySelectorAll('.payment-method');
@@ -218,17 +189,16 @@ function resetPaymentModal() {
     document.getElementById('card-name').value = '';
 }
 
-// Prescription Download
+// -------------------- RECETAS --------------------
 function downloadPrescription(id) {
     alert(`Descargando receta médica #${id}...`);
-    // Aquí iría la lógica para descargar el PDF real
 }
 
 function requestNewPrescription() {
     alert('Funcionalidad para solicitar una nueva receta médica próximamente.');
 }
 
-// Profile Update
+// -------------------- PERFIL --------------------
 document.getElementById('profile-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     alert('Perfil actualizado con éxito.');
