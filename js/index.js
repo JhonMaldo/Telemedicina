@@ -51,18 +51,26 @@ document.querySelectorAll('.quick-action').forEach(action => {
 
 // Enviar mensaje del usuario
 function sendMessage() {
-    const message = chatInput.value.trim();
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
     if (message === '') return;
 
     addMessage(message, 'user');
-    chatInput.value = '';
-    showTypingIndicator();
+    input.value = '';
 
-    setTimeout(() => {
-        const response = getBotResponse(message);
-        hideTypingIndicator();
-        addMessage(response, 'bot');
-    }, 1200);
+    fetch('bd/chatbot.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+    })
+    .then(res => res.json())
+    .then(data => {
+        addMessage(data.response, 'bot');
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        addMessage("Hubo un problema al conectar con el asistente.", 'bot');
+    });
 }
 
 // Agregar mensaje al chat
