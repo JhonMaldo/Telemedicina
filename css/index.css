@@ -469,3 +469,17 @@
                 justify-content: space-between;
             }
         }
+
+        .message .time {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+    margin-top: 2px;
+}
+
+#typing em {
+    color: #666;
+    font-style: italic;
+    font-size: 13px;
+}
