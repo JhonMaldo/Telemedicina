@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
@@ -144,7 +146,7 @@
                     <i class="fas fa-plus"></i> Agregar Doctor
                 </button>
             </div>
-            
+
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -165,7 +167,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -247,7 +249,7 @@
                     <i class="fas fa-plus"></i> Agregar Paciente
                 </button>
             </div>
-            
+
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -261,7 +263,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -342,7 +344,7 @@
         <!-- Appointments Section -->
         <div id="appointments" class="content-section">
             <h2 class="section-title">Citas del Sistema</h2>
-            
+
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -358,7 +360,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -439,7 +441,7 @@
         <!-- Users Section -->
         <div id="users" class="content-section">
             <h2 class="section-title">Usuarios del Sistema</h2>
-            
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -520,7 +522,7 @@
         <!-- Reports Section -->
         <div id="reports" class="content-section">
             <h2 class="section-title">Reportes del Sistema</h2>
-            
+
             <div class="dashboard-cards">
                 <div class="card">
                     <i class="fas fa-file-pdf"></i>
@@ -552,32 +554,32 @@
         <!-- Settings Section -->
         <div id="settings" class="content-section">
             <h2 class="section-title">Configuración del Sistema</h2>
-            
+
             <div class="form-group">
                 <label for="clinic-name">Nombre de la Clínica</label>
                 <input type="text" id="clinic-name" value="Clínica Médica Especializada">
             </div>
-            
+
             <div class="form-group">
                 <label for="clinic-address">Dirección</label>
                 <input type="text" id="clinic-address" value="Calle 123 #45-67, Bogotá">
             </div>
-            
+
             <div class="form-group">
                 <label for="clinic-phone">Teléfono</label>
                 <input type="text" id="clinic-phone" value="+57 1 234 5678">
             </div>
-            
+
             <div class="form-group">
                 <label for="clinic-email">Email</label>
                 <input type="email" id="clinic-email" value="info@clinica.com">
             </div>
-            
+
             <div class="form-group">
                 <label for="appointment-duration">Duración de Citas (minutos)</label>
                 <input type="number" id="appointment-duration" value="30" min="15" max="60">
             </div>
-            
+
             <div class="form-group">
                 <label for="working-hours">Horario de Trabajo</label>
                 <div class="form-row">
@@ -587,9 +589,17 @@
                     <div class="form-group">
                         <input type="time" id="work-end" value="18:00">
                     </div>
+                    <div class="form-group">
+                        <label>Políticas de Seguridad</label>
+                        <input type="number" id="longitud-password" placeholder="Longitud mínima password" value="8">
+                        <input type="number" id="dias-validez" placeholder="Días validez password" value="90">
+                        <label><input type="checkbox" id="requiere-mayusculas"> Requiere mayúsculas</label>
+                        <label><input type="checkbox" id="requiere-numeros"> Requiere números</label>
+                    </div>
+                    
                 </div>
             </div>
-            
+
             <button class="btn btn-success">Guardar Configuración</button>
         </div>
     </div>
@@ -613,17 +623,17 @@
                         <input type="text" id="doctor-lastname" required>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="doctor-email">Email</label>
                     <input type="email" id="doctor-email" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="doctor-phone">Teléfono</label>
                     <input type="tel" id="doctor-phone" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="doctor-specialty">Especialidad</label>
                     <select id="doctor-specialty" required>
@@ -635,12 +645,12 @@
                         <option value="orthopedics">Ortopedia</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="doctor-license">Número de Licencia</label>
                     <input type="text" id="doctor-license" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="doctor-status">Estado</label>
                     <select id="doctor-status" required>
@@ -648,7 +658,7 @@
                         <option value="inactive">Inactivo</option>
                     </select>
                 </div>
-                
+
                 <button type="submit" class="btn btn-success">Guardar Doctor</button>
             </form>
         </div>
@@ -673,17 +683,17 @@
                         <input type="text" id="patient-lastname" required>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="patient-email">Email</label>
                     <input type="email" id="patient-email" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="patient-phone">Teléfono</label>
                     <input type="tel" id="patient-phone" required>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="patient-birthdate">Fecha de Nacimiento</label>
@@ -699,12 +709,12 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="patient-address">Dirección</label>
                     <input type="text" id="patient-address">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="patient-status">Estado</label>
                     <select id="patient-status" required>
@@ -712,7 +722,7 @@
                         <option value="inactive">Inactivo</option>
                     </select>
                 </div>
-                
+
                 <button type="submit" class="btn btn-success">Guardar Paciente</button>
             </form>
         </div>
@@ -721,4 +731,5 @@
     <script src="js/admin.js">
     </script>
 </body>
+
 </html>
