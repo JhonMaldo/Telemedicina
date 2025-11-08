@@ -1,8 +1,11 @@
+// ==================== JS MÍNIMO PARA admin.php ====================
 
-
-// RF-17 COMPLETO: Gestión de usuarios (CRUD completo)
+// RF-17: Gestión de usuarios
 function cargarUsuarios() {
-    fetch('php/admin_backend.php', {method: 'POST', body: 'action=obtener_usuarios'})
+    fetch('php/admin.php', {  // ← CAMBIADO A admin.php
+        method: 'POST',
+        body: 'action=obtener_usuarios'
+    })
     .then(r => r.json())
     .then(data => {
         if (data.success) {
@@ -18,7 +21,6 @@ function cargarUsuarios() {
                     <td>${usuario.role}</td>
                     <td><span class="status-badge ${usuario.status === 'Activo' ? 'status-active' : 'status-inactive'}">${usuario.status}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-warning" onclick="editarUsuario(${usuario.id_usuario})">Editar</button>
                         <button class="btn btn-sm ${usuario.status === 'Activo' ? 'btn-danger' : 'btn-success'}" 
                                 onclick="cambiarEstadoUsuario(${usuario.id_usuario}, '${usuario.status === 'Activo' ? 'Inactivo' : 'Activo'}')">
                             ${usuario.status === 'Activo' ? 'Desactivar' : 'Activar'}
@@ -34,32 +36,17 @@ function cargarUsuarios() {
 function crearUsuario() {
     const nombre = prompt('Nombre completo:');
     const email = prompt('Email:');
-    const rol = prompt('Rol (Administrador/Doctor/Paciente):');
+    const role = prompt('Rol (Administrador/Doctor/Paciente):');
     const password = prompt('Contraseña:');
     
-    if (nombre && email && rol && password) {
-        fetch('php/admin_backend.php', {
+    if (nombre && email && role && password) {
+        fetch('php/admin.php', {  // ← CAMBIADO A admin.php
             method: 'POST',
-            body: `action=crear_usuario&nombre=${nombre}&email=${email}&role=${rol}&password=${password}`
+            body: `action=crear_usuario&nombre=${encodeURIComponent(nombre)}&email=${encodeURIComponent(email)}&role=${role}&password=${password}`
         })
         .then(r => r.json())
         .then(data => {
-            alert(data.success ? 'Usuario creado' : 'Error');
-            if (data.success) cargarUsuarios();
-        });
-    }
-}
-
-function editarUsuario(id) {
-    const nuevoRol = prompt('Nuevo rol (Administrador/Doctor/Paciente):');
-    if (nuevoRol) {
-        fetch('php/admin_backend.php', {
-            method: 'POST', 
-            body: `action=editar_usuario&id_usuario=${id}&nuevo_role=${nuevoRol}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            alert(data.success ? 'Usuario actualizado' : 'Error');
+            alert(data.success ? 'Usuario creado' : data.error);
             if (data.success) cargarUsuarios();
         });
     }
@@ -67,7 +54,7 @@ function editarUsuario(id) {
 
 function cambiarEstadoUsuario(id, estado) {
     if (confirm(`¿${estado === 'Activo' ? 'Activar' : 'Desactivar'} usuario?`)) {
-        fetch('php/admin_backend.php', {
+        fetch('php/admin.php', {  // ← CAMBIADO A admin.php
             method: 'POST',
             body: `action=actualizar_estado_usuario&id_usuario=${id}&nuevo_estado=${estado}`
         })
@@ -78,54 +65,92 @@ function cambiarEstadoUsuario(id, estado) {
     }
 }
 
-// RF-18 COMPLETO: Configuración de seguridad
-function cargarPoliticasSeguridad() {
-    fetch('php/admin_backend.php', {method: 'POST', body: 'action=obtener_politicas'})
-    .then(r => r.json())
-    .then(data => {
-        if (data.success && data.data) {
-            document.getElementById('longitud-password').value = data.data.longitud_minima_password || 8;
-            document.getElementById('dias-validez').value = data.data.dias_validez_password || 90;
-        }
-    });
-}
-
-function guardarPoliticasSeguridad() {
-    const politicas = {
-        longitud_minima_password: document.getElementById('longitud-password').value,
-        dias_validez_password: document.getElementById('dias-validez').value,
-        requiere_mayusculas: document.getElementById('requiere-mayusculas').checked,
-        requiere_numeros: document.getElementById('requiere-numeros').checked
-    };
-
-    fetch('php/admin_backend.php', {
+// RF-18: Gestión de facturación
+function cargarFacturas() {
+    fetch('php/admin.php', {  // ← CAMBIADO A admin.php
         method: 'POST',
-        body: `action=actualizar_politicas&politicas=${JSON.stringify(politicas)}`
+        body: 'action=obtener_facturas'
     })
     .then(r => r.json())
     .then(data => {
-        alert(data.success ? 'Políticas guardadas' : 'Error');
+        if (data.success) {
+            const tbody = document.querySelector('#reports table tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            data.data.forEach(factura => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>FAC-${factura.id_pagos}</td>
+                    <td>${factura.paciente_nombre || 'N/A'}</td>
+                    <td>$${factura.cantidad}</td>
+                    <td>${new Date(factura.creado_en).toLocaleDateString()}</td>
+                    <td><span class="status-badge ${factura.status === 'pagado' ? 'status-active' : 'status-warning'}">${factura.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="marcarComoPagado(${factura.id_pagos})" ${factura.status === 'pagado' ? 'disabled' : ''}>
+                            Pagar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
     });
 }
 
-// Inicialización
+function marcarComoPagado(idPago) {
+    if (confirm('¿Marcar como pagado?')) {
+        fetch('php/admin.php', {  // ← CAMBIADO A admin.php
+            method: 'POST',
+            body: `action=actualizar_estado_pago&id_pago=${idPago}&nuevo_estado=pagado`
+        })
+        .then(r => r.json())
+        .then(data => {
+            alert(data.success ? 'Pago actualizado' : 'Error');
+            if (data.success) cargarFacturas();
+        });
+    }
+}
+
+// Configuración
+function guardarConfiguracion() {
+    const config = {
+        'nombre_clinica': document.getElementById('clinic-name').value,
+        'telefono_clinica': document.getElementById('clinic-phone').value,
+        'duracion_citas': document.getElementById('appointment-duration').value
+    };
+
+    fetch('php/admin.php', {  // ← CAMBIADO A admin.php
+        method: 'POST',
+        body: `action=actualizar_configuracion&configuraciones=${JSON.stringify(config)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert(data.success ? 'Configuración guardada' : 'Error');
+    });
+}
+
+// Inicialización - Agrega esto a tu showSection existente
 function showSection(sectionId) {
     // ... tu código existente ...
     
-    // Agregar estas líneas:
+    // Agregar estas líneas al final:
     if (sectionId === 'users') {
         cargarUsuarios();
         // Agregar botón crear usuario si no existe
-        if (!document.querySelector('#users .btn-success')) {
+        if (!document.querySelector('#users .btn-crear-usuario')) {
             const titulo = document.querySelector('#users .section-title');
-            titulo.innerHTML += '<button class="btn btn-success" onclick="crearUsuario()">Crear Usuario</button>';
+            titulo.innerHTML += '<button class="btn btn-success btn-crear-usuario" onclick="crearUsuario()">Crear Usuario</button>';
         }
     }
-    if (sectionId === 'settings') cargarPoliticasSeguridad();
+    if (sectionId === 'reports') cargarFacturas();
 }
 
 // Agregar al final del DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
     const btnGuardar = document.querySelector('#settings .btn-success');
-    if (btnGuardar) btnGuardar.addEventListener('click', guardarPoliticasSeguridad);
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', guardarConfiguracion);
+    }
 });
