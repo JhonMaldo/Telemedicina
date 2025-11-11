@@ -556,4 +556,9 @@
     flex-grow: 1; /* Hacemos que crezcan para llenar el espacio */
     flex-basis: 0; /* Asegura que se distribuyan equitativamente */
     text-align: center;
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> origin/master

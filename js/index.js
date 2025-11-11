@@ -47,6 +47,10 @@ document.querySelectorAll('.quick-action').forEach(action => {
     });
 });
 
+<<<<<<< HEAD
+=======
+// Enviar mensaje del usuario
+>>>>>>> origin/master
 // Enviar mensaje del usuario
 function sendMessage() {
     const message = chatInput.value.trim();
@@ -57,6 +61,7 @@ function sendMessage() {
 
     showTypingIndicator();
 
+<<<<<<< HEAD
     fetch('bd/chatbot.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -65,6 +70,82 @@ function sendMessage() {
     .then(res => res.json())
     .then(data => {
         hideTypingIndicator();
+=======
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+    // Simular respuesta del bot
+    setTimeout(() => {
+        hideTypingIndicator();
+        const response = generateBotResponse(message);
+        addMessage(response, 'bot');
+    }, 1000 + Math.random() * 2000);
+=======
+    console.log('🔍 DEPURACIÓN - Enviando mensaje:', message);
+
+    // Intentar diferentes rutas
+    const pathsToTry = [
+        'DataBase/php/chatbot.php',
+        './DataBase/php/chatbot.php',
+        '../DataBase/php/chatbot.php',
+        '/DataBase/php/chatbot.php'
+    ];
+
+    let currentTry = 0;
+
+    function attemptFetch() {
+        if (currentTry >= pathsToTry.length) {
+            console.error('❌ Todas las rutas fallaron');
+            hideTypingIndicator();
+            addMessage("⚠️ Error: Verifica que el servidor esté funcionando y los archivos PHP estén en DataBase/php/", 'bot');
+            return;
+        }
+
+        const currentPath = pathsToTry[currentTry];
+        console.log(`🔄 Intentando ruta ${currentTry + 1}: ${currentPath}`);
+
+        fetch(currentPath, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => {
+            console.log(`📊 Status: ${response.status}, OK: ${response.ok}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ ÉXITO - Respuesta recibida:', data);
+            hideTypingIndicator();
+            addMessage(data.response, 'bot');
+        })
+        .catch(error => {
+            console.error(`❌ Error con ${currentPath}:`, error);
+            currentTry++;
+            
+            // Intentar siguiente ruta después de un breve delay
+            setTimeout(attemptFetch, 100);
+        });
+    }
+
+    // Comenzar el primer intento
+    attemptFetch();
+>>>>>>> Stashed changes
+=======
+    fetch('bd/chatbot.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+    })
+    .then(res => res.json())
+    .then(data => {
+        hideTypingIndicator();
+>>>>>>> origin/master
         addMessage(data.response, 'bot');
     })
     .catch(err => {
@@ -72,6 +153,10 @@ function sendMessage() {
         console.error('Error:', err);
         addMessage("⚠️ No se pudo conectar con el asistente.", 'bot');
     });
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 396ba34 (Botones)
+>>>>>>> origin/master
 }
 
 // Agregar mensajes al chat
@@ -92,7 +177,38 @@ function addMessage(text, sender) {
     chatHistory.push({ sender, text, time });
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+// Generar respuesta del bot
+function generateBotResponse(message) {
+    const lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.includes('hola') || lowerMessage.includes('buenos')) {
+        return '¡Hola! Soy tu asistente virtual de salud. ¿En qué puedo ayudarte hoy?';
+    } else if (lowerMessage.includes('cita') || lowerMessage.includes('agendar')) {
+        return 'Puedes agendar una cita en la sección "Agendar Cita". ¿Necesitas ayuda con algún tipo de consulta específica?';
+    } else if (lowerMessage.includes('receta') || lowerMessage.includes('medic')) {
+        return 'Para solicitar una receta médica, ve a la sección "Mis Recetas" o contacta a tu médico directamente.';
+    } else if (lowerMessage.includes('video') || lowerMessage.includes('virtual')) {
+        return 'Puedes solicitar una videoconsulta en la sección "Videoconsulta". Tenemos disponibilidad inmediata.';
+    } else if (lowerMessage.includes('fiebre') || lowerMessage.includes('dolor')) {
+        return 'Si tienes fiebre o dolor persistente, te recomiendo agendar una consulta. ¿Quieres que te ayude a programarla?';
+    } else if (lowerMessage.includes('gracias')) {
+        return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
+    } else {
+        return 'Entiendo que necesitas ayuda. Puedo asistirte con: agendar citas, solicitar recetas, videoconsultas o responder preguntas generales de salud. ¿En qué específicamente necesitas ayuda?';
+    }
+}
+
+=======
+>>>>>>> Stashed changes
+>>>>>>> origin/master
 // Indicador de "escribiendo..."
+=======
+// Indicador de “escribiendo...”
+>>>>>>> parent of 396ba34 (Botones)
 function showTypingIndicator() {
     const typing = document.createElement('div');
     typing.id = 'typing';
@@ -202,4 +318,53 @@ function requestNewPrescription() {
 document.getElementById('profile-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     alert('Perfil actualizado con éxito.');
+<<<<<<< HEAD
 });
+=======
+});
+<<<<<<< HEAD
+
+<<<<<<< Updated upstream
+// Botón solicitar nueva receta
+document.querySelector('#prescriptions .btn')?.addEventListener('click', function() {
+    if (this.textContent.includes('Solicitar Nueva Receta')) {
+        requestNewPrescription();
+    }
+});
+
+// -------------------- INICIALIZACIÓN --------------------
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Sistema de paciente inicializado');
+    
+    // Configurar fecha mínima para agendar citas (hoy)
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('appointment-date');
+    if (dateInput) {
+        dateInput.min = today;
+    }
+});
+=======
+// Función de prueba para verificar rutas
+function testPaths() {
+    console.log('🧪 TESTEANDO RUTAS DISPONIBLES:');
+    const testPaths = [
+        'DataBase/php/chatbot.php',
+        '../DataBase/php/chatbot.php', 
+        './DataBase/php/chatbot.php',
+        'php/chatbot.php',
+        '../php/chatbot.php'
+    ];
+    
+    testPaths.forEach(path => {
+        fetch(path, { method: 'HEAD' })
+            .then(res => console.log(`✅ ${path}: ${res.status}`))
+            .catch(err => console.log(`❌ ${path}: ${err.message}`));
+    });
+}
+
+// Ejecutar test al cargar (opcional)
+// setTimeout(testPaths, 1000);
+>>>>>>> Stashed changes
+=======
+>>>>>>> parent of 396ba34 (Botones)
+>>>>>>> origin/master
