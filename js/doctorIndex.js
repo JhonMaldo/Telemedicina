@@ -251,19 +251,18 @@ async function cargarPerfilPaciente(id) {
                     </div>
                 </div>
                 
-            <div class="profile-action-update">
-            <button class="btn btn-success btn-full-width" id="btnActualizar" data-id="${id}">
-                Actualizar Expediente
-            </button>
-            </div>
-
-
+                <div class="profile-action-update">
+                    <button class="btn btn-success btn-full-width" id="btnActivarEdicion" data-id="${id}">
+                        ✏️ Actualizar Expediente
+                    </button>
+                </div>
 
                 <div class="profile-actions-row">
                     <button class="btn btn-primary">Agendar Nueva Cita</button>
                     <button class="btn btn-secondary">Generar Reporte</button>
-                    <button class="btn" onclick="cargarListaPacientes()">Volver a la Lista</button>
+                    <button class="btn" onclick="cargarListaPacientes()">← Volver a la Lista</button>
                 </div>
+            </div>
         `;
          
     } catch (error) {
@@ -306,3 +305,149 @@ document.addEventListener('click', function(e) {
         cargarListaPacientes();
     }
 });
+
+// --- ACTUALIZAR EXPEDIENTE ---
+document.addEventListener('click', function (e) {
+    // Botón para activar edición
+    if (e.target.id === 'btnActivarEdicion') {
+        const idPaciente = e.target.dataset.id;
+        activarModoEdicion(idPaciente);
+    }
+    
+    // Botón para guardar cambios
+    if (e.target.id === 'btnGuardarCambios') {
+        const idPaciente = e.target.dataset.id;
+        guardarCambiosExpediente(idPaciente);
+    }
+    
+    // Botón para cancelar edición
+    if (e.target.id === 'btnCancelarEdicion') {
+        const idPaciente = document.querySelector('#btnGuardarCambios').dataset.id;
+        cancelarEdicion(idPaciente);
+    }
+});
+
+// Función para activar el modo edición
+function activarModoEdicion(idPaciente) {
+    const profile = document.querySelector('.patient-profile');
+    
+    // Reemplazar campos de solo lectura por campos editables
+    const basicInfo = profile.querySelector('.patient-basic-info');
+    basicInfo.innerHTML = `
+        <p><strong>Edad:</strong> ${profile.querySelector('p:nth-child(1)').textContent.replace('Edad:', '').trim()}</p>
+        <p><strong>Género:</strong> ${profile.querySelector('p:nth-child(2)').textContent.replace('Género:', '').trim()}</p>
+        
+        <div class="editable-field">
+            <label><strong>Teléfono:</strong></label>
+            <input type="text" class="editable-input" id="telefono" value="${profile.querySelector('p:nth-child(3)').textContent.replace('Teléfono:', '').trim() || ''}" placeholder="No registrado">
+        </div>
+        
+        <div class="editable-field">
+            <label><strong>Dirección:</strong></label>
+            <textarea class="editable-textarea" id="direccion" placeholder="No registrada">${profile.querySelector('p:nth-child(4)').textContent.replace('Dirección:', '').trim() || ''}</textarea>
+        </div>
+        
+        <div class="editable-field">
+            <label><strong>Contacto emergencia:</strong></label>
+            <input type="text" class="editable-input" id="contacto_emergencia" value="${profile.querySelector('p:nth-child(5)') ? profile.querySelector('p:nth-child(5)').textContent.replace('Contacto emergencia:', '').trim() : ''}" placeholder="No registrado">
+        </div>
+    `;
+
+    // Hacer editables las otras secciones
+    const historialContainer = profile.querySelector('.historial-container');
+    const historialOriginal = Array.from(historialContainer.querySelectorAll('.historial-item'))
+        .map(item => item.textContent.trim())
+        .join('\n\n');
+    
+    historialContainer.innerHTML = `
+        <textarea class="editable-textarea large" id="historial_medico" placeholder="Agregar historial médico...">${historialOriginal}</textarea>
+    `;
+
+    const medicacionContainer = profile.querySelector('.medicacion-container');
+    const medicacionOriginal = Array.from(medicacionContainer.querySelectorAll('.receta-item'))
+        .map(item => item.textContent.trim())
+        .join('\n\n');
+    
+    medicacionContainer.innerHTML = `
+        <textarea class="editable-textarea large" id="medicacion" placeholder="Agregar medicación...">${medicacionOriginal}</textarea>
+    `;
+
+    const alergiasContainer = profile.querySelector('.allergies-display');
+    const alergiasOriginal = alergiasContainer.textContent.trim();
+    
+    alergiasContainer.innerHTML = `
+        <textarea class="editable-textarea" id="alergias" placeholder="Listar alergias...">${alergiasOriginal}</textarea>
+    `;
+
+    const citaContainer = profile.querySelector('.appointment-display');
+    citaContainer.innerHTML = `
+        <div class="editable-field">
+            <input type="datetime-local" class="editable-input" id="proxima_cita">
+            <input type="text" class="editable-input" id="razon_cita" placeholder="Razón de la cita" style="margin-top: 5px;">
+        </div>
+    `;
+
+    // Cambiar el botón a "Guardar Cambios"
+    const btnContainer = profile.querySelector('.profile-action-update');
+    btnContainer.innerHTML = `
+        <button class="btn btn-success btn-full-width" id="btnGuardarCambios" data-id="${idPaciente}">
+            💾 Guardar Cambios
+        </button>
+        <button class="btn btn-secondary btn-full-width" id="btnCancelarEdicion">
+            ❌ Cancelar
+        </button>
+    `;
+}
+
+// Función para guardar cambios
+async function guardarCambiosExpediente(idPaciente) {
+    try {
+        // Obtener todos los valores editados
+        const telefono = document.getElementById('telefono').value;
+        const direccion = document.getElementById('direccion').value;
+        const contacto_emergencia = document.getElementById('contacto_emergencia').value;
+        const historial_medico = document.getElementById('historial_medico').value;
+        const medicacion = document.getElementById('medicacion').value;
+        const alergias = document.getElementById('alergias').value;
+
+        console.log('Enviando datos al servidor...', {
+            id_paciente: idPaciente,
+            telefono,
+            direccion,
+            contacto_emergencia,
+            historial_medico,
+            medicacion,
+            alergias
+        });
+
+        // Enviar la actualización
+        const updateResponse = await fetch('DataBase/php/actualizarExpediente.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_paciente: parseInt(idPaciente),
+                telefono_paciente: telefono,
+                direccion: direccion,
+                contacto_de_emergencia: contacto_emergencia,
+                historial_medico: historial_medico,
+                medicacion: medicacion,
+                alergias: alergias
+            })
+        });
+
+        const result = await updateResponse.json();
+        console.log('Respuesta del servidor:', result);
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        alert('✅ Expediente actualizado correctamente');
+        // Volver a vista normal - ESTO ES IMPORTANTE para recargar los datos
+        cargarPerfilPaciente(idPaciente);
+        
+    } catch (error) {
+        console.error('Error al actualizar:', error);
+        alert('❌ Error al actualizar expediente: ' + error.message);
+    }
+}

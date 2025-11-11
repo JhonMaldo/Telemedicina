@@ -558,3 +558,51 @@
     text-align: center;
 }
 
+/* Estilos básicos para campos editables */
+.editable-field {
+    margin-bottom: 15px;
+}
+
+.editable-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.editable-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.editable-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.editable-textarea.large {
+    min-height: 120px;
+}
+
+.btn-full-width {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.profile-action-update {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #28a745;
+}
