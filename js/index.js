@@ -182,6 +182,7 @@ function startEmergencyVideoCall() {
 }
 
 // Enviar mensaje del usuario
+// Enviar mensaje del usuario
 function sendMessage() {
     const message = chatInput.value.trim();
     if (message === '') return;
@@ -191,12 +192,70 @@ function sendMessage() {
 
     showTypingIndicator();
 
+<<<<<<< Updated upstream
     // Simular respuesta del bot
     setTimeout(() => {
         hideTypingIndicator();
         const response = generateBotResponse(message);
         addMessage(response, 'bot');
     }, 1000 + Math.random() * 2000);
+=======
+    console.log('🔍 DEPURACIÓN - Enviando mensaje:', message);
+
+    // Intentar diferentes rutas
+    const pathsToTry = [
+        'DataBase/php/chatbot.php',
+        './DataBase/php/chatbot.php',
+        '../DataBase/php/chatbot.php',
+        '/DataBase/php/chatbot.php'
+    ];
+
+    let currentTry = 0;
+
+    function attemptFetch() {
+        if (currentTry >= pathsToTry.length) {
+            console.error('❌ Todas las rutas fallaron');
+            hideTypingIndicator();
+            addMessage("⚠️ Error: Verifica que el servidor esté funcionando y los archivos PHP estén en DataBase/php/", 'bot');
+            return;
+        }
+
+        const currentPath = pathsToTry[currentTry];
+        console.log(`🔄 Intentando ruta ${currentTry + 1}: ${currentPath}`);
+
+        fetch(currentPath, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => {
+            console.log(`📊 Status: ${response.status}, OK: ${response.ok}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ ÉXITO - Respuesta recibida:', data);
+            hideTypingIndicator();
+            addMessage(data.response, 'bot');
+        })
+        .catch(error => {
+            console.error(`❌ Error con ${currentPath}:`, error);
+            currentTry++;
+            
+            // Intentar siguiente ruta después de un breve delay
+            setTimeout(attemptFetch, 100);
+        });
+    }
+
+    // Comenzar el primer intento
+    attemptFetch();
+>>>>>>> Stashed changes
 }
 
 // Agregar mensajes al chat
@@ -217,6 +276,7 @@ function addMessage(text, sender) {
     chatHistory.push({ sender, text, time });
 }
 
+<<<<<<< Updated upstream
 // Generar respuesta del bot
 function generateBotResponse(message) {
     const lowerMessage = message.toLowerCase();
@@ -238,6 +298,8 @@ function generateBotResponse(message) {
     }
 }
 
+=======
+>>>>>>> Stashed changes
 // Indicador de "escribiendo..."
 function showTypingIndicator() {
     const typing = document.createElement('div');
@@ -386,6 +448,7 @@ document.querySelectorAll('.prescription-item .btn').forEach(btn => {
     }
 });
 
+<<<<<<< Updated upstream
 // Botón solicitar nueva receta
 document.querySelector('#prescriptions .btn')?.addEventListener('click', function() {
     if (this.textContent.includes('Solicitar Nueva Receta')) {
@@ -404,3 +467,25 @@ document.addEventListener('DOMContentLoaded', function() {
         dateInput.min = today;
     }
 });
+=======
+// Función de prueba para verificar rutas
+function testPaths() {
+    console.log('🧪 TESTEANDO RUTAS DISPONIBLES:');
+    const testPaths = [
+        'DataBase/php/chatbot.php',
+        '../DataBase/php/chatbot.php', 
+        './DataBase/php/chatbot.php',
+        'php/chatbot.php',
+        '../php/chatbot.php'
+    ];
+    
+    testPaths.forEach(path => {
+        fetch(path, { method: 'HEAD' })
+            .then(res => console.log(`✅ ${path}: ${res.status}`))
+            .catch(err => console.log(`❌ ${path}: ${err.message}`));
+    });
+}
+
+// Ejecutar test al cargar (opcional)
+// setTimeout(testPaths, 1000);
+>>>>>>> Stashed changes
