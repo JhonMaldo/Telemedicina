@@ -324,6 +324,7 @@ document.addEventListener('click', function(e) {
         cargarListaPacientes();
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 });
 
 // Inicialización completa
@@ -334,4 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showSection('dashboard');
 =======
 >>>>>>> parent of 396ba34 (Botones)
+=======
+>>>>>>> parent of 8d26d8b (Generar Receta)
 });
