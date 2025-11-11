@@ -1,43 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Paciente - Sistema Médico</title>
+    <title>Panel de Administrador - Sistema Médico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
+
 <body>
-    <!-- Menu orientado a la izquierda -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h2>Panel de Paciente</h2>
-            <p>Bienvenido, Juan Pérez</p>
+            <h2>Panel de Administrador</h2>
+            <p>Bienvenido, Admin</p>
         </div>
         <div class="sidebar-menu">
             <div class="menu-item active" data-section="dashboard">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </div>
+            <div class="menu-item" data-section="doctors">
+                <i class="fas fa-user-md"></i>
+                <span>Gestión de Doctores</span>
+            </div>
+            <div class="menu-item" data-section="patients">
+                <i class="fas fa-user-injured"></i>
+                <span>Gestión de Pacientes</span>
+            </div>
             <div class="menu-item" data-section="appointments">
                 <i class="fas fa-calendar-alt"></i>
-                <span>Notificaciones</span>
+                <span>Citas del Sistema</span>
             </div>
-            <div class="menu-item" data-section="schedule">
-                <i class="fas fa-plus-circle"></i>
-                <span>Agendar Cita</span>
+            <div class="menu-item" data-section="users">
+                <i class="fas fa-users"></i>
+                <span>Usuarios del Sistema</span>
             </div>
-            <div class="menu-item" data-section="chatbot">
-                <i class="fas fa-robot"></i>
-                <span>Asistente Virtual</span>
+            <div class="menu-item" data-section="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reportes</span>
             </div>
-            <div class="menu-item" data-section="video-consultation">
-                <i class="fas fa-video"></i>
-                <span>Videoconsulta</span>
-            </div>
-            <div class="menu-item" data-section="prescriptions">
-                <i class="fas fa-file-prescription"></i>
-                <span>Mis Recetas</span>
+            <div class="menu-item" data-section="settings">
+                <i class="fas fa-cog"></i>
+                <span>Configuración</span>
             </div>
             <div class="menu-item">
                 <i class="fas fa-sign-out-alt"></i>
@@ -46,109 +52,592 @@
         </div>
     </div>
 
-    <!-- Main Content - Menu de acciones rapidas -->
+    <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <h1 id="section-title">Dashboard</h1>
             <div class="user-info">
-                <img src="#" alt="Usuario">
+                <img src="#" alt="Administrador">
                 <div>
-                    <div>Juan Pérez</div>
-                    <small>Paciente</small>
+                    <div>Administrador</div>
+                    <small>Super Usuario</small>
                 </div>
+                <div class="notification-badge">5</div>
             </div>
         </div>
 
-            <h2 class="section-title">Acciones Rápidas</h2>
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
             <div class="dashboard-cards">
-                <div class="card" onclick="showSection('schedule')">
-                    <i class="fas fa-plus-circle"></i>
-                    <h3>Agendar Cita</h3>
-                    <p>Solicitar una nueva cita médica</p>
+                <div class="card">
+                    <i class="fas fa-user-md"></i>
+                    <h3>Doctores Registrados</h3>
+                    <p>24 doctores activos</p>
                 </div>
-                <div class="card" onclick="showSection('chatbot')">
-                    <i class="fas fa-robot"></i>
-                    <h3>Asistente Virtual</h3>
-                    <p>Obtener ayuda inmediata</p>
+                <div class="card">
+                    <i class="fas fa-user-injured"></i>
+                    <h3>Pacientes Registrados</h3>
+                    <p>348 pacientes activos</p>
                 </div>
-                <div class="card" onclick="showSection('video-consultation')">
-                    <i class="fas fa-video"></i>
-                    <h3>Videoconsulta</h3>
-                    <p>Consulta virtual con especialista</p>
+                <div class="card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Citas del Día</h3>
+                    <p>42 citas programadas</p>
                 </div>
-                <div class="card" onclick="showSection('prescriptions')">
+                <div class="card">
                     <i class="fas fa-file-prescription"></i>
-                    <h3>Mis Recetas</h3>
-                    <p>Ver y descargar recetas</p>
+                    <h3>Recetas Emitidas</h3>
+                    <p>18 recetas este mes</p>
                 </div>
+            </div>
+
+            <h2 class="section-title">Actividad Reciente</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Acción</th>
+                            <th>Fecha</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dr. Martínez</td>
+                            <td>Actualizó perfil de paciente</td>
+                            <td>15 Oct, 2023 14:30</td>
+                            <td>192.168.1.105</td>
+                        </tr>
+                        <tr>
+                            <td>Ana López (Paciente)</td>
+                            <td>Agendó nueva cita</td>
+                            <td>15 Oct, 2023 13:15</td>
+                            <td>192.168.1.112</td>
+                        </tr>
+                        <tr>
+                            <td>Dr. González</td>
+                            <td>Emitió receta médica</td>
+                            <td>15 Oct, 2023 11:45</td>
+                            <td>192.168.1.108</td>
+                        </tr>
+                        <tr>
+                            <td>Administrador</td>
+                            <td>Registró nuevo doctor</td>
+                            <td>15 Oct, 2023 10:20</td>
+                            <td>192.168.1.100</td>
+                        </tr>
+                        <tr>
+                            <td>Carlos Rodríguez (Paciente)</td>
+                            <td>Solicitó renovación de receta</td>
+                            <td>14 Oct, 2023 16:40</td>
+                            <td>192.168.1.115</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Appointments Section - Menu orientado a la derecha -->
-        <div id="appointments" class="content-section">
-            <h2 class="section-title">Modulo de notificaciones</h2>
-            <div class="appointments-list">
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Consulta General</h4>
-                        <p><i class="far fa-calendar"></i> 15 Oct, 2023 - 10:00 AM</p>
-                        <p><i class="fas fa-user-md"></i> Dr. María González</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 204</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Control Cardiológico</h4>
-                        <p><i class="far fa-calendar"></i> 20 Oct, 2023 - 3:30 PM</p>
-                        <p><i class="fas fa-user-md"></i> Dr. Carlos Rodríguez</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 105</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Dermatología</h4>
-                        <p><i class="far fa-calendar"></i> 25 Oct, 2023 - 11:15 AM</p>
-                        <p><i class="fas fa-user-md"></i> Dra. Laura Martínez</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 312</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
+        <!-- Doctors Management Section -->
+        <div id="doctors" class="content-section">
+            <div class="section-title">
+                <h2>Gestión de Doctores</h2>
+                <button class="btn btn-success" id="add-doctor-btn">
+                    <i class="fas fa-plus"></i> Agregar Doctor
+                </button>
             </div>
-        </div>
 
-        <!-- Schedule Appointment Section -->
-        <div id="schedule" class="content-section">
-            <h2 class="section-title">Agendar Nueva Cita</h2>
-            <form id="schedule-form">
-                <div class="form-group">
-                    <label for="appointment-type">Tipo de Consulta</label>
-                    <select id="appointment-type" required>
-                        <option value="">Selecciona el tipo de consulta</option>
-                        <option value="general">Consulta General</option>
-                        <option value="specialist">Especialista</option>
-                        <option value="follow-up">Control</option>
-                        <option value="emergency">Urgencia</option>
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-doctors" placeholder="Buscar doctores...">
+                </div>
+                <div class="filters">
+                    <select id="specialty-filter">
+                        <option value="">Todas las especialidades</option>
+                        <option value="cardiology">Cardiología</option>
+                        <option value="dermatology">Dermatología</option>
+                        <option value="pediatrics">Pediatría</option>
+                        <option value="neurology">Neurología</option>
+                    </select>
+                    <select id="status-filter">
+                        <option value="">Todos los estados</option>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
                     </select>
                 </div>
-                
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Especialidad</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>DOC-001</td>
+                            <td>Dr. Laura Martínez</td>
+                            <td>Cardiología</td>
+                            <td>laura.martinez@clinica.com</td>
+                            <td>+57 301 987 6543</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning edit-doctor" data-id="1">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-doctor" data-id="1">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>DOC-002</td>
+                            <td>Dr. Carlos Rodríguez</td>
+                            <td>Dermatología</td>
+                            <td>carlos.rodriguez@clinica.com</td>
+                            <td>+57 302 876 5432</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning edit-doctor" data-id="2">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-doctor" data-id="2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>DOC-003</td>
+                            <td>Dra. María González</td>
+                            <td>Pediatría</td>
+                            <td>maria.gonzalez@clinica.com</td>
+                            <td>+57 303 765 4321</td>
+                            <td><span class="status-badge status-inactive">Inactivo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning edit-doctor" data-id="3">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-doctor" data-id="3">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Patients Management Section -->
+        <div id="patients" class="content-section">
+            <div class="section-title">
+                <h2>Gestión de Pacientes</h2>
+                <button class="btn btn-success" id="add-patient-btn">
+                    <i class="fas fa-plus"></i> Agregar Paciente
+                </button>
+            </div>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-patients" placeholder="Buscar pacientes...">
+                </div>
+                <div class="filters">
+                    <select id="status-patient-filter">
+                        <option value="">Todos los estados</option>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Edad</th>
+                            <th>Género</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PAC-001</td>
+                            <td>Juan Pérez</td>
+                            <td>juan.perez@example.com</td>
+                            <td>+57 300 123 4567</td>
+                            <td>45</td>
+                            <td>Masculino</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning edit-patient" data-id="1">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-patient" data-id="1">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PAC-002</td>
+                            <td>María González</td>
+                            <td>maria.gonzalez@example.com</td>
+                            <td>+57 301 234 5678</td>
+                            <td>52</td>
+                            <td>Femenino</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning edit-patient" data-id="2">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-patient" data-id="2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PAC-003</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>carlos.rodriguez@example.com</td>
+                            <td>+57 302 345 6789</td>
+                            <td>38</td>
+                            <td>Masculino</td>
+                            <td><span class="status-badge status-inactive">Inactivo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning edit-patient" data-id="3">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-patient" data-id="3">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div id="appointments" class="content-section">
+            <h2 class="section-title">Citas del Sistema</h2>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-appointments" placeholder="Buscar citas...">
+                </div>
+                <div class="filters">
+                    <input type="date" id="date-filter">
+                    <select id="status-appointment-filter">
+                        <option value="">Todos los estados</option>
+                        <option value="scheduled">Programada</option>
+                        <option value="completed">Completada</option>
+                        <option value="cancelled">Cancelada</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Paciente</th>
+                            <th>Doctor</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>APT-001</td>
+                            <td>Juan Pérez</td>
+                            <td>Dr. Laura Martínez</td>
+                            <td>15 Oct, 2023</td>
+                            <td>9:00 AM</td>
+                            <td>Consulta General</td>
+                            <td><span class="status-badge status-active">Programada</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>APT-002</td>
+                            <td>María González</td>
+                            <td>Dr. Carlos Rodríguez</td>
+                            <td>16 Oct, 2023</td>
+                            <td>10:30 AM</td>
+                            <td>Dermatología</td>
+                            <td><span class="status-badge status-active">Programada</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>APT-003</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>Dra. María González</td>
+                            <td>14 Oct, 2023</td>
+                            <td>11:15 AM</td>
+                            <td>Pediatría</td>
+                            <td><span class="status-badge status-inactive">Completada</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users" class="content-section">
+            <h2 class="section-title">Usuarios del Sistema</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Fecha Registro</th>
+                            <th>Último Acceso</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>USR-001</td>
+                            <td>Administrador</td>
+                            <td>admin@clinica.com</td>
+                            <td>Administrador</td>
+                            <td>01 Ene, 2023</td>
+                            <td>15 Oct, 2023 14:30</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>USR-002</td>
+                            <td>Dr. Laura Martínez</td>
+                            <td>laura.martinez@clinica.com</td>
+                            <td>Doctor</td>
+                            <td>15 Feb, 2023</td>
+                            <td>15 Oct, 2023 13:15</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>USR-003</td>
+                            <td>Juan Pérez</td>
+                            <td>juan.perez@example.com</td>
+                            <td>Paciente</td>
+                            <td>20 Mar, 2023</td>
+                            <td>15 Oct, 2023 11:45</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="content-section">
+            <h2 class="section-title">Reportes del Sistema</h2>
+
+            <div class="dashboard-cards">
+                <div class="card">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>Reporte de Doctores</h3>
+                    <p>Listado completo de doctores</p>
+                    <button class="btn" style="margin-top: 15px;">Generar PDF</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-file-excel"></i>
+                    <h3>Reporte de Pacientes</h3>
+                    <p>Datos demográficos de pacientes</p>
+                    <button class="btn" style="margin-top: 15px;">Generar Excel</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Estadísticas de Citas</h3>
+                    <p>Métricas y tendencias</p>
+                    <button class="btn" style="margin-top: 15px;">Ver Reporte</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h3>Reporte Financiero</h3>
+                    <p>Ingresos y transacciones</p>
+                    <button class="btn" style="margin-top: 15px;">Generar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="content-section">
+            <h2 class="section-title">Configuración del Sistema</h2>
+
+            <div class="form-group">
+                <label for="clinic-name">Nombre de la Clínica</label>
+                <input type="text" id="clinic-name" value="Clínica Médica Especializada">
+            </div>
+
+            <div class="form-group">
+                <label for="clinic-address">Dirección</label>
+                <input type="text" id="clinic-address" value="Calle 123 #45-67, Bogotá">
+            </div>
+
+            <div class="form-group">
+                <label for="clinic-phone">Teléfono</label>
+                <input type="text" id="clinic-phone" value="+57 1 234 5678">
+            </div>
+
+            <div class="form-group">
+                <label for="clinic-email">Email</label>
+                <input type="email" id="clinic-email" value="info@clinica.com">
+            </div>
+
+            <div class="form-group">
+                <label for="appointment-duration">Duración de Citas (minutos)</label>
+                <input type="number" id="appointment-duration" value="30" min="15" max="60">
+            </div>
+
+            <div class="form-group">
+                <label for="working-hours">Horario de Trabajo</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="time" id="work-start" value="08:00">
+                    </div>
+                    <div class="form-group">
+                        <input type="time" id="work-end" value="18:00">
+                    </div>
+                    <div class="form-group">
+                        <label>Políticas de Seguridad</label>
+                        <input type="number" id="longitud-password" placeholder="Longitud mínima password" value="8">
+                        <input type="number" id="dias-validez" placeholder="Días validez password" value="90">
+                        <label><input type="checkbox" id="requiere-mayusculas"> Requiere mayúsculas</label>
+                        <label><input type="checkbox" id="requiere-numeros"> Requiere números</label>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <button class="btn btn-success">Guardar Configuración</button>
+        </div>
+    </div>
+
+    <!-- Doctor Modal -->
+    <div id="doctor-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="doctor-modal-title">Agregar Nuevo Doctor</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="doctor-form">
+                <input type="hidden" id="doctor-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="doctor-firstname">Nombre</label>
+                        <input type="text" id="doctor-firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doctor-lastname">Apellido</label>
+                        <input type="text" id="doctor-lastname" required>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label for="specialty">Especialidad (si aplica)</label>
-                    <select id="specialty">
-                        <option value="">Selecciona especialidad</option>
+                    <label for="doctor-email">Email</label>
+                    <input type="email" id="doctor-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-phone">Teléfono</label>
+                    <input type="tel" id="doctor-phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-specialty">Especialidad</label>
+                    <select id="doctor-specialty" required>
+                        <option value="">Seleccione especialidad</option>
                         <option value="cardiology">Cardiología</option>
                         <option value="dermatology">Dermatología</option>
                         <option value="pediatrics">Pediatría</option>
@@ -156,229 +645,91 @@
                         <option value="orthopedics">Ortopedia</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="doctor">Médico (opcional)</label>
-                    <select id="doctor">
-                        <option value="">Selecciona médico</option>
-                        <option value="1">Dr. María González</option>
-                        <option value="2">Dr. Carlos Rodríguez</option>
-                        <option value="3">Dra. Laura Martínez</option>
-                        <option value="4">Dr. Javier López</option>
+                    <label for="doctor-license">Número de Licencia</label>
+                    <input type="text" id="doctor-license" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="doctor-status">Estado</label>
+                    <select id="doctor-status" required>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="appointment-date">Fecha Preferida</label>
-                    <input type="date" id="appointment-date" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="appointment-time">Hora Preferida</label>
-                    <select id="appointment-time" required>
-                        <option value="">Selecciona hora</option>
-                        <option value="08:00">8:00 AM</option>
-                        <option value="09:00">9:00 AM</option>
-                        <option value="10:00">10:00 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="14:00">2:00 PM</option>
-                        <option value="15:00">3:00 PM</option>
-                        <option value="16:00">4:00 PM</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="symptoms">Síntomas o Motivo de Consulta</label>
-                    <textarea id="symptoms" rows="4" placeholder="Describe brevemente tus síntomas o el motivo de tu consulta"></textarea>
-                </div>
-                
-                <button type="submit" class="btn">Solicitar Cita</button>
+
+                <button type="submit" class="btn btn-success">Guardar Doctor</button>
             </form>
         </div>
-
-        <!-- Chatbot Section -->
-        <div id="chatbot" class="content-section">
-            <h2 class="section-title">Asistente Virtual de Salud</h2>
-            <div class="chatbot-container">
-                <div class="chatbot-header">
-                    <h3>Asistente Médico Virtual</h3>
-                    <p>Estoy aquí para ayudarte con tus consultas de salud</p>
-                </div>
-                <div class="chatbot-messages" id="chatbot-messages">
-                    <div class="message bot">
-                        <p>¡Hola! Soy tu asistente virtual de salud. ¿En qué puedo ayudarte hoy?</p>
-                    </div>
-                </div>
-                <div class="chatbot-input">
-                    <input type="text" id="chat-input" placeholder="Escribe tu mensaje...">
-                    <button class="btn" id="send-message">Enviar</button>
-                </div>
-            </div>
-            
-            <div class="quick-actions">
-                <div class="quick-action" data-message="Tengo fiebre y dolor de cabeza">Síntomas: Fiebre y dolor de cabeza</div>
-                <div class="quick-action" data-message="Necesito una receta médica">Solicitar receta médica</div>
-                <div class="quick-action" data-message="Quiero agendar una cita">Agendar cita médica</div>
-                <div class="quick-action" data-message="Necesito una videoconsulta">Solicitar videoconsulta</div>
-            </div>
-            
-            <div style="margin-top: 20px; text-align: center;">
-                <button class="btn" id="start-video-call">
-                    <i class="fas fa-video"></i> Iniciar Videollamada con Especialista
-                </button>
-            </div>
-        </div>
-
-        <!-- Video Consultation Section -->
-        <div id="video-consultation" class="content-section">
-            <h2 class="section-title">Videoconsulta</h2>
-            
-            <div class="dashboard-cards">
-                <div class="card">
-                    <i class="fas fa-video"></i>
-                    <h3>Consulta General</h3>
-                    <p>Consulta virtual con médico general</p>
-                    <p style="margin-top: 10px; font-weight: bold;">$25.000</p>
-                    <button class="btn" style="margin-top: 15px;" onclick="showPaymentModal('general')">Solicitar</button>
-                </div>
-                <div class="card">
-                    <i class="fas fa-stethoscope"></i>
-                    <h3>Especialista</h3>
-                    <p>Consulta con médico especialista</p>
-                    <p style="margin-top: 10px; font-weight: bold;">$40.000</p>
-                    <button class="btn" style="margin-top: 15px;" onclick="showPaymentModal('specialist')">Solicitar</button>
-                </div>
-            </div>
-            
-            <h3 style="margin-top: 30px; margin-bottom: 15px;">Próximas Videoconsultas</h3>
-            <div class="appointments-list">
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Consulta General - Videollamada</h4>
-                        <p><i class="far fa-calendar"></i> 18 Oct, 2023 - 2:00 PM</p>
-                        <p><i class="fas fa-user-md"></i> Dr. Javier López</p>
-                        <p><i class="fas fa-video"></i> Enlace: <a href="#">Unirse a la videollamada</a></p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Unirse</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Prescriptions Section -->
-        <div id="prescriptions" class="content-section">
-            <h2 class="section-title">Mis Recetas Médicas</h2>
-            
-            <div class="prescriptions-list">
-                <div class="prescription-item">
-                    <div class="prescription-info">
-                        <h4>Paracetamol 500mg</h4>
-                        <p><i class="fas fa-user-md"></i> Dr. María González</p>
-                        <p><i class="far fa-calendar"></i> Emitida: 10 Oct, 2023</p>
-                        <p><i class="fas fa-prescription-bottle-alt"></i> Tomar 1 comprimido cada 8 horas por 5 días</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn" onclick="downloadPrescription(1)">
-                            <i class="fas fa-download"></i> Descargar PDF
-                        </button>
-                    </div>
-                </div>
-                <div class="prescription-item">
-                    <div class="prescription-info">
-                        <h4>Ibuprofeno 400mg</h4>
-                        <p><i class="fas fa-user-md"></i> Dr. Carlos Rodríguez</p>
-                        <p><i class="far fa-calendar"></i> Emitida: 5 Oct, 2023</p>
-                        <p><i class="fas fa-prescription-bottle-alt"></i> Tomar 1 comprimido cada 12 horas por 3 días</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn" onclick="downloadPrescription(2)">
-                            <i class="fas fa-download"></i> Descargar PDF
-                        </button>
-                    </div>
-                </div>
-                <div class="prescription-item">
-                    <div class="prescription-info">
-                        <h4>Amoxicilina 500mg</h4>
-                        <p><i class="fas fa-user-md"></i> Dra. Laura Martínez</p>
-                        <p><i class="far fa-calendar"></i> Emitida: 1 Oct, 2023</p>
-                        <p><i class="fas fa-prescription-bottle-alt"></i> Tomar 1 comprimido cada 8 horas por 7 días</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn" onclick="downloadPrescription(3)">
-                            <i class="fas fa-download"></i> Descargar PDF
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 30px; text-align: center;">
-                <button class="btn" onclick="requestNewPrescription()">
-                    <i class="fas fa-plus"></i> Solicitar Nueva Receta
-                </button>
-            </div>
-        </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div id="payment-modal" class="modal">
+    <!-- Patient Modal -->
+    <div id="patient-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Pago de Videoconsulta</h3>
+                <h3 id="patient-modal-title">Agregar Nuevo Paciente</h3>
                 <button class="close-modal">&times;</button>
             </div>
-            <div class="form-group">
-                <label for="consultation-type">Tipo de Consulta</label>
-                <input type="text" id="consultation-type" readonly>
-            </div>
-            <div class="form-group">
-                <label for="consultation-price">Precio</label>
-                <input type="text" id="consultation-price" readonly>
-            </div>
-            
-            <h4 style="margin: 20px 0 10px;">Método de Pago</h4>
-            <div class="payment-methods">
-                <div class="payment-method" data-method="credit-card">
-                    <i class="far fa-credit-card"></i>
-                    <p>Tarjeta de Crédito</p>
-                </div>
-                <div class="payment-method" data-method="debit-card">
-                    <i class="fas fa-credit-card"></i>
-                    <p>Tarjeta de Débito</p>
-                </div>
-                <div class="payment-method" data-method="paypal">
-                    <i class="fab fa-paypal"></i>
-                    <p>PayPal</p>
-                </div>
-            </div>
-            
-            <div id="credit-card-form" style="display: none;">
-                <div class="form-group">
-                    <label for="card-number">Número de Tarjeta</label>
-                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456">
-                </div>
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label for="card-expiry">Fecha de Vencimiento</label>
-                        <input type="text" id="card-expiry" placeholder="MM/AA">
+            <form id="patient-form">
+                <input type="hidden" id="patient-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patient-firstname">Nombre</label>
+                        <input type="text" id="patient-firstname" required>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label for="card-cvc">CVC</label>
-                        <input type="text" id="card-cvc" placeholder="123">
+                    <div class="form-group">
+                        <label for="patient-lastname">Apellido</label>
+                        <input type="text" id="patient-lastname" required>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label for="card-name">Nombre en la Tarjeta</label>
-                    <input type="text" id="card-name" placeholder="Juan Pérez">
+                    <label for="patient-email">Email</label>
+                    <input type="email" id="patient-email" required>
                 </div>
-            </div>
-            
-            <button class="btn" style="width: 100%; margin-top: 20px;" id="confirm-payment">Confirmar Pago</button>
+
+                <div class="form-group">
+                    <label for="patient-phone">Teléfono</label>
+                    <input type="tel" id="patient-phone" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patient-birthdate">Fecha de Nacimiento</label>
+                        <input type="date" id="patient-birthdate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-gender">Género</label>
+                        <select id="patient-gender" required>
+                            <option value="">Seleccione</option>
+                            <option value="male">Masculino</option>
+                            <option value="female">Femenino</option>
+                            <option value="other">Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="patient-address">Dirección</label>
+                    <input type="text" id="patient-address">
+                </div>
+
+                <div class="form-group">
+                    <label for="patient-status">Estado</label>
+                    <select id="patient-status" required>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">Guardar Paciente</button>
+            </form>
         </div>
     </div>
 
-    <script src="js/index.js">
+    <script src="js/admin.js">
     </script>
 </body>
+
 </html>

@@ -27,13 +27,6 @@ function showSection(sectionId) {
     // Update section title
     const titles = {
         'dashboard': 'Dashboard',
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        'appointments': 'Mis Citas',
-=======
->>>>>>> parent of 396ba34 (Botones)
->>>>>>> origin/master
         'patients': 'Mis Pacientes',
         'consultations': 'Consultas',
         'medical-records': 'Expedientes Médicos',
@@ -79,18 +72,6 @@ async function cargarListaPacientes() {
         console.log('Cargando lista de pacientes...');
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p>Cargando...</p>';
         
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        // Simular carga de pacientes (sin llamadas a BD por ahora)
-        setTimeout(() => {
-            const pacientes = [
-                { id_paciente: 1, nombre_completo: 'Juan Pérez', edad: 45, genero: 'M', telefono_paciente: '+57 300 123 4567' },
-                { id_paciente: 2, nombre_completo: 'María González', edad: 52, genero: 'F', telefono_paciente: '+57 301 234 5678' },
-                { id_paciente: 3, nombre_completo: 'Carlos Rodríguez', edad: 38, genero: 'M', telefono_paciente: '+57 302 345 6789' }
-            ];
-=======
->>>>>>> origin/master
         // RUTA CORREGIDA - mismo directorio
         const response = await fetch('bd/listaPacientes.php');
         
@@ -103,10 +84,6 @@ async function cargarListaPacientes() {
         
         const pacientes = JSON.parse(text);
         console.log('Pacientes cargados:', pacientes);
-<<<<<<< HEAD
-=======
->>>>>>> parent of 396ba34 (Botones)
->>>>>>> origin/master
 
         // Limpiamos la lista
         recordsSidebar.innerHTML = '<h3>Pacientes</h3>';
@@ -317,15 +294,7 @@ function calcularEdad(fechaNacimiento) {
     return edad;
 }
 
-<<<<<<< HEAD
 // 5. También agreguemos funcionalidad al botón "Ver Expediente" en otras secciones
-=======
-<<<<<<< HEAD
-// Funcionalidad adicional para botones "Ver Expediente"
-=======
-// 5. También agreguemos funcionalidad al botón "Ver Expediente" en otras secciones
->>>>>>> parent of 396ba34 (Botones)
->>>>>>> origin/master
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn') && e.target.textContent.includes('Ver Expediente')) {
         // Navegar a la sección de expedientes
@@ -336,21 +305,4 @@ document.addEventListener('click', function(e) {
         // Cargar lista de pacientes
         cargarListaPacientes();
     }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-});
-
-// Inicialización completa
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Sistema del doctor inicializado');
-    
-    // Configurar navegación por defecto
-    showSection('dashboard');
-=======
->>>>>>> parent of 396ba34 (Botones)
-=======
->>>>>>> parent of 8d26d8b (Generar Receta)
->>>>>>> origin/master
 });
