@@ -73,7 +73,7 @@ async function cargarListaPacientes() {
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p>Cargando...</p>';
         
         // RUTA CORREGIDA - mismo directorio
-        const response = await fetch('bd/listaPacientes.php');
+        const response = await fetch('DataBase/php/listaPacientes.php');
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -151,7 +151,7 @@ async function cargarPerfilPaciente(id) {
     try {
         console.log('Cargando perfil del paciente ID:', id);
         // RUTA CORREGIDA - mismo directorio
-        const response = await fetch(`bd/perfilPaciente.php?id=${id}`);
+        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${id}`);
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);

@@ -1,15 +1,9 @@
 <?php
 // conexion.php
 $host = "localhost";
-<<<<<<< Updated upstream
 $user = "root";        // cambia si usas otro usuario
 $pass = "";            // agrega tu contraseña si tienes una
 $db = "telemed";       // nombre de tu base de datos
-=======
-$user = "root";
-$pass = "root";
-$db = "telemed";
->>>>>>> Stashed changes
 
 $conn = new mysqli($host, $user, $pass, $db);
 
