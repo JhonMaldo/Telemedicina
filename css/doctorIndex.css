@@ -441,3 +441,120 @@
                 justify-content: space-between;
             }
         }
+        /* --- AÑADIR ESTILOS PARA PERFIL DINÁMICO --- */
+
+/* Contenedor principal del perfil */
+.patient-profile {
+    padding: 10px;
+}
+
+/* Encabezado con datos básicos */
+.profile-header h3 {
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.patient-basic-info {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.patient-basic-info p {
+    color: #555;
+    font-size: 14px;
+}
+
+/* Espaciado para cada sección (Historial, Medicación, etc.) */
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+/* ESTA ES LA REGLA CLAVE */
+/* Hace que tus nuevos contenedores se vean como los <textarea> e <input> originales */
+.historial-container,
+.medicacion-container,
+.allergies-display,
+.appointment-display {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9; /* Damos un fondo gris claro como si fuera "readonly" */
+    min-height: 60px;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Estilos para los items dentro de los contenedores */
+.historial-item,
+.receta-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+.historial-item:last-child,
+.receta-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.historial-item p,
+.receta-item p {
+    color: #555;
+}
+
+/* Estilos para los botones de acción al final */
+.profile-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+/* --- ESTILOS PARA BOTONES APILADOS (CORREGIDO) --- */
+
+/* Contenedor para el botón de Actualizar (fila de arriba) */
+.profile-action-update {
+    margin-top: 25px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-bottom: 10px; /* Espacio entre las dos filas */
+}
+
+/* Hace el botón verde de ancho completo */
+.btn-full-width {
+    width: 100%;
+    text-align: center;
+    /* Hacemos que se comporte como bloque para forzar el ancho */
+    display: block; 
+}
+
+/* Contenedor para la fila de 3 botones (fila de abajo) */
+.profile-actions-row {
+    display: flex; /* <-- ESTO LOS PONE EN FILA */
+    gap: 10px;
+}
+
+/* Hace que los 3 botones de abajo compartan el espacio */
+.profile-actions-row > .btn {
+    flex-grow: 1; /* Hacemos que crezcan para llenar el espacio */
+    flex-basis: 0; /* Asegura que se distribuyan equitativamente */
+    text-align: center;
+}
+
