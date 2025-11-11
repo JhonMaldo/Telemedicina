@@ -39,6 +39,8 @@ function showSection(sectionId) {
     // Update section title
     const titles = {
         'dashboard': 'Dashboard',
+        'appointments': 'Mis Citas',
+        'patients': 'Mis Pacientes',
         'consultations': 'Consultas',
         'medical-records': 'Expedientes Médicos',
         'prescriptions': 'Recetas Médicas',
@@ -234,7 +236,7 @@ async function cargarListaPacientes() {
         console.log('Cargando lista de pacientes...');
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p>Cargando...</p>';
         
-        // Simular carga de pacientes
+        // Simular carga de pacientes (sin llamadas a BD por ahora)
         setTimeout(() => {
             const pacientes = [
                 { id_paciente: 1, nombre_completo: 'Juan Pérez', edad: 45, genero: 'M', telefono_paciente: '+57 300 123 4567' },
@@ -497,3 +499,24 @@ function calcularEdad(fechaNacimiento) {
     
     return edad;
 }
+
+// Funcionalidad adicional para botones "Ver Expediente"
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn') && e.target.textContent.includes('Ver Expediente')) {
+        // Navegar a la sección de expedientes
+        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('[data-section="medical-records"]').classList.add('active');
+        showSection('medical-records');
+        
+        // Cargar lista de pacientes
+        cargarListaPacientes();
+    }
+});
+
+// Inicialización completa
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Sistema del doctor inicializado');
+    
+    // Configurar navegación por defecto
+    showSection('dashboard');
+});

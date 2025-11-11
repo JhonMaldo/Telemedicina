@@ -19,6 +19,14 @@
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </div>
+            <div class="menu-item" data-section="appointments">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Mis Citas</span>
+            </div>
+            <div class="menu-item" data-section="patients">
+                <i class="fas fa-user-injured"></i>
+                <span>Mis Pacientes</span>
+            </div>
             <div class="menu-item" data-section="consultations">
                 <i class="fas fa-stethoscope"></i>
                 <span>Consultas</span>
@@ -57,13 +65,10 @@
             </div>
         </div>
 
-        <!-- Dashboard Section -->
-
-        <div id="dashboard" class="content-section active">  <h2 class="section-title">Citas del Día</h2>
+        <!-- Dashboard Section CORREGIDO -->
+        <div id="dashboard" class="content-section active">
+            <h2 class="section-title">Citas del Día</h2>
             <div class="appointments-list">
-                </div>
-
-        </div>
                 <div class="appointment-item">
                     <div class="appointment-info">
                         <h4>Juan Pérez - Control Cardiológico</h4>
@@ -195,7 +200,7 @@
             </div>
         </div>
 
-        <!-- Consultations Section -->
+        <!-- Consultations Section CORREGIDO -->
         <div id="consultations" class="content-section">
             <h2 class="section-title">Consultas y Videollamadas</h2>
             
@@ -213,48 +218,28 @@
                     <button class="btn" style="margin-top: 15px;">Nueva Consulta</button>
                 </div>
             </div>
-            </div>
         </div>
 
-        <!-- Medical Records Section -->
+        <!-- Medical Records Section CORREGIDO -->
         <div id="medical-records" class="content-section">
             <h2 class="section-title">Expedientes Médicos</h2>
             
             <div class="records-container">
                 <div class="records-sidebar">
                     <h3>Pacientes</h3>
+                    <!-- Los pacientes se cargarán dinámicamente -->
                 </div>
                 
                 <div class="records-content">
-                    <h3>Expediente de Juan Pérez</h3>
-                    <div class="form-group">
-                        <label for="patient-history">Historial Médico</label>
-                        <textarea id="patient-history" rows="6">Paciente con diagnóstico de hipertensión arterial desde 2018. Control regular con medicación. Última consulta: 15/09/2023 - PA: 130/85 mmHg. Sin eventos adversos recientes.</textarea>
+                    <!-- El contenido se cargará dinámicamente -->
+                    <div class="loading-message">
+                        <p>Selecciona un paciente para ver su expediente</p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="current-medication">Medicación Actual</label>
-                        <textarea id="current-medication" rows="4">- Losartán 50 mg: 1 tableta cada 24 horas
-- Atorvastatina 20 mg: 1 tableta cada 24 horas
-- Ácido acetilsalicílico 100 mg: 1 tableta cada 24 horas</textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="allergies">Alergias</label>
-                        <input type="text" id="allergies" value="Penicilina (rash cutáneo)">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="next-appointment">Próxima Cita</label>
-                        <input type="date" id="next-appointment" value="2023-11-15">
-                    </div>
-                    
-                    <button class="btn">Actualizar Expediente</button>
                 </div>
             </div>
         </div>
 
-        <!-- Prescriptions Section -->
+        <!-- Prescriptions Section SIMPLIFICADO -->
         <div id="prescriptions" class="content-section">
             <h2 class="section-title">Gestión de Recetas Médicas</h2>
             
@@ -264,6 +249,18 @@
                     <h3>Nueva Receta</h3>
                     <p>Crear nueva receta médica</p>
                     <button class="btn" style="margin-top: 15px;">Crear Receta</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-history"></i>
+                    <h3>Historial de Recetas</h3>
+                    <p>Ver recetas emitidas anteriormente</p>
+                    <button class="btn" style="margin-top: 15px;">Ver Historial</button>
+                </div>
+                <div class="card">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>Recetas Pendientes</h3>
+                    <p>3 recetas por generar en PDF</p>
+                    <button class="btn" style="margin-top: 15px;">Generar PDFs</button>
                 </div>
             </div>
         </div>
@@ -327,7 +324,6 @@
         </div>
     </div>
 
-    <script src="js/doctorIndex.js">
-    </script>
+    <script src="js/doctorIndex.js"></script>
 </body>
 </html>
