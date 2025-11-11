@@ -1,346 +1,459 @@
-// -------------------- NAVEGACIÓN --------------------
-document.querySelectorAll('.menu-item').forEach(item => {
-    if (item.dataset.section) {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
-            showSection(this.dataset.section);
+// Elementos del DOM
+        const userTypeSelector = document.querySelectorAll('.user-type');
+        const formSections = document.querySelectorAll('.form-section');
+        const patientRegisterForm = document.getElementById('patient-register-form');
+        const doctorRegisterForm = document.getElementById('doctor-register-form');
+        const adminRegisterForm = document.getElementById('admin-register-form');
+        const adminLoginInfo = document.getElementById('admin-login-info');
+        const adminRegisterInfo = document.getElementById('admin-register-info');
+        const loginTitle = document.getElementById('login-title');
+        const loginSubtitle = document.getElementById('login-subtitle');
+        const registerTitle = document.getElementById('register-title');
+        const registerSubtitle = document.getElementById('register-subtitle');
+        const loginButton = document.getElementById('login-button');
+        
+        // Mostrar/ocultar secciones
+        document.getElementById('show-register').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('register-section');
+            updateRegisterForm();
         });
-    }
-});
-
-function showSection(sectionId) {
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    document.getElementById(sectionId).classList.add('active');
-    
-    const titles = {
-        'dashboard': 'Dashboard',
-        'appointments': 'Notificaciones',
-        'schedule': 'Agendar Cita',
-        'chatbot': 'Asistente Virtual',
-        'video-consultation': 'Videoconsulta',
-        'prescriptions': 'Mis Recetas'
-    };
-    
-    document.getElementById('section-title').textContent = titles[sectionId] || 'Dashboard';
-}
-
-// -------------------- CHATBOT --------------------
-const chatInput = document.getElementById('chat-input');
-const sendBtn = document.getElementById('send-message');
-const chatMessages = document.getElementById('chatbot-messages');
-let chatHistory = [];
-
-// Enviar mensaje con Enter o botón
-chatInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') sendMessage();
-});
-sendBtn.addEventListener('click', sendMessage);
-
-// Acciones rápidas
-document.querySelectorAll('.quick-action').forEach(action => {
-    action.addEventListener('click', function() {
-        chatInput.value = this.dataset.message;
-        sendMessage();
-    });
-});
-
-// Enviar mensaje del usuario
-// Enviar mensaje del usuario
-function sendMessage() {
-    const message = chatInput.value.trim();
-    if (message === '') return;
-
-    addMessage(message, 'user');
-    chatInput.value = '';
-
-    showTypingIndicator();
-
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    // Simular respuesta del bot
-    setTimeout(() => {
-        hideTypingIndicator();
-        const response = generateBotResponse(message);
-        addMessage(response, 'bot');
-    }, 1000 + Math.random() * 2000);
-=======
-    console.log('🔍 DEPURACIÓN - Enviando mensaje:', message);
-
-    // Intentar diferentes rutas
-    const pathsToTry = [
-        'DataBase/php/chatbot.php',
-        './DataBase/php/chatbot.php',
-        '../DataBase/php/chatbot.php',
-        '/DataBase/php/chatbot.php'
-    ];
-
-    let currentTry = 0;
-
-    function attemptFetch() {
-        if (currentTry >= pathsToTry.length) {
-            console.error('❌ Todas las rutas fallaron');
-            hideTypingIndicator();
-            addMessage("⚠️ Error: Verifica que el servidor esté funcionando y los archivos PHP estén en DataBase/php/", 'bot');
-            return;
-        }
-
-        const currentPath = pathsToTry[currentTry];
-        console.log(`🔄 Intentando ruta ${currentTry + 1}: ${currentPath}`);
-
-        fetch(currentPath, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => {
-            console.log(`📊 Status: ${response.status}, OK: ${response.ok}`);
+        
+        document.getElementById('show-forgot').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('forgot-section');
+        });
+        
+        document.getElementById('show-login').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('login-section');
+            updateLoginUI();
+        });
+        
+        document.getElementById('show-login-from-forgot').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('login-section');
+            updateLoginUI();
+        });
+        
+        // Cambiar tipo de usuario
+        userTypeSelector.forEach(type => {
+            type.addEventListener('click', function() {
+                userTypeSelector.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Actualizar la interfaz según el tipo de usuario
+                updateLoginUI();
+                
+                // Si estamos en la sección de registro, actualizar el formulario
+                if (document.getElementById('register-section').classList.contains('active')) {
+                    updateRegisterForm();
+                }
+            });
+        });
+        
+        // Función para mostrar sección
+        function showSection(sectionId) {
+            formSections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // Actualizar la interfaz según el tipo de usuario
+            if (sectionId === 'login-section') {
+                updateLoginUI();
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log('✅ ÉXITO - Respuesta recibida:', data);
-            hideTypingIndicator();
-            addMessage(data.response, 'bot');
-        })
-        .catch(error => {
-            console.error(`❌ Error con ${currentPath}:`, error);
-            currentTry++;
-            
-            // Intentar siguiente ruta después de un breve delay
-            setTimeout(attemptFetch, 100);
-        });
-    }
-
-    // Comenzar el primer intento
-    attemptFetch();
->>>>>>> Stashed changes
-=======
-    fetch('bd/chatbot.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
-    })
-    .then(res => res.json())
-    .then(data => {
-        hideTypingIndicator();
-        addMessage(data.response, 'bot');
-    })
-    .catch(err => {
-        hideTypingIndicator();
-        console.error('Error:', err);
-        addMessage("⚠️ No se pudo conectar con el asistente.", 'bot');
-    });
->>>>>>> parent of 396ba34 (Botones)
-}
-
-// Agregar mensajes al chat
-function addMessage(text, sender) {
-    const messageContainer = document.createElement('div');
-    messageContainer.classList.add('message', sender);
-
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    messageContainer.innerHTML = `
-        <p>${text}</p>
-        <span class="time">${time}</span>
-    `;
-
-    chatMessages.appendChild(messageContainer);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    chatHistory.push({ sender, text, time });
-}
-
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-// Generar respuesta del bot
-function generateBotResponse(message) {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('hola') || lowerMessage.includes('buenos')) {
-        return '¡Hola! Soy tu asistente virtual de salud. ¿En qué puedo ayudarte hoy?';
-    } else if (lowerMessage.includes('cita') || lowerMessage.includes('agendar')) {
-        return 'Puedes agendar una cita en la sección "Agendar Cita". ¿Necesitas ayuda con algún tipo de consulta específica?';
-    } else if (lowerMessage.includes('receta') || lowerMessage.includes('medic')) {
-        return 'Para solicitar una receta médica, ve a la sección "Mis Recetas" o contacta a tu médico directamente.';
-    } else if (lowerMessage.includes('video') || lowerMessage.includes('virtual')) {
-        return 'Puedes solicitar una videoconsulta en la sección "Videoconsulta". Tenemos disponibilidad inmediata.';
-    } else if (lowerMessage.includes('fiebre') || lowerMessage.includes('dolor')) {
-        return 'Si tienes fiebre o dolor persistente, te recomiendo agendar una consulta. ¿Quieres que te ayude a programarla?';
-    } else if (lowerMessage.includes('gracias')) {
-        return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
-    } else {
-        return 'Entiendo que necesitas ayuda. Puedo asistirte con: agendar citas, solicitar recetas, videoconsultas o responder preguntas generales de salud. ¿En qué específicamente necesitas ayuda?';
-    }
-}
-
-=======
->>>>>>> Stashed changes
-// Indicador de "escribiendo..."
-=======
-// Indicador de “escribiendo...”
->>>>>>> parent of 396ba34 (Botones)
-function showTypingIndicator() {
-    const typing = document.createElement('div');
-    typing.id = 'typing';
-    typing.classList.add('message', 'bot');
-    typing.innerHTML = `<p><em>Escribiendo...</em></p>`;
-    chatMessages.appendChild(typing);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function hideTypingIndicator() {
-    const typing = document.getElementById('typing');
-    if (typing) typing.remove();
-}
-
-// Limpiar chat
-function clearChat() {
-    chatMessages.innerHTML = '';
-    chatHistory = [];
-}
-
-// -------------------- PAGOS --------------------
-const paymentModal = document.getElementById('payment-modal');
-const closeModalBtn = document.querySelector('.close-modal');
-const paymentMethods = document.querySelectorAll('.payment-method');
-let selectedMethod = null;
-let consultationType = '';
-let consultationPrice = 0;
-
-function showPaymentModal(type) {
-    consultationType = type === 'general' ? 'Consulta General' : type === 'specialist' ? 'Especialista' : 'Control';
-    consultationPrice = type === 'general' ? 25000 : type === 'specialist' ? 40000 : 20000;
-    
-    document.getElementById('consultation-type').value = consultationType;
-    document.getElementById('consultation-price').value = `$${consultationPrice.toLocaleString()}`;
-    
-    paymentModal.style.display = 'flex';
-}
-
-closeModalBtn.addEventListener('click', () => {
-    paymentModal.style.display = 'none';
-    resetPaymentModal();
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target === paymentModal) {
-        paymentModal.style.display = 'none';
-        resetPaymentModal();
-    }
-});
-
-paymentMethods.forEach(method => {
-    method.addEventListener('click', function() {
-        paymentMethods.forEach(m => m.classList.remove('selected'));
-        this.classList.add('selected');
-        selectedMethod = this.dataset.method;
-        
-        document.getElementById('credit-card-form').style.display = 
-            selectedMethod === 'credit-card' || selectedMethod === 'debit-card' ? 'block' : 'none';
-    });
-});
-
-document.getElementById('confirm-payment').addEventListener('click', () => {
-    if (!selectedMethod) {
-        alert('Por favor, selecciona un método de pago.');
-        return;
-    }
-    
-    if (selectedMethod === 'credit-card' || selectedMethod === 'debit-card') {
-        const cardNumber = document.getElementById('card-number').value.trim();
-        const cardExpiry = document.getElementById('card-expiry').value.trim();
-        const cardCvc = document.getElementById('card-cvc').value.trim();
-        const cardName = document.getElementById('card-name').value.trim();
-        
-        if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
-            alert('Por favor, completa todos los campos de la tarjeta.');
-            return;
         }
-    }
-    
-    alert(`Pago de $${consultationPrice.toLocaleString()} por ${consultationType} realizado con éxito.`);
-    paymentModal.style.display = 'none';
-    resetPaymentModal();
-});
-
-function resetPaymentModal() {
-    selectedMethod = null;
-    consultationType = '';
-    consultationPrice = 0;
-    paymentMethods.forEach(m => m.classList.remove('selected'));
-    document.getElementById('credit-card-form').style.display = 'none';
-    document.getElementById('card-number').value = '';
-    document.getElementById('card-expiry').value = '';
-    document.getElementById('card-cvc').value = '';
-    document.getElementById('card-name').value = '';
-}
-
-// -------------------- RECETAS --------------------
-function downloadPrescription(id) {
-    alert(`Descargando receta médica #${id}...`);
-}
-
-function requestNewPrescription() {
-    alert('Funcionalidad para solicitar una nueva receta médica próximamente.');
-}
-
-// -------------------- PERFIL --------------------
-document.getElementById('profile-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    alert('Perfil actualizado con éxito.');
-});
-<<<<<<< HEAD
-
-<<<<<<< Updated upstream
-// Botón solicitar nueva receta
-document.querySelector('#prescriptions .btn')?.addEventListener('click', function() {
-    if (this.textContent.includes('Solicitar Nueva Receta')) {
-        requestNewPrescription();
-    }
-});
-
-// -------------------- INICIALIZACIÓN --------------------
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Sistema de paciente inicializado');
-    
-    // Configurar fecha mínima para agendar citas (hoy)
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('appointment-date');
-    if (dateInput) {
-        dateInput.min = today;
-    }
-});
-=======
-// Función de prueba para verificar rutas
-function testPaths() {
-    console.log('🧪 TESTEANDO RUTAS DISPONIBLES:');
-    const testPaths = [
-        'DataBase/php/chatbot.php',
-        '../DataBase/php/chatbot.php', 
-        './DataBase/php/chatbot.php',
-        'php/chatbot.php',
-        '../php/chatbot.php'
-    ];
-    
-    testPaths.forEach(path => {
-        fetch(path, { method: 'HEAD' })
-            .then(res => console.log(`✅ ${path}: ${res.status}`))
-            .catch(err => console.log(`❌ ${path}: ${err.message}`));
-    });
-}
-
-// Ejecutar test al cargar (opcional)
-// setTimeout(testPaths, 1000);
->>>>>>> Stashed changes
-=======
->>>>>>> parent of 396ba34 (Botones)
+        
+        // Actualizar formulario de registro según el tipo de usuario
+        function updateRegisterForm() {
+            const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+            
+            // Ocultar todos los formularios primero
+            patientRegisterForm.classList.add('hidden');
+            doctorRegisterForm.classList.add('hidden');
+            adminRegisterForm.classList.add('hidden');
+            adminRegisterInfo.classList.add('hidden');
+            
+            // Mostrar el formulario correspondiente
+            if (activeType === 'patient') {
+                patientRegisterForm.classList.remove('hidden');
+                registerTitle.textContent = 'Registrarse como Paciente';
+                registerSubtitle.textContent = 'Crea una nueva cuenta de paciente';
+            } else if (activeType === 'doctor') {
+                doctorRegisterForm.classList.remove('hidden');
+                registerTitle.textContent = 'Registrarse como Doctor';
+                registerSubtitle.textContent = 'Crea una nueva cuenta de doctor';
+            } else if (activeType === 'admin') {
+                adminRegisterForm.classList.remove('hidden');
+                adminRegisterInfo.classList.remove('hidden');
+                registerTitle.textContent = 'Registro de Administrador';
+                registerSubtitle.textContent = 'Solicitar cuenta de administrador';
+            }
+        }
+        
+        // Actualizar la interfaz de login según el tipo de usuario
+        function updateLoginUI() {
+            const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+            
+            if (activeType === 'patient') {
+                loginTitle.textContent = 'Iniciar Sesión como Paciente';
+                loginSubtitle.textContent = 'Accede a tu cuenta de paciente';
+                loginButton.textContent = 'Iniciar Sesión';
+                adminLoginInfo.classList.add('hidden');
+            } else if (activeType === 'doctor') {
+                loginTitle.textContent = 'Iniciar Sesión como Doctor';
+                loginSubtitle.textContent = 'Accede a tu cuenta de doctor';
+                loginButton.textContent = 'Iniciar Sesión';
+                adminLoginInfo.classList.add('hidden');
+            } else if (activeType === 'admin') {
+                loginTitle.textContent = 'Acceso de Administrador';
+                loginSubtitle.textContent = 'Panel de control del sistema';
+                loginButton.textContent = 'Acceder al Panel Admin';
+                adminLoginInfo.classList.remove('hidden');
+            }
+        }
+        
+        // Validación de formularios
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateLoginForm()) {
+                const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+                
+                // Redirigir según el tipo de usuario
+                if (activeType === 'patient') {
+                    window.location.href = 'paciente.html';
+                } else if (activeType === 'doctor') {
+                    window.location.href = 'doctor.html';
+                } else if (activeType === 'admin') {
+                    window.location.href = 'admin.html';
+                }
+            }
+        });
+        
+        document.getElementById('patient-register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validatePatientRegisterForm()) {
+                // Aquí iría la lógica para enviar los datos al servidor
+                alert('Registro de paciente exitoso (simulación)');
+                window.location.href = 'paciente.html';
+            }
+        });
+        
+        document.getElementById('doctor-register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateDoctorRegisterForm()) {
+                // Aquí iría la lógica para enviar los datos al servidor
+                alert('Registro de doctor exitoso (simulación)');
+                window.location.href = 'doctor.html';
+            }
+        });
+        
+        document.getElementById('admin-register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateAdminRegisterForm()) {
+                // Aquí iría la lógica para enviar los datos al servidor
+                alert('Solicitud de registro de administrador enviada (simulación)');
+                window.location.href = 'login.html';
+            }
+        });
+        
+        document.getElementById('forgot-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateForgotForm()) {
+                document.getElementById('forgot-success').style.display = 'block';
+                // Aquí iría la lógica para enviar el correo de recuperación
+            }
+        });
+        
+        // Funciones de validación
+        function validateLoginForm() {
+            let isValid = true;
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Validar email
+            if (!validateEmail(email)) {
+                showError('login-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('login-email-error');
+            }
+            
+            // Validar contraseña
+            if (password.length < 6) {
+                showError('login-password-error', 'La contraseña debe tener al menos 6 caracteres');
+                isValid = false;
+            } else {
+                hideError('login-password-error');
+            }
+            
+            return isValid;
+        }
+        
+        function validatePatientRegisterForm() {
+            let isValid = true;
+            
+            // Validar nombre
+            const name = document.getElementById('patient-name').value;
+            if (name.trim().length < 2) {
+                showError('patient-name-error', 'El nombre debe tener al menos 2 caracteres');
+                isValid = false;
+            } else {
+                hideError('patient-name-error');
+            }
+            
+            // Validar email
+            const email = document.getElementById('patient-email').value;
+            if (!validateEmail(email)) {
+                showError('patient-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('patient-email-error');
+            }
+            
+            // Validar teléfono
+            const phone = document.getElementById('patient-phone').value;
+            if (!validatePhone(phone)) {
+                showError('patient-phone-error', 'Por favor ingresa un número de teléfono válido');
+                isValid = false;
+            } else {
+                hideError('patient-phone-error');
+            }
+            
+            // Validar fecha de nacimiento
+            const birthdate = document.getElementById('patient-birthdate').value;
+            if (!birthdate) {
+                showError('patient-birthdate-error', 'Por favor ingresa tu fecha de nacimiento');
+                isValid = false;
+            } else {
+                hideError('patient-birthdate-error');
+            }
+            
+            // Validar género
+            const gender = document.getElementById('patient-gender').value;
+            if (!gender) {
+                showError('patient-gender-error', 'Por favor selecciona tu género');
+                isValid = false;
+            } else {
+                hideError('patient-gender-error');
+            }
+            
+            // Validar contraseña
+            const password = document.getElementById('patient-password').value;
+            if (!validatePassword(password)) {
+                showError('patient-password-error', 'La contraseña no cumple con los requisitos');
+                isValid = false;
+            } else {
+                hideError('patient-password-error');
+            }
+            
+            // Validar confirmación de contraseña
+            const confirmPassword = document.getElementById('patient-confirm-password').value;
+            if (password !== confirmPassword) {
+                showError('patient-confirm-password-error', 'Las contraseñas no coinciden');
+                isValid = false;
+            } else {
+                hideError('patient-confirm-password-error');
+            }
+            
+            return isValid;
+        }
+        
+        function validateDoctorRegisterForm() {
+            let isValid = true;
+            
+            // Validar nombre
+            const name = document.getElementById('doctor-name').value;
+            if (name.trim().length < 2) {
+                showError('doctor-name-error', 'El nombre debe tener al menos 2 caracteres');
+                isValid = false;
+            } else {
+                hideError('doctor-name-error');
+            }
+            
+            // Validar email
+            const email = document.getElementById('doctor-email').value;
+            if (!validateEmail(email)) {
+                showError('doctor-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('doctor-email-error');
+            }
+            
+            // Validar teléfono
+            const phone = document.getElementById('doctor-phone').value;
+            if (!validatePhone(phone)) {
+                showError('doctor-phone-error', 'Por favor ingresa un número de teléfono válido');
+                isValid = false;
+            } else {
+                hideError('doctor-phone-error');
+            }
+            
+            // Validar especialidad
+            const specialty = document.getElementById('doctor-specialty').value;
+            if (!specialty.trim()) {
+                showError('doctor-specialty-error', 'Por favor ingresa tu especialidad');
+                isValid = false;
+            } else {
+                hideError('doctor-specialty-error');
+            }
+            
+            // Validar licencia
+            const license = document.getElementById('doctor-license').value;
+            if (!license.trim()) {
+                showError('doctor-license-error', 'Por favor ingresa tu número de licencia');
+                isValid = false;
+            } else {
+                hideError('doctor-license-error');
+            }
+            
+            // Validar hospital/clínica
+            const hospital = document.getElementById('doctor-hospital').value;
+            if (!hospital.trim()) {
+                showError('doctor-hospital-error', 'Por favor ingresa tu hospital o clínica');
+                isValid = false;
+            } else {
+                hideError('doctor-hospital-error');
+            }
+            
+            // Validar contraseña
+            const password = document.getElementById('doctor-password').value;
+            if (!validatePassword(password)) {
+                showError('doctor-password-error', 'La contraseña no cumple con los requisitos');
+                isValid = false;
+            } else {
+                hideError('doctor-password-error');
+            }
+            
+            // Validar confirmación de contraseña
+            const confirmPassword = document.getElementById('doctor-confirm-password').value;
+            if (password !== confirmPassword) {
+                showError('doctor-confirm-password-error', 'Las contraseñas no coinciden');
+                isValid = false;
+            } else {
+                hideError('doctor-confirm-password-error');
+            }
+            
+            return isValid;
+        }
+        
+        function validateAdminRegisterForm() {
+            let isValid = true;
+            
+            // Validar nombre
+            const name = document.getElementById('admin-name').value;
+            if (name.trim().length < 2) {
+                showError('admin-name-error', 'El nombre debe tener al menos 2 caracteres');
+                isValid = false;
+            } else {
+                hideError('admin-name-error');
+            }
+            
+            // Validar email
+            const email = document.getElementById('admin-email').value;
+            if (!validateEmail(email)) {
+                showError('admin-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('admin-email-error');
+            }
+            
+            // Validar teléfono
+            const phone = document.getElementById('admin-phone').value;
+            if (!validatePhone(phone)) {
+                showError('admin-phone-error', 'Por favor ingresa un número de teléfono válido');
+                isValid = false;
+            } else {
+                hideError('admin-phone-error');
+            }
+            
+            // Validar departamento
+            const department = document.getElementById('admin-department').value;
+            if (!department) {
+                showError('admin-department-error', 'Por favor selecciona tu departamento');
+                isValid = false;
+            } else {
+                hideError('admin-department-error');
+            }
+            
+            // Validar código de verificación
+            const code = document.getElementById('admin-code').value;
+            if (!code.trim()) {
+                showError('admin-code-error', 'Por favor ingresa el código de verificación');
+                isValid = false;
+            } else {
+                hideError('admin-code-error');
+            }
+            
+            // Validar contraseña (más estricta para administradores)
+            const password = document.getElementById('admin-password').value;
+            if (!validateAdminPassword(password)) {
+                showError('admin-password-error', 'La contraseña debe tener al menos 10 caracteres, incluyendo una mayúscula, un número y un carácter especial');
+                isValid = false;
+            } else {
+                hideError('admin-password-error');
+            }
+            
+            // Validar confirmación de contraseña
+            const confirmPassword = document.getElementById('admin-confirm-password').value;
+            if (password !== confirmPassword) {
+                showError('admin-confirm-password-error', 'Las contraseñas no coinciden');
+                isValid = false;
+            } else {
+                hideError('admin-confirm-password-error');
+            }
+            
+            return isValid;
+        }
+        
+        function validateForgotForm() {
+            let isValid = true;
+            const email = document.getElementById('forgot-email').value;
+            
+            if (!validateEmail(email)) {
+                showError('forgot-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('forgot-email-error');
+            }
+            
+            return isValid;
+        }
+        
+        // Funciones auxiliares de validación
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function validatePhone(phone) {
+            const re = /^[0-9+\-\s()]{10,}$/;
+            return re.test(phone);
+        }
+        
+        function validatePassword(password) {
+            // Al menos 8 caracteres, una mayúscula, un número y un carácter especial
+            const re = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return re.test(password);
+        }
+        
+        function validateAdminPassword(password) {
+            // Al menos 10 caracteres, una mayúscula, un número y un carácter especial (más estricto)
+            const re = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+            return re.test(password);
+        }
+        
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
+        }
+        
+        // Inicializar la interfaz
+        updateLoginUI();
