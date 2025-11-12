@@ -451,3 +451,650 @@ async function guardarCambiosExpediente(idPaciente) {
         alert('❌ Error al actualizar expediente: ' + error.message);
     }
 }
+
+// --- SISTEMA DE RECETAS VIRTUALES EN PDF ---
+
+// Variables globales para recetas
+let pacienteSeleccionadoReceta = null;
+let recetaActual = null;
+
+// Inicializar sistema de recetas cuando se carga la sección
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarSistemaRecetas();
+});
+
+function inicializarSistemaRecetas() {
+    // Cargar pacientes para recetas cuando se accede a la sección
+    document.querySelector('[data-section="prescriptions"]').addEventListener('click', function() {
+        cargarPacientesParaRecetas();
+        cargarRecetasExistentes();
+    });
+    
+    // Event listeners para botones de recetas
+    document.getElementById('btnNuevaReceta').addEventListener('click', mostrarFormularioReceta);
+    document.getElementById('btnCancelarReceta').addEventListener('click', cancelarReceta);
+    document.getElementById('btnGuardarReceta').addEventListener('click', guardarReceta);
+    document.getElementById('btnGenerarReceta').addEventListener('click', generarVistaPrevia);
+    document.getElementById('btnDescargarReceta').addEventListener('click', descargarRecetaPDF);
+    document.getElementById('btnEditarReceta').addEventListener('click', editarReceta);
+}
+
+// 1. Cargar pacientes para el sistema de recetas
+async function cargarPacientesParaRecetas() {
+    try {
+        console.log('Cargando pacientes para recetas...');
+        const response = await fetch('DataBase/php/listaPacientes.php');
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const pacientes = await response.json();
+        
+        const selectPaciente = document.getElementById('select-paciente');
+        const listaPacientes = document.getElementById('lista-pacientes-recetas');
+        
+        // Limpiar listas
+        selectPaciente.innerHTML = '<option value="">Seleccione un paciente</option>';
+        listaPacientes.innerHTML = '';
+        
+        if (pacientes.length === 0) {
+            listaPacientes.innerHTML = '<p>No hay pacientes registrados</p>';
+            return;
+        }
+        
+        // Llenar select y lista mini
+        pacientes.forEach(paciente => {
+            // Option para select
+            const option = document.createElement('option');
+            option.value = paciente.id_paciente;
+            option.textContent = `${paciente.nombre_completo} - ${paciente.edad} años`;
+            selectPaciente.appendChild(option);
+            
+            // Item para lista mini
+            const item = document.createElement('div');
+            item.className = 'patient-item-mini';
+            item.dataset.patientId = paciente.id_paciente;
+            item.innerHTML = `
+                <h5>${paciente.nombre_completo}</h5>
+                <p>${paciente.edad} años • ${paciente.telefono_paciente || 'Sin teléfono'}</p>
+            `;
+            listaPacientes.appendChild(item);
+            
+            // Event listener para items de lista mini
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.patient-item-mini').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                seleccionarPacienteReceta(paciente.id_paciente, paciente.nombre_completo);
+            });
+        });
+        
+        // Event listener para el select
+        selectPaciente.addEventListener('change', function() {
+            if (this.value) {
+                const selectedOption = this.options[this.selectedIndex];
+                const nombrePaciente = selectedOption.text.split(' - ')[0];
+                seleccionarPacienteReceta(this.value, nombrePaciente);
+                
+                // Marcar como activo en la lista mini
+                document.querySelectorAll('.patient-item-mini').forEach(item => {
+                    if (item.dataset.patientId === this.value) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error cargando pacientes para recetas:', error);
+        alert('Error al cargar la lista de pacientes: ' + error.message);
+    }
+}
+
+// 2. Seleccionar paciente para receta
+function seleccionarPacienteReceta(idPaciente, nombrePaciente) {
+    pacienteSeleccionadoReceta = { 
+        id: idPaciente, 
+        nombre: nombrePaciente 
+    };
+    document.getElementById('titulo-formulario-receta').textContent = `Nueva Receta para ${nombrePaciente}`;
+    
+    // Habilitar botones si estaban deshabilitados
+    document.getElementById('btnGenerarReceta').disabled = false;
+}
+
+// 3. Mostrar formulario de receta
+function mostrarFormularioReceta() {
+    document.getElementById('formulario-receta').style.display = 'block';
+    document.getElementById('vista-previa-receta').style.display = 'none';
+    document.getElementById('lista-recetas').style.display = 'none';
+    
+    // Limpiar formulario
+    document.getElementById('medicamentos').value = '';
+    document.getElementById('instrucciones').value = '';
+    document.getElementById('validez-receta').value = '30';
+    pacienteSeleccionadoReceta = null;
+    
+    // Resetear selección
+    document.getElementById('select-paciente').value = '';
+    document.querySelectorAll('.patient-item-mini').forEach(item => item.classList.remove('active'));
+    
+    // Cargar pacientes si no están cargados
+    if (document.getElementById('select-paciente').options.length <= 1) {
+        cargarPacientesParaRecetas();
+    }
+}
+
+// 4. Cancelar receta
+function cancelarReceta() {
+    document.getElementById('formulario-receta').style.display = 'none';
+    document.getElementById('vista-previa-receta').style.display = 'none';
+    document.getElementById('lista-recetas').style.display = 'block';
+    pacienteSeleccionadoReceta = null;
+    recetaActual = null;
+}
+
+// 5. Generar vista previa de receta (MEJORADA)
+function generarVistaPrevia() {
+    const pacienteId = document.getElementById('select-paciente').value;
+    const medicamentos = document.getElementById('medicamentos').value.trim();
+    const instrucciones = document.getElementById('instrucciones').value.trim();
+    const validez = document.getElementById('validez-receta').value;
+    
+    // Validaciones
+    if (!pacienteId) {
+        alert('❌ Por favor seleccione un paciente');
+        return;
+    }
+    
+    if (!medicamentos) {
+        alert('❌ Por favor ingrese los medicamentos y tratamiento');
+        return;
+    }
+    
+    if (medicamentos.length < 10) {
+        alert('❌ La descripción del tratamiento es muy breve. Por favor sea más específico.');
+        return;
+    }
+    
+    // Obtener nombre del paciente seleccionado
+    const select = document.getElementById('select-paciente');
+    const nombrePaciente = select.options[select.selectedIndex].text.split(' - ')[0];
+    
+    // Crear objeto receta
+    recetaActual = {
+        paciente_id: pacienteId,
+        paciente_nombre: nombrePaciente,
+        medicamentos: medicamentos,
+        instrucciones: instrucciones,
+        validez_dias: validez,
+        fecha_emision: new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }),
+        doctor_nombre: 'Dr. Laura Martínez',
+        doctor_especialidad: 'Cardióloga',
+        doctor_cedula: 'LIC-DF-2020-001',
+        consultorio: 'Centro Médico TeleMed',
+        direccion_consultorio: 'Av. Principal #123, Ciudad'
+    };
+    
+    // Mostrar loading
+    const vistaPrevia = document.querySelector('.receta-preview');
+    vistaPrevia.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #3498db;"></i>
+            <p style="margin-top: 15px;">Generando vista previa...</p>
+        </div>
+    `;
+    
+    // Pequeño delay para mejor UX
+    setTimeout(() => {
+        // Generar vista previa MEJORADA
+        vistaPrevia.innerHTML = generarHTMLVistaPrevia(recetaActual);
+        
+        // Mostrar vista previa
+        document.getElementById('formulario-receta').style.display = 'none';
+        document.getElementById('vista-previa-receta').style.display = 'block';
+    }, 500);
+}
+
+// Función auxiliar para vista previa mejorada
+function generarHTMLVistaPrevia(receta) {
+    const fechaVencimiento = new Date();
+    fechaVencimiento.setDate(fechaVencimiento.getDate() + parseInt(receta.validez_dias));
+    
+    return `
+        <div class="receta-preview-content">
+            <div class="receta-header">
+                <h2>${receta.consultorio}</h2>
+                <p class="subtitle">Sistema de Telemedicina - Receta Digital</p>
+            </div>
+            
+            <hr class="separator">
+            
+            <div class="receta-section">
+                <h3>INFORMACIÓN DEL PACIENTE</h3>
+                <div class="patient-info">
+                    <p><strong>Nombre:</strong> ${receta.paciente_nombre}</p>
+                    <p><strong>Fecha de emisión:</strong> ${receta.fecha_emision}</p>
+                    <p><strong>Válida hasta:</strong> ${fechaVencimiento.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })}</p>
+                </div>
+            </div>
+            
+            <div class="receta-section">
+                <h3>TRATAMIENTO PRESCRITO</h3>
+                <div class="treatment-content">
+                    ${receta.medicamentos.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+            
+            ${receta.instrucciones ? `
+            <div class="receta-section">
+                <h3>INSTRUCCIONES ESPECIALES</h3>
+                <div class="instructions-content">
+                    ${receta.instrucciones.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+            ` : ''}
+            
+            <hr class="separator">
+            
+            <div class="receta-footer">
+                <h3>MÉDICO TRATANTE</h3>
+                <div class="doctor-info">
+                    <p><strong>${receta.doctor_nombre}</strong></p>
+                    <p>${receta.doctor_especialidad}</p>
+                    <p><small>Cédula Profesional: ${receta.doctor_cedula}</small></p>
+                </div>
+            </div>
+            
+            <div class="receta-notes">
+                <p><small>Nota: Esta receta es válida por ${receta.validez_dias} días a partir de la fecha de emisión.</small></p>
+                <p><small>Documento generado electrónicamente - Firma digital del médico</small></p>
+            </div>
+        </div>
+        
+        <div class="preview-alert">
+            <p>✅ <strong>Vista previa</strong> - Al descargar se generará un archivo PDF profesional</p>
+        </div>
+    `;
+}
+
+// 6. Descargar receta como PDF (MEJORADA)
+async function descargarRecetaPDF() {
+    if (!recetaActual) {
+        alert('❌ No hay receta para descargar');
+        return;
+    }
+
+    // Mostrar loading
+    const btnDescargar = document.getElementById('btnDescargarReceta');
+    const originalText = btnDescargar.innerHTML;
+    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+    btnDescargar.disabled = true;
+
+    try {
+        // Verificar que jsPDF esté disponible
+        if (typeof jspdf === 'undefined') {
+            throw new Error('La librería PDF no está disponible. Recarga la página.');
+        }
+
+        // Crear instancia de jsPDF
+        const doc = new jspdf.jsPDF();
+        
+        // Configuración
+        const margin = 20;
+        let yPosition = margin;
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        const contentWidth = pageWidth - (margin * 2);
+        
+        // Calcular fecha de vencimiento
+        const fechaVencimiento = new Date();
+        fechaVencimiento.setDate(fechaVencimiento.getDate() + parseInt(recetaActual.validez_dias));
+        
+        // --- ENCABEZADO ---
+        doc.setFillColor(0, 102, 204);
+        doc.rect(0, 0, pageWidth, 25, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(recetaActual.consultorio, pageWidth / 2, 12, { align: 'center' });
+        
+        doc.setFontSize(8);
+        doc.text('Sistema de Telemedicina - Receta Digital', pageWidth / 2, 18, { align: 'center' });
+        
+        yPosition = 40;
+        doc.setTextColor(0, 0, 0);
+        
+        // --- INFORMACIÓN DEL PACIENTE ---
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('INFORMACIÓN DEL PACIENTE', margin, yPosition);
+        
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Nombre: ${recetaActual.paciente_nombre}`, margin, yPosition);
+        
+        yPosition += 5;
+        doc.text(`Fecha de emisión: ${recetaActual.fecha_emision}`, margin, yPosition);
+        
+        yPosition += 5;
+        doc.text(`Válida hasta: ${fechaVencimiento.toLocaleDateString('es-ES')}`, margin, yPosition);
+        
+        yPosition += 12;
+        
+        // Línea separadora
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 15;
+        
+        // --- TRATAMIENTO PRESCRITO ---
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TRATAMIENTO PRESCRITO', margin, yPosition);
+        
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        // Dividir texto de medicamentos
+        const medicamentosLines = doc.splitTextToSize(recetaActual.medicamentos, contentWidth);
+        medicamentosLines.forEach(line => {
+            if (yPosition > pageHeight - 50) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            doc.text(line, margin, yPosition);
+            yPosition += 5;
+        });
+        
+        yPosition += 8;
+        
+        // --- INSTRUCCIONES ESPECIALES ---
+        if (recetaActual.instrucciones && recetaActual.instrucciones.trim() !== '') {
+            if (yPosition > pageHeight - 80) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('INSTRUCCIONES ESPECIALES', margin, yPosition);
+            
+            yPosition += 8;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            
+            const instruccionesLines = doc.splitTextToSize(recetaActual.instrucciones, contentWidth);
+            instruccionesLines.forEach(line => {
+                if (yPosition > pageHeight - 50) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+                doc.text(line, margin, yPosition);
+                yPosition += 5;
+            });
+            
+            yPosition += 8;
+        }
+        
+        // Línea separadora final
+        if (yPosition > pageHeight - 40) {
+            doc.addPage();
+            yPosition = margin;
+        }
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 15;
+        
+        // --- INFORMACIÓN DEL MÉDICO ---
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MÉDICO TRATANTE', pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 7;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(recetaActual.doctor_nombre, pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 5;
+        doc.text(recetaActual.doctor_especialidad, pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 5;
+        doc.text(`Cédula Profesional: ${recetaActual.doctor_cedula}`, pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 10;
+        doc.text(recetaActual.consultorio, pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 5;
+        doc.text(recetaActual.direccion_consultorio, pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 15;
+        
+        // --- NOTAS FINALES ---
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Nota: Esta receta es válida por ${recetaActual.validez_dias} días a partir de la fecha de emisión.`, 
+                 pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 4;
+        doc.text('Documento generado electrónicamente - Firma digital del médico', 
+                 pageWidth / 2, yPosition, { align: 'center' });
+        
+        // --- WATERMARK ---
+        doc.setFontSize(40);
+        doc.setTextColor(240, 240, 240);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RECETA VIRTUAL', pageWidth / 2, pageHeight / 2, { 
+            align: 'center',
+            angle: 45
+        });
+        
+        // Generar nombre del archivo
+        const fileName = `Receta_${recetaActual.paciente_nombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        
+        // Descargar el PDF
+        doc.save(fileName);
+        
+        alert('✅ Receta descargada en formato PDF correctamente');
+        
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        alert('❌ Error al generar el PDF: ' + error.message);
+    } finally {
+        // Restaurar botón
+        btnDescargar.innerHTML = originalText;
+        btnDescargar.disabled = false;
+    }
+}
+
+// 7. Guardar receta en base de datos
+async function guardarReceta() {
+    if (!recetaActual) {
+        alert('❌ Primero genere la vista previa de la receta');
+        return;
+    }
+    
+    try {
+        // Mostrar loading
+        const btnGuardar = document.getElementById('btnGuardarReceta');
+        const originalText = btnGuardar.innerHTML;
+        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btnGuardar.disabled = true;
+        
+        const response = await fetch('DataBase/php/guardarReceta.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(recetaActual)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const resultado = await response.json();
+        
+        if (resultado.success) {
+            alert('✅ Receta guardada exitosamente');
+            cancelarReceta();
+            cargarRecetasExistentes();
+        } else {
+            throw new Error(resultado.error || 'Error desconocido');
+        }
+        
+    } catch (error) {
+        console.error('Error guardando receta:', error);
+        alert('❌ Error al guardar la receta: ' + error.message);
+    } finally {
+        // Restaurar botón
+        const btnGuardar = document.getElementById('btnGuardarReceta');
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar Receta';
+        btnGuardar.disabled = false;
+    }
+}
+
+// 8. Editar receta
+function editarReceta() {
+    document.getElementById('vista-previa-receta').style.display = 'none';
+    document.getElementById('formulario-receta').style.display = 'block';
+    
+    if (recetaActual) {
+        document.getElementById('medicamentos').value = recetaActual.medicamentos;
+        document.getElementById('instrucciones').value = recetaActual.instrucciones || '';
+        document.getElementById('validez-receta').value = recetaActual.validez_dias;
+    }
+}
+
+// 9. Cargar recetas existentes
+async function cargarRecetasExistentes() {
+    try {
+        console.log('Cargando recetas existentes...');
+        const response = await fetch('DataBase/php/obtenerRecetas.php');
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const recetas = await response.json();
+        
+        const contenedor = document.getElementById('contenedor-recetas');
+        contenedor.innerHTML = '';
+        
+        if (recetas.length === 0) {
+            contenedor.innerHTML = '<p class="no-recetas">No hay recetas registradas</p>';
+            return;
+        }
+        
+        recetas.forEach(receta => {
+            const item = document.createElement('div');
+            item.className = 'receta-item';
+            
+            // Extraer información básica de la receta
+            const primerParrafo = receta.la_receta.split('\n')[0] || 'Receta médica';
+            const preview = primerParrafo.length > 100 ? 
+                primerParrafo.substring(0, 100) + '...' : primerParrafo;
+            
+            item.innerHTML = `
+                <div class="receta-header">
+                    <div class="receta-paciente">${receta.paciente_nombre}</div>
+                    <div class="receta-fecha">${receta.fecha_emision}</div>
+                </div>
+                <div class="receta-contenido">
+                    ${preview}
+                </div>
+                <div class="receta-actions">
+                    <button class="btn btn-sm" onclick="verRecetaCompleta(${receta.id_receta_medica})">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="descargarRecetaExistente(${receta.id_receta_medica})">
+                        <i class="fas fa-download"></i> PDF
+                    </button>
+                </div>
+            `;
+            contenedor.appendChild(item);
+        });
+        
+    } catch (error) {
+        console.error('Error cargando recetas existentes:', error);
+        const contenedor = document.getElementById('contenedor-recetas');
+        contenedor.innerHTML = `<p class="error">Error al cargar recetas: ${error.message}</p>`;
+    }
+}
+
+// 10. Ver receta completa
+async function verRecetaCompleta(idReceta) {
+    try {
+        const response = await fetch(`DataBase/php/obtenerReceta.php?id=${idReceta}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const receta = await response.json();
+        
+        if (receta.error) {
+            throw new Error(receta.error);
+        }
+        
+        if (receta) {
+            recetaActual = receta;
+            const vistaPrevia = document.querySelector('.receta-preview');
+            vistaPrevia.innerHTML = generarHTMLVistaPrevia(receta);
+            
+            document.getElementById('formulario-receta').style.display = 'none';
+            document.getElementById('vista-previa-receta').style.display = 'block';
+            document.getElementById('lista-recetas').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error cargando receta:', error);
+        alert('Error al cargar la receta: ' + error.message);
+    }
+}
+
+// 11. Descargar receta existente
+async function descargarRecetaExistente(idReceta) {
+    try {
+        const response = await fetch(`DataBase/php/obtenerReceta.php?id=${idReceta}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const receta = await response.json();
+        
+        if (receta.error) {
+            throw new Error(receta.error);
+        }
+        
+        if (receta) {
+            recetaActual = receta;
+            await descargarRecetaPDF();
+        }
+    } catch (error) {
+        console.error('Error descargando receta:', error);
+        alert('Error al descargar la receta: ' + error.message);
+    }
+}
+
+// Función auxiliar para formatear fecha
+function formatearFecha(fecha) {
+    return new Date(fecha).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}

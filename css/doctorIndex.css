@@ -606,3 +606,32 @@
     margin: 20px 0;
     border-left: 4px solid #28a745;
 }
+/* Mejoras para la vista previa de recetas */
+.receta-preview {
+    background: white !important;
+    padding: 0 !important;
+    border: 1px solid #ddd !important;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para los botones de acciones de receta */
+.preview-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+.btn-pdf {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-pdf:hover {
+    background: #c82333;
+}

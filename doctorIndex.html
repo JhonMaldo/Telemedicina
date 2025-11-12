@@ -6,6 +6,9 @@
     <title>Panel de Doctor - Sistema Médico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/doctorIndex.css">
+    <!-- LibreríasPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -258,12 +261,87 @@
         <div id="prescriptions" class="content-section">
             <h2 class="section-title">Gestión de Recetas Médicas</h2>
             
-            <div class="dashboard-cards">
-                <div class="card">
-                    <i class="fas fa-plus-circle"></i>
-                    <h3>Nueva Receta</h3>
-                    <p>Crear nueva receta médica</p>
-                    <button class="btn" style="margin-top: 15px;">Crear Receta</button>
+            <div class="prescriptions-container">
+                <!-- Panel izquierdo: Lista de pacientes y crear nueva receta -->
+                <div class="prescriptions-sidebar">
+                    <div class="card">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3>Nueva Receta</h3>
+                        <p>Crear nueva receta médica para paciente</p>
+                        <button class="btn btn-primary" id="btnNuevaReceta" style="margin-top: 15px;">
+                            Crear Nueva Receta
+                        </button>
+                    </div>
+                    
+                    <div class="patients-list-mini">
+                        <h4>Pacientes Recientes</h4>
+                        <div id="lista-pacientes-recetas">
+                            <!-- Lista de pacientes se cargará aquí -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Panel derecho: Formulario de receta -->
+                <div class="prescriptions-content">
+                    <div id="formulario-receta" style="display: none;">
+                        <h3 id="titulo-formulario-receta">Nueva Receta Médica</h3>
+                        
+                        <div class="form-group">
+                            <label for="select-paciente">Seleccionar Paciente</label>
+                            <select id="select-paciente" class="form-control">
+                                <option value="">Seleccione un paciente</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="medicamentos">Medicamentos y Tratamiento</label>
+                            <textarea id="medicamentos" rows="6" placeholder="Ejemplo:
+        - Amoxicilina 500mg: 1 tableta cada 8 horas por 7 días
+        - Ibuprofeno 400mg: 1 tableta cada 8 horas si hay dolor
+        - Reposo relativo por 3 días
+        - Control en 7 días si persisten los síntomas"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="instrucciones">Instrucciones Especiales</label>
+                            <textarea id="instrucciones" rows="3" placeholder="Instrucciones adicionales para el paciente..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="validez-receta">Validez de la Receta (días)</label>
+                            <input type="number" id="validez-receta" min="1" max="90" value="30" class="form-control">
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-success" id="btnGenerarReceta">
+                                <i class="fas fa-file-pdf"></i> Generar Receta PDF
+                            </button>
+                            <button class="btn btn-primary" id="btnGuardarReceta">
+                                <i class="fas fa-save"></i> Guardar Receta
+                            </button>
+                            <button class="btn" id="btnCancelarReceta">Cancelar</button>
+                        </div>
+                    </div>
+                    
+                    <div id="vista-previa-receta" style="display: none;">
+                        <h3>Vista Previa de Receta</h3>
+                        <div class="receta-preview">
+                            <!-- Vista previa se generará aquí -->
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-success" id="btnDescargarReceta">
+                                <i class="fas fa-download"></i> Descargar PDF
+                            </button>
+                            <button class="btn" id="btnEditarReceta">Editar Receta</button>
+                        </div>
+                    </div>
+                    
+                    <div id="lista-recetas" class="recetas-list">
+                        <h3>Recetas Recientes</h3>
+                        <div id="contenedor-recetas">
+                            <!-- Lista de recetas existentes se cargará aquí -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
