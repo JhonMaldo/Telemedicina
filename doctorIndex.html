@@ -22,6 +22,10 @@
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </div>
+            <div class="menu-item" data-section="patients">
+                <i class="fas fa-user-injured"></i>
+                <span>Pacientes</span>
+            </div>
             <div class="menu-item" data-section="consultations">
                 <i class="fas fa-stethoscope"></i>
                 <span>Consultas</span>
@@ -61,12 +65,9 @@
         </div>
 
         <!-- Dashboard Section -->
-
-        <div id="dashboard" class="content-section active">  <h2 class="section-title">Citas del Día</h2>
+        <div id="dashboard" class="content-section active">
+            <h2 class="section-title">Citas del Día</h2>
             <div class="appointments-list">
-                </div>
-
-        </div>
                 <div class="appointment-item">
                     <div class="appointment-info">
                         <h4>Juan Pérez - Control Cardiológico</h4>
@@ -103,96 +104,31 @@
             </div>
         </div>
 
-        <!-- Appointments Section -->
-        <div id="appointments" class="content-section">
-            <h2 class="section-title">Mis Citas Programadas</h2>
-            <div class="appointments-list">
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Juan Pérez - Control Cardiológico</h4>
-                        <p><i class="far fa-calendar"></i> 15 Oct, 2023 - 9:00 AM</p>
-                        <p><i class="fas fa-info-circle"></i> Seguimiento post-tratamiento</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Ana López - Evaluación Cardiológica</h4>
-                        <p><i class="far fa-calendar"></i> 16 Oct, 2023 - 10:30 AM</p>
-                        <p><i class="fas fa-info-circle"></i> Primera consulta, antecedentes familiares</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Roberto Sánchez - Control de Medicación</h4>
-                        <p><i class="far fa-calendar"></i> 17 Oct, 2023 - 11:15 AM</p>
-                        <p><i class="fas fa-info-circle"></i> Ajuste de dosis de anticoagulantes</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Patients Section -->
         <div id="patients" class="content-section">
-            <h2 class="section-title">Mis Pacientes</h2>
-            <div class="patients-list">
-                <div class="patient-item">
-                    <div class="patient-info">
-                        <img src="#" alt="Paciente">
-                        <div class="patient-details">
-                            <h4>Juan Pérez</h4>
-                            <p><i class="fas fa-birthday-cake"></i> 45 años</p>
-                            <p><i class="fas fa-phone"></i> +57 300 123 4567</p>
-                            <p><i class="fas fa-stethoscope"></i> Hipertensión arterial</p>
-                        </div>
+            <h2 class="section-title">Gestión de Pacientes</h2>
+            
+            <div class="patients-management-container">
+                <!-- Panel izquierdo: Lista de pacientes -->
+                <div class="patients-sidebar">
+                    <div class="search-box">
+                        <input type="text" id="search-patient" placeholder="🔍 Buscar paciente..." class="form-control">
                     </div>
-                    <div class="appointment-actions">
-                        <button class="btn">Ver Expediente</button>
-                        <button class="btn btn-success">Agendar Cita</button>
+                    <div class="patients-list-full">
+                        <div id="lista-pacientes-completa">
+                            <!-- Lista completa de pacientes se cargará aquí -->
+                        </div>
                     </div>
                 </div>
-                <div class="patient-item">
-                    <div class="patient-info">
-                        <img src="#" alt="Paciente">
-                        <div class="patient-details">
-                            <h4>María González</h4>
-                            <p><i class="fas fa-birthday-cake"></i> 52 años</p>
-                            <p><i class="fas fa-phone"></i> +57 301 234 5678</p>
-                            <p><i class="fas fa-stethoscope"></i> Cardiopatía isquémica</p>
+                
+                <!-- Panel derecho: Detalles del paciente -->
+                <div class="patients-details">
+                    <div id="vista-paciente-seleccionado">
+                        <div class="patient-profile-empty">
+                            <i class="fas fa-user-injured" style="font-size: 60px; color: #bdc3c7; margin-bottom: 20px;"></i>
+                            <h3>Selecciona un paciente</h3>
+                            <p>Haz clic en un paciente de la lista para ver su información detallada</p>
                         </div>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn">Ver Expediente</button>
-                        <button class="btn btn-success">Agendar Cita</button>
-                    </div>
-                </div>
-                <div class="patient-item">
-                    <div class="patient-info">
-                        <img src="#" alt="Paciente">
-                        <div class="patient-details">
-                            <h4>Carlos Rodríguez</h4>
-                            <p><i class="fas fa-birthday-cake"></i> 38 años</p>
-                            <p><i class="fas fa-phone"></i> +57 302 345 6789</p>
-                            <p><i class="fas fa-stethoscope"></i> Arritmia cardíaca</p>
-                        </div>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn">Ver Expediente</button>
-                        <button class="btn btn-success">Agendar Cita</button>
                     </div>
                 </div>
             </div>
@@ -215,7 +151,6 @@
                     <p>Programar nueva consulta con paciente</p>
                     <button class="btn" style="margin-top: 15px;">Nueva Consulta</button>
                 </div>
-            </div>
             </div>
         </div>
 
@@ -262,7 +197,7 @@
             <h2 class="section-title">Gestión de Recetas Médicas</h2>
             
             <div class="prescriptions-container">
-                <!-- Panel izquierdo: Lista de pacientes y crear nueva receta -->
+                <!-- Panel izquierdo: Lista de pacientes -->
                 <div class="prescriptions-sidebar">
                     <div class="card">
                         <i class="fas fa-plus-circle"></i>
@@ -275,12 +210,13 @@
                     
                     <div class="patients-list-mini">
                         <h4>Pacientes Recientes</h4>
+                        <!-- ESTE ES EL CONTENEDOR DE PACIENTES -->
                         <div id="lista-pacientes-recetas">
                             <!-- Lista de pacientes se cargará aquí -->
                         </div>
                     </div>
                 </div>
-                
+        
                 <!-- Panel derecho: Formulario de receta -->
                 <div class="prescriptions-content">
                     <div id="formulario-receta" style="display: none;">
@@ -337,7 +273,12 @@
                     </div>
                     
                     <div id="lista-recetas" class="recetas-list">
-                        <h3>Recetas Recientes</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 id="titulo-lista-recetas">Todas las Recetas Recientes</h3>
+                            <button class="btn btn-sm btn-outline" onclick="mostrarTodasLasRecetas()" id="btn-todas-recetas">
+                                <i class="fas fa-list"></i> Ver Todas
+                            </button>
+                        </div>
                         <div id="contenedor-recetas">
                             <!-- Lista de recetas existentes se cargará aquí -->
                         </div>
@@ -405,7 +346,6 @@
         </div>
     </div>
 
-    <script src="js/doctorIndex.js">
-    </script>
+    <script src="js/doctorIndex.js"></script>
 </body>
 </html>
