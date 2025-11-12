@@ -6,7 +6,7 @@
     <title>Panel de Doctor - Sistema Médico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/doctorIndex.css">
-    <!-- LibreríasPDF -->
+    <!-- Librerías PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -41,7 +41,7 @@
             <div class="menu-item" data-section="notifications">
                 <i class="fas fa-bell"></i>
                 <span>Notificaciones</span>
-                <div class="notification-badge">3</div>
+                <div class="notification-badge" style="display:none;">0</div>
             </div>
             <div class="menu-item">
                 <i class="fas fa-sign-out-alt"></i>
@@ -60,7 +60,7 @@
                     <div>Dr. Laura Martínez</div>
                     <small>Cardióloga</small>
                 </div>
-                <div class="notification-badge">3</div>
+                <div class="notification-badge" style="display:none;">0</div>
             </div>
         </div>
 
@@ -68,42 +68,12 @@
         <div id="dashboard" class="content-section active">
             <h2 class="section-title">Citas del Día</h2>
             <div class="appointments-list">
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Juan Pérez - Control Cardiológico</h4>
-                        <p><i class="far fa-clock"></i> 9:00 AM - 9:30 AM</p>
-                        <p><i class="fas fa-info-circle"></i> Seguimiento post-tratamiento</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Iniciar Consulta</button>
-                        <button class="btn">Ver Expediente</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>María González - Consulta General</h4>
-                        <p><i class="far fa-clock"></i> 10:15 AM - 10:45 AM</p>
-                        <p><i class="fas fa-info-circle"></i> Dolor torácico leve</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Iniciar Consulta</button>
-                        <button class="btn">Ver Expediente</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Carlos Rodríguez - Primera Vez</h4>
-                        <p><i class="far fa-clock"></i> 11:30 AM - 12:00 PM</p>
-                        <p><i class="fas fa-info-circle"></i> Evaluación cardiológica inicial</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Iniciar Consulta</button>
-                        <button class="btn">Ver Expediente</button>
-                    </div>
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando citas...</p>
                 </div>
             </div>
         </div>
-        <!-- CIERRE DEL DIV DASHBOARD -->
 
         <!-- Patients Section -->
         <div id="patients" class="content-section">
@@ -117,7 +87,6 @@
             </div>
 
             <div class="patients-management">
-                <!-- Sidebar con lista de pacientes -->
                 <div class="patients-sidebar">
                     <div class="search-box">
                         <input type="text" id="search-patient" placeholder="🔍 Buscar paciente por nombre...">
@@ -129,7 +98,6 @@
                             <span class="badge" id="contador-pacientes">0</span>
                         </div>
                         <div id="lista-pacientes-completa" class="patients-list">
-                            <!-- Los pacientes se cargarán aquí dinámicamente -->
                             <div class="loading-state">
                                 <i class="fas fa-spinner fa-spin"></i>
                                 <p>Cargando pacientes...</p>
@@ -138,7 +106,6 @@
                     </div>
                 </div>
 
-                <!-- Panel principal de detalles del paciente -->
                 <div class="patients-detail-view">
                     <div id="vista-paciente-seleccionado">
                         <div class="no-patient-selected">
@@ -165,14 +132,13 @@
             </div>
 
             <div class="consultations-management">
-                <!-- Sidebar con lista de consultas -->
                 <div class="consultations-sidebar">
                     <div class="consultations-filters">
                         <div class="filter-group">
                             <label>Filtrar por estado:</label>
                             <select id="filter-status">
                                 <option value="all">Todas</option>
-                                <option value="programada">Programadas</option>
+                                <option value="programado">Programadas</option>
                                 <option value="en-curso">En Curso</option>
                                 <option value="completada">Completadas</option>
                                 <option value="cancelada">Canceladas</option>
@@ -197,7 +163,6 @@
                     </div>
                 </div>
 
-                <!-- Panel principal de detalles de consulta -->
                 <div class="consultation-detail-view">
                     <div id="vista-consulta-seleccionada">
                         <div class="no-consultation-selected">
@@ -217,7 +182,6 @@
             <div class="records-container">
                 <div class="records-sidebar">
                     <h3>Pacientes</h3>
-                    <!-- Lista de pacientes se cargará aquí -->
                 </div>
                 <div class="records-content">
                     <div class="loading-message">
@@ -230,9 +194,7 @@
         <!-- Prescriptions Section -->
         <div id="prescriptions" class="content-section">
             <h2 class="section-title">Gestión de Recetas Médicas</h2>
-            
             <div class="prescriptions-container">
-                <!-- Panel izquierdo: Lista de pacientes -->
                 <div class="prescriptions-sidebar">
                     <div class="card">
                         <i class="fas fa-plus-circle"></i>
@@ -242,146 +204,65 @@
                             Crear Nueva Receta
                         </button>
                     </div>
-                    
                     <div class="patients-list-mini">
                         <h4>Pacientes Recientes</h4>
-                        <div id="lista-pacientes-recetas">
-                            <!-- Lista de pacientes se cargará aquí -->
-                        </div>
+                        <div id="lista-pacientes-recetas"></div>
                     </div>
                 </div>
-        
-                <!-- Panel derecho: Formulario de receta -->
                 <div class="prescriptions-content">
                     <div id="formulario-receta" style="display: none;">
                         <h3 id="titulo-formulario-receta">Nueva Receta Médica</h3>
-                        
                         <div class="form-group">
                             <label for="select-paciente">Seleccionar Paciente</label>
                             <select id="select-paciente" class="form-control">
                                 <option value="">Seleccione un paciente</option>
                             </select>
                         </div>
-                        
                         <div class="form-group">
                             <label for="medicamentos">Medicamentos y Tratamiento</label>
-                            <textarea id="medicamentos" rows="6" placeholder="Ejemplo:
-        - Amoxicilina 500mg: 1 tableta cada 8 horas por 7 días
-        - Ibuprofeno 400mg: 1 tableta cada 8 horas si hay dolor
-        - Reposo relativo por 3 días
-        - Control en 7 días si persisten los síntomas"></textarea>
+                            <textarea id="medicamentos" rows="6"></textarea>
                         </div>
-                        
                         <div class="form-group">
                             <label for="instrucciones">Instrucciones Especiales</label>
-                            <textarea id="instrucciones" rows="3" placeholder="Instrucciones adicionales para el paciente..."></textarea>
+                            <textarea id="instrucciones" rows="3"></textarea>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="validez-receta">Validez de la Receta (días)</label>
+                            <label for="validez-receta">Validez (días)</label>
                             <input type="number" id="validez-receta" min="1" max="90" value="30" class="form-control">
                         </div>
-                        
                         <div class="form-actions">
                             <button class="btn btn-success" id="btnGenerarReceta">
-                                <i class="fas fa-file-pdf"></i> Generar Receta PDF
+                                <i class="fas fa-file-pdf"></i> Generar PDF
                             </button>
                             <button class="btn btn-primary" id="btnGuardarReceta">
-                                <i class="fas fa-save"></i> Guardar Receta
+                                <i class="fas fa-save"></i> Guardar
                             </button>
                             <button class="btn" id="btnCancelarReceta">Cancelar</button>
                         </div>
                     </div>
-                    
-                    <div id="vista-previa-receta" style="display: none;">
-                        <h3>Vista Previa de Receta</h3>
-                        <div class="receta-preview">
-                            <!-- Vista previa se generará aquí -->
-                        </div>
-                        <div class="preview-actions">
-                            <button class="btn btn-success" id="btnDescargarReceta">
-                                <i class="fas fa-download"></i> Descargar PDF
-                            </button>
-                            <button class="btn" id="btnEditarReceta">Editar Receta</button>
-                        </div>
-                    </div>
-                    
                     <div id="lista-recetas" class="recetas-list">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 id="titulo-lista-recetas">Todas las Recetas Recientes</h3>
-                            <button class="btn btn-sm btn-outline" onclick="mostrarTodasLasRecetas()" id="btn-todas-recetas">
-                                <i class="fas fa-list"></i> Ver Todas
-                            </button>
+                            <h3>Todas las Recetas Recientes</h3>
                         </div>
-                        <div id="contenedor-recetas">
-                            <!-- Lista de recetas existentes se cargará aquí -->
-                        </div>
+                        <div id="contenedor-recetas"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Notifications Section -->
+        <!-- Notifications Section (dinámica con BD) -->
         <div id="notifications" class="content-section">
             <h2 class="section-title">Notificaciones</h2>
-            
             <div class="notifications-list">
-                <div class="notification-item unread">
-                    <div class="notification-icon">
-                        <i class="fas fa-calendar-plus"></i>
-                    </div>
-                    <div class="notification-content">
-                        <h4>Nueva Cita Programada</h4>
-                        <p>Ana López ha agendado una cita para el 18 de octubre a las 11:00 AM</p>
-                        <p class="notification-time">Hace 2 horas</p>
-                    </div>
-                </div>
-                <div class="notification-item unread">
-                    <div class="notification-icon">
-                        <i class="fas fa-file-medical"></i>
-                    </div>
-                    <div class="notification-content">
-                        <h4>Resultados de Laboratorio Disponibles</h4>
-                        <p>Los resultados de Juan Pérez están disponibles para revisión</p>
-                        <p class="notification-time">Hace 5 horas</p>
-                    </div>
-                </div>
-                <div class="notification-item unread">
-                    <div class="notification-icon">
-                        <i class="fas fa-prescription-bottle-alt"></i>
-                    </div>
-                    <div class="notification-content">
-                        <h4>Solicitud de Receta</h4>
-                        <p>María González ha solicitado la renovación de su medicación</p>
-                        <p class="notification-time">Ayer, 14:30</p>
-                    </div>
-                </div>
-                <div class="notification-item">
-                    <div class="notification-icon">
-                        <i class="fas fa-user-clock"></i>
-                    </div>
-                    <div class="notification-content">
-                        <h4>Recordatorio de Cita</h4>
-                        <p>Tienes una cita con Carlos Rodríguez mañana a las 10:00 AM</p>
-                        <p class="notification-time">Ayer, 09:15</p>
-                    </div>
-                </div>
-                <div class="notification-item">
-                    <div class="notification-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="notification-content">
-                        <h4>Videoconsulta Programada</h4>
-                        <p>Videoconsulta con Roberto Sánchez confirmada para el 17 de octubre</p>
-                        <p class="notification-time">15 Oct, 2023</p>
-                    </div>
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando notificaciones...</p>
                 </div>
             </div>
         </div>
     </div>
-    <!-- CIERRE DEL MAIN CONTENT -->
 
-    <!-- Modal para Nueva Consulta -->
+    <!-- Modal Nueva Consulta -->
     <div id="modalNuevaConsulta" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -396,12 +277,10 @@
                         <option value="">Seleccione un paciente</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
                     <label for="fecha-consulta">Fecha y Hora *</label>
                     <input type="datetime-local" id="fecha-consulta" required>
                 </div>
-                
                 <div class="form-group">
                     <label for="duracion-consulta">Duración Estimada</label>
                     <select id="duracion-consulta">
@@ -412,40 +291,18 @@
                         <option value="120">2 horas</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="tipo-consulta">Tipo de Consulta</label>
-                    <select id="tipo-consulta">
-                        <option value="primera-vez">Primera Vez</option>
-                        <option value="seguimiento" selected>Seguimiento</option>
-                        <option value="urgencia">Urgencia</option>
-                        <option value="control">Control Rutinario</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="urgencia-consulta">Nivel de Urgencia</label>
-                    <select id="urgencia-consulta">
-                        <option value="baja">Baja</option>
-                        <option value="normal" selected>Normal</option>
-                        <option value="alta">Alta</option>
-                    </select>
-                </div>
-                
                 <div class="form-group">
                     <label for="motivo-consulta">Motivo de la Consulta *</label>
-                    <textarea id="motivo-consulta" placeholder="Describa el motivo de la consulta..." required></textarea>
+                    <textarea id="motivo-consulta" required></textarea>
                 </div>
-                
                 <div class="form-group">
                     <label for="notas-consulta">Notas Adicionales</label>
-                    <textarea id="notas-consulta" placeholder="Notas o observaciones adicionales..."></textarea>
+                    <textarea id="notas-consulta"></textarea>
                 </div>
-                
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="btnCancelarConsulta">Cancelar</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-calendar-plus"></i> Programar Consulta
+                        <i class="fas fa-calendar-plus"></i> Programar
                     </button>
                 </div>
             </form>

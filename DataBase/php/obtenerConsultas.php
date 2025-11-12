@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include 'conexion.php'; // tu archivo de conexión existente
+include 'conexion.php'; // Asegúrate que este archivo devuelva $conexion con PDO conectado a la BD telemed
 
 try {
     $sql = "
@@ -16,16 +16,17 @@ try {
             co.notas,
             co.url_video AS enlace_meet
         FROM citas c
-        JOIN pacientes p ON c.id_paciente = p.id_paciente
+        INNER JOIN pacientes p ON c.id_paciente = p.id_paciente
         LEFT JOIN consultas co ON c.id_citas = co.id_citas
-        ORDER BY c.fecha_programada ASC
+        ORDER BY c.fecha_programada DESC
     ";
 
     $stmt = $conexion->prepare($sql);
     $stmt->execute();
 
     $consultas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($consultas);
+
+    echo json_encode($consultas, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 } catch (Exception $e) {
     echo json_encode(["error" => $e->getMessage()]);
