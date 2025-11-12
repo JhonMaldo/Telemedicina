@@ -104,36 +104,53 @@
             </div>
         </div>
 
-        <!-- Patients Section -->
-        <div id="patients" class="content-section">
-            <h2 class="section-title">Gestión de Pacientes</h2>
+<!-- Patients Section -->
+<div id="patients" class="content-section">
+    <div class="section-header">
+        <h2 id="section-title">Mis Pacientes</h2>
+        <div class="header-actions">
+            <button class="btn btn-primary" id="btn-nuevo-paciente">
+                <i class="fas fa-plus"></i> Nuevo Paciente
+            </button>
+        </div>
+    </div>
+
+    <div class="patients-management">
+        <!-- Sidebar con lista de pacientes -->
+        <div class="patients-sidebar">
+            <div class="search-box">
+                <input type="text" id="search-patient" placeholder="🔍 Buscar paciente por nombre...">
+            </div>
             
-            <div class="patients-management-container">
-                <!-- Panel izquierdo: Lista de pacientes -->
-                <div class="patients-sidebar">
-                    <div class="search-box">
-                        <input type="text" id="search-patient" placeholder="🔍 Buscar paciente..." class="form-control">
-                    </div>
-                    <div class="patients-list-full">
-                        <div id="lista-pacientes-completa">
-                            <!-- Lista completa de pacientes se cargará aquí -->
-                        </div>
-                    </div>
+            <div class="patients-list-container">
+                <div class="list-header">
+                    <h4>Lista de Pacientes</h4>
+                    <span class="badge" id="contador-pacientes">0</span>
                 </div>
-                
-                <!-- Panel derecho: Detalles del paciente -->
-                <div class="patients-details">
-                    <div id="vista-paciente-seleccionado">
-                        <div class="patient-profile-empty">
-                            <i class="fas fa-user-injured" style="font-size: 60px; color: #bdc3c7; margin-bottom: 20px;"></i>
-                            <h3>Selecciona un paciente</h3>
-                            <p>Haz clic en un paciente de la lista para ver su información detallada</p>
-                        </div>
+                <div id="lista-pacientes-completa" class="patients-list">
+                    <!-- Los pacientes se cargarán aquí dinámicamente -->
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando pacientes...</p>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Panel principal de detalles del paciente -->
+        <div class="patients-detail-view">
+            <div id="vista-paciente-seleccionado">
+                <div class="no-patient-selected">
+                    <div class="empty-state">
+                        <i class="fas fa-user-injured"></i>
+                        <h3>Selecciona un paciente</h3>
+                        <p>Haz clic en un paciente de la lista para ver su perfil completo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Consultations Section -->
         <div id="consultations" class="content-section">
             <h2 class="section-title">Consultas y Videollamadas</h2>

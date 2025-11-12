@@ -487,6 +487,11 @@ function inicializarSistemaRecetas() {
             console.log('📋 Accediendo a sección de recetas');
             cargarPacientesParaRecetas();
             cargarRecetasExistentes();
+            
+            // POR DEFECTO: Mostrar lista de recetas al entrar
+            document.getElementById('formulario-receta').style.display = 'none';
+            document.getElementById('vista-previa-receta').style.display = 'none';
+            document.getElementById('lista-recetas').style.display = 'block';
         });
     }
     
@@ -511,7 +516,6 @@ function inicializarSistemaRecetas() {
     
     console.log('✅ Sistema de recetas inicializado');
 }
-
 // 1. Cargar pacientes para el sistema de recetas - VERSIÓN CORREGIDA
 async function cargarPacientesParaRecetas() {
     try {
@@ -564,7 +568,12 @@ async function cargarPacientesParaRecetas() {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.patient-item-mini').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
+                
+                // SOLO seleccionar paciente, NO mostrar formulario automáticamente
                 seleccionarPacienteReceta(paciente.id_paciente, paciente.nombre_completo);
+                
+                // Cargar las recetas de este paciente específico
+                cargarRecetasExistentes(paciente.id_paciente);
             });
         });
         
@@ -583,12 +592,16 @@ async function cargarPacientesParaRecetas() {
                         item.classList.remove('active');
                     }
                 });
+                
+                // NO cambiar la vista automáticamente - solo cargar recetas de ese paciente
+                cargarRecetasExistentes(this.value);
+                
             } else {
                 // Si se selecciona "Seleccione un paciente", mostrar todas las recetas
                 mostrarTodasLasRecetas();
             }
         });
-        
+
     } catch (error) {
         console.error('❌ Error cargando pacientes para recetas:', error);
         // Mostrar error en la interfaz si los elementos existen
@@ -599,7 +612,7 @@ async function cargarPacientesParaRecetas() {
     }
 }
 
-// 2. Seleccionar paciente para receta - VERSIÓN MEJORADA
+// 2. Seleccionar paciente para receta - VERSIÓN FINAL CORREGIDA
 function seleccionarPacienteReceta(idPaciente, nombrePaciente) {
     pacienteSeleccionadoReceta = { 
         id: idPaciente, 
@@ -613,14 +626,17 @@ function seleccionarPacienteReceta(idPaciente, nombrePaciente) {
     // Habilitar botones
     document.getElementById('btnGenerarReceta').disabled = false;
     
-    // MOSTRAR RECETAS DE ESTE PACIENTE ESPECÍFICO
-    console.log(`👤 Cargando recetas del paciente: ${nombrePaciente} (ID: ${idPaciente})`);
-    cargarRecetasExistentes(idPaciente);
+    console.log(`👤 Paciente seleccionado para receta: ${nombrePaciente} (ID: ${idPaciente})`);
     
-    // Mostrar la lista de recetas si está oculta
-    document.getElementById('formulario-receta').style.display = 'none';
-    document.getElementById('vista-previa-receta').style.display = 'none';
-    document.getElementById('lista-recetas').style.display = 'block';
+    // IMPORTANTE: NO cambiar la vista aquí, solo preparar los datos
+    // La vista se cambiará dependiendo del contexto
+    
+    // Limpiar formulario para nueva receta si estamos en modo creación
+    if (document.getElementById('formulario-receta').style.display === 'block') {
+        document.getElementById('medicamentos').value = '';
+        document.getElementById('instrucciones').value = '';
+        document.getElementById('validez-receta').value = '30';
+    }
 }
 
 // 3. Mostrar formulario de receta
@@ -1083,6 +1099,7 @@ async function guardarReceta() {
         btnGuardar.disabled = false;
     }
 }
+
 // 8. Editar receta
 function editarReceta() {
     document.getElementById('vista-previa-receta').style.display = 'none';
@@ -1235,6 +1252,7 @@ async function cargarRecetasExistentes(pacienteId = null) {
         }
     }
 }
+
 // 10. Ver receta completa
 async function verRecetaCompleta(idReceta) {
     try {
@@ -1290,15 +1308,6 @@ async function descargarRecetaExistente(idReceta) {
     }
 }
 
-// Función auxiliar para formatear fecha
-function formatearFecha(fecha) {
-    return new Date(fecha).toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-}
-
 // 12. Reutilizar receta existente (NUEVA FUNCIÓN)
 async function reutilizarReceta(idReceta) {
     try {
@@ -1340,4 +1349,495 @@ function mostrarTodasLasRecetas() {
     cargarRecetasExistentes();
     
     console.log('📋 Mostrando todas las recetas');
+}
+
+// ===== SISTEMA COMPLETO DE GESTIÓN DE PACIENTES =====
+
+// Variables globales
+let pacienteSeleccionado = null;
+let todosLosPacientes = [];
+
+// Inicializar sistema de pacientes
+function inicializarSistemaPacientes() {
+    console.log('🔄 Inicializando sistema de pacientes...');
+    
+    const patientsSection = document.querySelector('[data-section="patients"]');
+    if (patientsSection) {
+        patientsSection.addEventListener('click', function() {
+            console.log('📋 Accediendo a sección de pacientes');
+            cargarListaPacientesCompleta();
+        });
+    }
+    
+    // Event listener para búsqueda
+    const searchInput = document.getElementById('search-patient');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            filtrarPacientes(e.target.value.toLowerCase());
+        });
+    }
+    
+    // Event listener para nuevo paciente
+    const btnNuevoPaciente = document.getElementById('btn-nuevo-paciente');
+    if (btnNuevoPaciente) {
+        btnNuevoPaciente.addEventListener('click', function() {
+            alert('👥 Funcionalidad de nuevo paciente - Próximamente');
+        });
+    }
+}
+
+// Cargar lista completa de pacientes
+async function cargarListaPacientesCompleta() {
+    try {
+        console.log('🔄 Cargando lista completa de pacientes...');
+        const listaPacientes = document.getElementById('lista-pacientes-completa');
+        
+        if (!listaPacientes) {
+            console.error('❌ Elemento lista-pacientes-completa no encontrado');
+            return;
+        }
+        
+        // Mostrar loading
+        listaPacientes.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando lista de pacientes...</p>
+            </div>
+        `;
+        
+        const response = await fetch('DataBase/php/listaPacientes.php');
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const pacientes = await response.json();
+        todosLosPacientes = pacientes; // Guardar para filtrado
+        
+        console.log(`✅ ${pacientes.length} pacientes cargados`);
+        
+        // Actualizar contador
+        const contador = document.getElementById('contador-pacientes');
+        if (contador) {
+            contador.textContent = pacientes.length;
+        }
+        
+        // Renderizar lista
+        renderizarListaPacientes(pacientes);
+        
+    } catch (error) {
+        console.error('❌ Error cargando lista de pacientes:', error);
+        const listaPacientes = document.getElementById('lista-pacientes-completa');
+        if (listaPacientes) {
+            listaPacientes.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Error al cargar pacientes</h4>
+                    <p>${error.message}</p>
+                    <button class="btn btn-sm" onclick="cargarListaPacientesCompleta()">
+                        <i class="fas fa-redo"></i> Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Renderizar lista de pacientes
+function renderizarListaPacientes(pacientes) {
+    const listaPacientes = document.getElementById('lista-pacientes-completa');
+    
+    if (!listaPacientes) return;
+    
+    if (pacientes.length === 0) {
+        listaPacientes.innerHTML = `
+            <div class="no-data">
+                <i class="fas fa-users"></i>
+                <p>No hay pacientes registrados</p>
+                <small>Usa el botón "Nuevo Paciente" para agregar uno</small>
+            </div>
+        `;
+        return;
+    }
+    
+    listaPacientes.innerHTML = '';
+    
+    pacientes.forEach(paciente => {
+        const item = document.createElement('div');
+        item.className = 'patient-item-full';
+        item.dataset.patientId = paciente.id_paciente;
+        
+        item.innerHTML = `
+            <div class="patient-item-content">
+                <div class="patient-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="patient-info-compact">
+                    <h4>${paciente.nombre_completo}</h4>
+                    <div class="patient-details-compact">
+                        <span class="patient-age">${paciente.edad} años</span>
+                        <span class="patient-gender">${paciente.genero === 'M' ? '♂ Masculino' : '♀ Femenino'}</span>
+                        <span class="patient-phone">${paciente.telefono_paciente || 'Sin teléfono'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Event listener para seleccionar paciente
+        item.addEventListener('click', function() {
+            seleccionarPacienteEnLista(paciente.id_paciente);
+            mostrarDetallesPaciente(paciente.id_paciente);
+        });
+        
+        listaPacientes.appendChild(item);
+    });
+}
+
+// Seleccionar paciente en la lista
+function seleccionarPacienteEnLista(idPaciente) {
+    const items = document.querySelectorAll('.patient-item-full');
+    items.forEach(item => {
+        if (item.dataset.patientId === idPaciente.toString()) {
+            item.classList.add('active');
+            pacienteSeleccionado = idPaciente;
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+// Filtrar pacientes
+function filtrarPacientes(searchTerm) {
+    if (!searchTerm) {
+        renderizarListaPacientes(todosLosPacientes);
+        return;
+    }
+    
+    const pacientesFiltrados = todosLosPacientes.filter(paciente => 
+        paciente.nombre_completo.toLowerCase().includes(searchTerm) ||
+        (paciente.telefono_paciente && paciente.telefono_paciente.includes(searchTerm)) ||
+        (paciente.email && paciente.email.toLowerCase().includes(searchTerm))
+    );
+    
+    renderizarListaPacientes(pacientesFiltrados);
+    
+    // Mostrar mensaje si no hay resultados
+    const listaPacientes = document.getElementById('lista-pacientes-completa');
+    const mensajeNoResultados = listaPacientes.querySelector('.no-results');
+    
+    if (pacientesFiltrados.length === 0 && searchTerm) {
+        if (!mensajeNoResultados) {
+            const mensaje = document.createElement('div');
+            mensaje.className = 'no-results';
+            mensaje.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #6c757d;">
+                    <i class="fas fa-search" style="font-size: 32px; margin-bottom: 10px;"></i>
+                    <p>No se encontraron pacientes con "<strong>${searchTerm}</strong>"</p>
+                    <small>Intenta con otro nombre o término de búsqueda</small>
+                </div>
+            `;
+            listaPacientes.appendChild(mensaje);
+        }
+    } else if (mensajeNoResultados) {
+        mensajeNoResultados.remove();
+    }
+}
+
+// Mostrar detalles del paciente seleccionado
+async function mostrarDetallesPaciente(idPaciente) {
+    try {
+        const vistaPaciente = document.getElementById('vista-paciente-seleccionado');
+        
+        if (!vistaPaciente) {
+            console.error('❌ Elemento vista-paciente-seleccionado no encontrado');
+            return;
+        }
+        
+        // Mostrar loading
+        vistaPaciente.innerHTML = `
+            <div class="loading-paciente">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando información del paciente...</p>
+            </div>
+        `;
+        
+        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${idPaciente}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        const info = data.info;
+        
+        // Generar y mostrar el perfil detallado
+        vistaPaciente.innerHTML = generarHTMLPerfilPaciente(info, data);
+        
+        console.log('✅ Perfil del paciente cargado:', info.nombre_completo);
+        
+    } catch (error) {
+        console.error('❌ Error cargando detalles del paciente:', error);
+        const vistaPaciente = document.getElementById('vista-paciente-seleccionado');
+        if (vistaPaciente) {
+            vistaPaciente.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Error al cargar información</h4>
+                    <p>${error.message}</p>
+                    <button class="btn btn-sm" onclick="mostrarDetallesPaciente(${idPaciente})">
+                        <i class="fas fa-redo"></i> Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Generar HTML del perfil del paciente
+function generarHTMLPerfilPaciente(info, data) {
+    const edad = calcularEdad(info.fecha_nacimiento);
+    const ultimaVisita = data.ultima_visita ? 
+        new Date(data.ultima_visita).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }) : 
+        'No registrada';
+    
+    // Obtener estadísticas
+    const totalRegistros = data.historial ? data.historial.length : 0;
+    const totalRecetas = data.recetas ? data.recetas.length : 0;
+    const tieneCitaProgramada = data.proxima_cita ? 'Sí' : 'No';
+    const alergias = obtenerAlergias(data.historial);
+    
+    return `
+        <div class="patient-profile-detailed">
+            <!-- Header con información principal -->
+            <div class="patient-header-detailed">
+                <div class="patient-main-info">
+                    <div class="patient-avatar-large">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="patient-basic-details">
+                        <h2>${info.nombre_completo}</h2>
+                        <div class="patient-meta">
+                            <span class="patient-id">ID: ${info.id_paciente}</span>
+                            <span class="patient-age">${edad} años</span>
+                            <span class="patient-gender">${info.genero === 'M' ? 'Masculino' : 'Femenino'}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="patient-stats-overview">
+                    <div class="stat-item">
+                        <div class="stat-number">${totalRegistros}</div>
+                        <div class="stat-label">Registros Médicos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${totalRecetas}</div>
+                        <div class="stat-label">Recetas Activas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${tieneCitaProgramada}</div>
+                        <div class="stat-label">Cita Programada</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información de contacto -->
+            <div class="patient-contact-section">
+                <h3>📞 Información de Contacto</h3>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <label>Teléfono Principal</label>
+                            <p>${info.telefono_paciente || 'No registrado'}</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <label>Correo Electrónico</label>
+                            <p>${info.email || 'No registrado'}</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-home"></i>
+                        <div>
+                            <label>Dirección</label>
+                            <p>${info.direccion || 'No registrada'}</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-ambulance"></i>
+                        <div>
+                            <label>Contacto de Emergencia</label>
+                            <p>${info.contacto_de_emergencia || 'No registrado'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen médico -->
+            <div class="patient-medical-overview">
+                <h3>🏥 Resumen Médico</h3>
+                <div class="medical-summary">
+                    <div class="summary-item">
+                        <label>Última Visita</label>
+                        <p>${ultimaVisita}</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Alergias Conocidas</label>
+                        <p>${alergias || 'No registradas'}</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Medicación Actual</label>
+                        <p>${totalRecetas > 0 ? `${totalRecetas} receta(s) activa(s)` : 'Sin medicación activa'}</p>
+                    </div>
+                    <div class="summary-item">
+                        <label>Estado General</label>
+                        <p>${totalRegistros > 0 ? 'Con historial médico' : 'Sin historial registrado'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Acciones rápidas -->
+            <div class="patient-actions-detailed">
+                <button class="btn btn-primary" onclick="irAExpediente(${info.id_paciente})">
+                    <i class="fas fa-notes-medical"></i> Ver Expediente Completo
+                </button>
+                <button class="btn btn-success" onclick="crearRecetaParaPaciente(${info.id_paciente}, '${info.nombre_completo}')">
+                    <i class="fas fa-file-prescription"></i> Nueva Receta
+                </button>
+                <button class="btn btn-warning" onclick="agendarCitaPaciente(${info.id_paciente})">
+                    <i class="fas fa-calendar-plus"></i> Agendar Cita
+                </button>
+                <button class="btn btn-info" onclick="generarReportePaciente(${info.id_paciente})">
+                    <i class="fas fa-chart-bar"></i> Generar Reporte
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Función auxiliar para obtener alergias del historial
+function obtenerAlergias(historial) {
+    if (!historial) return null;
+    
+    const alergias = historial.filter(h => 
+        h.tipo_registro && h.tipo_registro.toLowerCase() === 'alergia'
+    );
+    
+    return alergias.length > 0 ? 
+        alergias.map(a => a.descripcion).join(', ') : 
+        null;
+}
+
+// ===== FUNCIONES DE ACCIÓN PARA LOS BOTONES =====
+
+function irAExpediente(idPaciente) {
+    console.log('📁 Navegando a expediente del paciente:', idPaciente);
+    
+    // Navegar a la sección de expedientes
+    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+    document.querySelector('[data-section="medical-records"]').classList.add('active');
+    showSection('medical-records');
+    
+    // Cargar lista y seleccionar paciente
+    setTimeout(() => {
+        cargarListaPacientes();
+        
+        // Esperar a que cargue la lista y luego seleccionar el paciente
+        setTimeout(() => {
+            const pacienteItem = document.querySelector(`.record-item[data-patient="${idPaciente}"]`);
+            if (pacienteItem) {
+                pacienteItem.click();
+            } else {
+                console.warn('⚠️ No se encontró el paciente en la lista de expedientes');
+                // Recargar después de un tiempo si no se encuentra
+                setTimeout(() => {
+                    const pacienteItemRetry = document.querySelector(`.record-item[data-patient="${idPaciente}"]`);
+                    if (pacienteItemRetry) {
+                        pacienteItemRetry.click();
+                    }
+                }, 1000);
+            }
+        }, 800);
+    }, 100);
+}
+
+function crearRecetaParaPaciente(idPaciente, nombrePaciente) {
+    console.log('📝 Creando receta para:', nombrePaciente);
+    
+    // Navegar a la sección de recetas
+    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+    document.querySelector('[data-section="prescriptions"]').classList.add('active');
+    showSection('prescriptions');
+    
+    // Seleccionar el paciente en el sistema de recetas
+    setTimeout(() => {
+        if (typeof seleccionarPacienteReceta === 'function') {
+            // PRIMERO mostrar el formulario (solo cuando viene de "Nueva Receta")
+            mostrarFormularioReceta();
+            // LUEGO seleccionar el paciente
+            seleccionarPacienteReceta(idPaciente, nombrePaciente);
+        } else {
+            console.error('❌ Función seleccionarPacienteReceta no disponible');
+            alert('Error: Sistema de recetas no disponible');
+        }
+    }, 100);
+}
+
+function agendarCitaPaciente(idPaciente) {
+    alert(`📅 Agendar cita para paciente ID: ${idPaciente}\n\nEsta funcionalidad estará disponible en la próxima actualización.`);
+    // Aquí puedes implementar la lógica de agendamiento
+}
+
+function generarReportePaciente(idPaciente) {
+    alert(`📊 Generar reporte para paciente ID: ${idPaciente}\n\nEsta funcionalidad estará disponible en la próxima actualización.`);
+    // Aquí puedes implementar la generación de reportes
+}
+
+// ===== INICIALIZACIÓN FINAL =====
+
+// Actualizar la inicialización principal
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando sistema médico completo...');
+    
+    // Inicializar sistemas
+    inicializarSistemaRecetas();
+    inicializarSistemaPacientes();
+    
+    // Mostrar dashboard por defecto
+    showSection('dashboard');
+    
+    console.log('✅ Sistema médico inicializado correctamente');
+});
+
+// Función de diagnóstico (opcional - remover en producción)
+function diagnosticarSistemaPacientes() {
+    console.log('🔍 Diagnóstico del sistema de pacientes:');
+    
+    const elementos = [
+        'lista-pacientes-completa',
+        'vista-paciente-seleccionado', 
+        'search-patient',
+        'btn-nuevo-paciente',
+        'contador-pacientes'
+    ];
+    
+    elementos.forEach(id => {
+        const elem = document.getElementById(id);
+        console.log(`- ${id}:`, elem ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
+    });
+    
+    console.log('- Función inicializarSistemaPacientes:', typeof inicializarSistemaPacientes);
+    console.log('- Función cargarListaPacientesCompleta:', typeof cargarListaPacientesCompleta);
+    console.log('- Función mostrarDetallesPaciente:', typeof mostrarDetallesPaciente);
 }
