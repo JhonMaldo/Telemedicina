@@ -103,108 +103,126 @@
                 </div>
             </div>
         </div>
+        <!-- CIERRE DEL DIV DASHBOARD -->
 
-<!-- Patients Section -->
-<div id="patients" class="content-section">
-    <div class="section-header">
-        <h2 id="section-title">Mis Pacientes</h2>
-        <div class="header-actions">
-            <button class="btn btn-primary" id="btn-nuevo-paciente">
-                <i class="fas fa-plus"></i> Nuevo Paciente
-            </button>
-        </div>
-    </div>
-
-    <div class="patients-management">
-        <!-- Sidebar con lista de pacientes -->
-        <div class="patients-sidebar">
-            <div class="search-box">
-                <input type="text" id="search-patient" placeholder="🔍 Buscar paciente por nombre...">
-            </div>
-            
-            <div class="patients-list-container">
-                <div class="list-header">
-                    <h4>Lista de Pacientes</h4>
-                    <span class="badge" id="contador-pacientes">0</span>
+        <!-- Patients Section -->
+        <div id="patients" class="content-section">
+            <div class="section-header">
+                <h2 id="section-title">Mis Pacientes</h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="btn-nuevo-paciente">
+                        <i class="fas fa-plus"></i> Nuevo Paciente
+                    </button>
                 </div>
-                <div id="lista-pacientes-completa" class="patients-list">
-                    <!-- Los pacientes se cargarán aquí dinámicamente -->
-                    <div class="loading-state">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Cargando pacientes...</p>
+            </div>
+
+            <div class="patients-management">
+                <!-- Sidebar con lista de pacientes -->
+                <div class="patients-sidebar">
+                    <div class="search-box">
+                        <input type="text" id="search-patient" placeholder="🔍 Buscar paciente por nombre...">
+                    </div>
+                    
+                    <div class="patients-list-container">
+                        <div class="list-header">
+                            <h4>Lista de Pacientes</h4>
+                            <span class="badge" id="contador-pacientes">0</span>
+                        </div>
+                        <div id="lista-pacientes-completa" class="patients-list">
+                            <!-- Los pacientes se cargarán aquí dinámicamente -->
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Cargando pacientes...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel principal de detalles del paciente -->
+                <div class="patients-detail-view">
+                    <div id="vista-paciente-seleccionado">
+                        <div class="no-patient-selected">
+                            <div class="empty-state">
+                                <i class="fas fa-user-injured"></i>
+                                <h3>Selecciona un paciente</h3>
+                                <p>Haz clic en un paciente de la lista para ver su perfil completo</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Panel principal de detalles del paciente -->
-        <div class="patients-detail-view">
-            <div id="vista-paciente-seleccionado">
-                <div class="no-patient-selected">
-                    <div class="empty-state">
-                        <i class="fas fa-user-injured"></i>
-                        <h3>Selecciona un paciente</h3>
-                        <p>Haz clic en un paciente de la lista para ver su perfil completo</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
         <!-- Consultations Section -->
         <div id="consultations" class="content-section">
-            <h2 class="section-title">Consultas y Videollamadas</h2>
-            
-            <div class="dashboard-cards">
-                <div class="card">
-                    <i class="fas fa-video"></i>
-                    <h3>Consultas Programadas</h3>
-                    <p>5 consultas virtuales esta semana</p>
-                    <button class="btn" style="margin-top: 15px;">Ver Todas</button>
+            <div class="section-header">
+                <h2 id="section-title">Consultas Virtuales</h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="btn-nueva-consulta">
+                        <i class="fas fa-video"></i> Nueva Consulta
+                    </button>
                 </div>
-                <div class="card">
-                    <i class="fas fa-calendar-plus"></i>
-                    <h3>Agendar Consulta</h3>
-                    <p>Programar nueva consulta con paciente</p>
-                    <button class="btn" style="margin-top: 15px;">Nueva Consulta</button>
+            </div>
+
+            <div class="consultations-management">
+                <!-- Sidebar con lista de consultas -->
+                <div class="consultations-sidebar">
+                    <div class="consultations-filters">
+                        <div class="filter-group">
+                            <label>Filtrar por estado:</label>
+                            <select id="filter-status">
+                                <option value="all">Todas</option>
+                                <option value="programada">Programadas</option>
+                                <option value="en-curso">En Curso</option>
+                                <option value="completada">Completadas</option>
+                                <option value="cancelada">Canceladas</option>
+                            </select>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="search-consultation" placeholder="🔍 Buscar por paciente...">
+                        </div>
+                    </div>
+                    
+                    <div class="consultations-list-container">
+                        <div class="list-header">
+                            <h4>Consultas Programadas</h4>
+                            <span class="badge" id="contador-consultas">0</span>
+                        </div>
+                        <div id="lista-consultas" class="consultations-list">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Cargando consultas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel principal de detalles de consulta -->
+                <div class="consultation-detail-view">
+                    <div id="vista-consulta-seleccionada">
+                        <div class="no-consultation-selected">
+                            <div class="empty-state">
+                                <i class="fas fa-video-slash"></i>
+                                <h3>Selecciona una consulta</h3>
+                                <p>Haz clic en una consulta de la lista para ver los detalles y gestionarla</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Medical Records Section -->
         <div id="medical-records" class="content-section">
-            <h2 class="section-title">Expedientes Médicos</h2>
-            
             <div class="records-container">
                 <div class="records-sidebar">
                     <h3>Pacientes</h3>
+                    <!-- Lista de pacientes se cargará aquí -->
                 </div>
-                
                 <div class="records-content">
-                    <h3>Expediente de Juan Pérez</h3>
-                    <div class="form-group">
-                        <label for="patient-history">Historial Médico</label>
-                        <textarea id="patient-history" rows="6">Paciente con diagnóstico de hipertensión arterial desde 2018. Control regular con medicación. Última consulta: 15/09/2023 - PA: 130/85 mmHg. Sin eventos adversos recientes.</textarea>
+                    <div class="loading-message">
+                        <p>Selecciona un paciente para ver su expediente</p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="current-medication">Medicación Actual</label>
-                        <textarea id="current-medication" rows="4">- Losartán 50 mg: 1 tableta cada 24 horas
-- Atorvastatina 20 mg: 1 tableta cada 24 horas
-- Ácido acetilsalicílico 100 mg: 1 tableta cada 24 horas</textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="allergies">Alergias</label>
-                        <input type="text" id="allergies" value="Penicilina (rash cutáneo)">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="next-appointment">Próxima Cita</label>
-                        <input type="date" id="next-appointment" value="2023-11-15">
-                    </div>
-                    
-                    <button class="btn">Actualizar Expediente</button>
                 </div>
             </div>
         </div>
@@ -227,7 +245,6 @@
                     
                     <div class="patients-list-mini">
                         <h4>Pacientes Recientes</h4>
-                        <!-- ESTE ES EL CONTENEDOR DE PACIENTES -->
                         <div id="lista-pacientes-recetas">
                             <!-- Lista de pacientes se cargará aquí -->
                         </div>
@@ -360,6 +377,78 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- CIERRE DEL MAIN CONTENT -->
+
+    <!-- Modal para Nueva Consulta -->
+    <div id="modalNuevaConsulta" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-video"></i> Programar Nueva Consulta Virtual</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <form id="formNuevaConsulta">
+                <div class="form-group">
+                    <label for="select-paciente-consulta">Seleccionar Paciente *</label>
+                    <select id="select-paciente-consulta" required>
+                        <option value="">Seleccione un paciente</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fecha-consulta">Fecha y Hora *</label>
+                    <input type="datetime-local" id="fecha-consulta" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duracion-consulta">Duración Estimada</label>
+                    <select id="duracion-consulta">
+                        <option value="30">30 minutos</option>
+                        <option value="45">45 minutos</option>
+                        <option value="60" selected>1 hora</option>
+                        <option value="90">1 hora 30 minutos</option>
+                        <option value="120">2 horas</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipo-consulta">Tipo de Consulta</label>
+                    <select id="tipo-consulta">
+                        <option value="primera-vez">Primera Vez</option>
+                        <option value="seguimiento" selected>Seguimiento</option>
+                        <option value="urgencia">Urgencia</option>
+                        <option value="control">Control Rutinario</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="urgencia-consulta">Nivel de Urgencia</label>
+                    <select id="urgencia-consulta">
+                        <option value="baja">Baja</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="alta">Alta</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="motivo-consulta">Motivo de la Consulta *</label>
+                    <textarea id="motivo-consulta" placeholder="Describa el motivo de la consulta..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notas-consulta">Notas Adicionales</label>
+                    <textarea id="notas-consulta" placeholder="Notas o observaciones adicionales..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="btnCancelarConsulta">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i> Programar Consulta
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
