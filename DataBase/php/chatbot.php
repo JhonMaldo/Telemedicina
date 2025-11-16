@@ -22,7 +22,7 @@ $response = "🤔 No entendí tu consulta. ¿Podrías explicarlo mejor?\n\nPuede
 if (preg_match('/hola|buenas|hey|saludo/', $message)) {
     $response = "👋 ¡Hola! Soy tu asistente virtual de Telemedicina. ¿En qué puedo ayudarte hoy?\n\nPuedes:\n• Consultar información médica\n• Agendar citas\n• Solicitar videoconsultas\n• Obtener orientación sobre síntomas";
 }
-
+    
 // DOCTORES - CONSULTA REAL A LA BASE DE DATOS
 elseif (preg_match('/doctor|médico|doctores|especialista|consultar con doctor/', $message)) {
     // Consultar doctores desde la base de datos
