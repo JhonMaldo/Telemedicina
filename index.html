@@ -59,6 +59,8 @@
             </div>
         </div>
 
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
             <h2 class="section-title">Acciones Rápidas</h2>
             <div class="dashboard-cards">
                 <div class="card" onclick="showSection('schedule')">
@@ -207,6 +209,7 @@
                 <div class="chatbot-messages" id="chatbot-messages">
                     <div class="message bot">
                         <p>¡Hola! Soy tu asistente virtual de salud. ¿En qué puedo ayudarte hoy?</p>
+                        <span class="time">09:00 PM</span>
                     </div>
                 </div>
                 <div class="chatbot-input">
@@ -217,7 +220,7 @@
             
             <div class="quick-actions">
                 <div class="quick-action" data-message="Tengo fiebre y dolor de cabeza">Síntomas: Fiebre y dolor de cabeza</div>
-                <div class="quick-action" data-message="Necesito una receta médica">Solicitar receta médica</div>
+                <div class="quick-action" data-message="Necesito hablar con un doctor">Consultar con doctor</div>
                 <div class="quick-action" data-message="Quiero agendar una cita">Agendar cita médica</div>
                 <div class="quick-action" data-message="Necesito una videoconsulta">Solicitar videoconsulta</div>
             </div>
@@ -257,10 +260,10 @@
                         <h4>Consulta General - Videollamada</h4>
                         <p><i class="far fa-calendar"></i> 18 Oct, 2023 - 2:00 PM</p>
                         <p><i class="fas fa-user-md"></i> Dr. Javier López</p>
-                        <p><i class="fas fa-video"></i> Enlace: <a href="#">Unirse a la videollamada</a></p>
+                        <p><i class="fas fa-video"></i> Enlace: <a href="https://meet.google.com/npr-mpgv-vrc" target="_blank">Unirse a la videollamada</a></p>
                     </div>
                     <div class="appointment-actions">
-                        <button class="btn btn-success">Unirse</button>
+                        <button class="btn btn-success" onclick="window.open('https://meet.google.com/npr-mpgv-vrc', '_blank')">Unirse</button>
                         <button class="btn">Cancelar</button>
                     </div>
                 </div>
@@ -378,7 +381,6 @@
         </div>
     </div>
 
-    <script src="js/index.js">
-    </script>
+    <script src="js/index.js"></script>
 </body>
 </html>

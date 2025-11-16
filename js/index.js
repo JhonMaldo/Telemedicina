@@ -42,8 +42,33 @@ sendBtn.addEventListener('click', sendMessage);
 // Acciones rápidas
 document.querySelectorAll('.quick-action').forEach(action => {
     action.addEventListener('click', function() {
-        chatInput.value = this.dataset.message;
-        sendMessage();
+        const message = this.dataset.message;
+        addMessage(message, 'user');
+        chatInput.value = '';
+
+        showTypingIndicator();
+
+        // RUTA CORREGIDA - DataBase/php/chatbot.php
+        fetch('DataBase/php/chatbot.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return res.json();
+        })
+        .then(data => {
+            hideTypingIndicator();
+            addMessage(data.response, 'bot');
+        })
+        .catch(err => {
+            hideTypingIndicator();
+            console.error('Error:', err);
+            addMessage("⚠️ No se pudo conectar con el asistente.", 'bot');
+        });
     });
 });
 
@@ -57,12 +82,18 @@ function sendMessage() {
 
     showTypingIndicator();
 
-    fetch('bd/chatbot.php', {
+    // RUTA CORREGIDA - DataBase/php/chatbot.php
+    fetch('DataBase/php/chatbot.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return res.json();
+    })
     .then(data => {
         hideTypingIndicator();
         addMessage(data.response, 'bot');
@@ -92,7 +123,7 @@ function addMessage(text, sender) {
     chatHistory.push({ sender, text, time });
 }
 
-// Indicador de “escribiendo...”
+// Indicador de "escribiendo..."
 function showTypingIndicator() {
     const typing = document.createElement('div');
     typing.id = 'typing';
@@ -107,11 +138,10 @@ function hideTypingIndicator() {
     if (typing) typing.remove();
 }
 
-// Limpiar chat
-function clearChat() {
-    chatMessages.innerHTML = '';
-    chatHistory = [];
-}
+// -------------------- VIDEOCONSULTA --------------------
+document.getElementById('start-video-call').addEventListener('click', function() {
+    window.open('https://meet.google.com/npr-mpgv-vrc', '_blank');
+});
 
 // -------------------- PAGOS --------------------
 const paymentModal = document.getElementById('payment-modal');
