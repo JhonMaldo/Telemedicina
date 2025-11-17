@@ -557,52 +557,146 @@
         <div id="settings" class="content-section">
             <h2 class="section-title">Configuración del Sistema</h2>
 
-            <div class="form-group">
-                <label for="clinic-name">Nombre de la Clínica</label>
-                <input type="text" id="clinic-name" value="Clínica Médica Especializada">
-            </div>
+            <div class="settings-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="general">General</button>
+                    <button class="tab-btn" data-tab="security">Seguridad</button>
+                    <button class="tab-btn" data-tab="roles">Roles y Permisos</button>
+                </div>
 
-            <div class="form-group">
-                <label for="clinic-address">Dirección</label>
-                <input type="text" id="clinic-address" value="Calle 123 #45-67, Bogotá">
-            </div>
-
-            <div class="form-group">
-                <label for="clinic-phone">Teléfono</label>
-                <input type="text" id="clinic-phone" value="+57 1 234 5678">
-            </div>
-
-            <div class="form-group">
-                <label for="clinic-email">Email</label>
-                <input type="email" id="clinic-email" value="info@clinica.com">
-            </div>
-
-            <div class="form-group">
-                <label for="appointment-duration">Duración de Citas (minutos)</label>
-                <input type="number" id="appointment-duration" value="30" min="15" max="60">
-            </div>
-
-            <div class="form-group">
-                <label for="working-hours">Horario de Trabajo</label>
-                <div class="form-row">
+                <!-- Pestaña General -->
+                <div class="tab-content active" id="tab-general">
+                    <h3>Configuración General</h3>
                     <div class="form-group">
-                        <input type="time" id="work-start" value="08:00">
+                        <label for="clinic-name">Nombre de la Clínica</label>
+                        <input type="text" id="clinic-name" value="Clínica Médica Especializada">
                     </div>
+
                     <div class="form-group">
-                        <input type="time" id="work-end" value="18:00">
+                        <label for="clinic-address">Dirección</label>
+                        <input type="text" id="clinic-address" value="Calle 123 #45-67, Bogotá">
                     </div>
+
                     <div class="form-group">
-                        <label>Políticas de Seguridad</label>
-                        <input type="number" id="longitud-password" placeholder="Longitud mínima password" value="8">
-                        <input type="number" id="dias-validez" placeholder="Días validez password" value="90">
-                        <label><input type="checkbox" id="requiere-mayusculas"> Requiere mayúsculas</label>
-                        <label><input type="checkbox" id="requiere-numeros"> Requiere números</label>
+                        <label for="clinic-phone">Teléfono</label>
+                        <input type="text" id="clinic-phone" value="+57 1 234 5678">
                     </div>
+
+                    <div class="form-group">
+                        <label for="clinic-email">Email</label>
+                        <input type="email" id="clinic-email" value="info@clinica.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="appointment-duration">Duración de Citas (minutos)</label>
+                        <input type="number" id="appointment-duration" value="30" min="15" max="60">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="working-hours">Horario de Trabajo</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Inicio</label>
+                                <input type="time" id="work-start" value="08:00">
+                            </div>
+                            <div class="form-group">
+                                <label>Fin</label>
+                                <input type="time" id="work-end" value="18:00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña Seguridad -->
+                <div class="tab-content" id="tab-security">
+                    <h3>Políticas de Seguridad</h3>
                     
+                    <div class="form-group">
+                        <label for="longitud-password">Longitud mínima de contraseña</label>
+                        <input type="number" id="longitud-password" value="8" min="6" max="20">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dias-validez">Días de validez de contraseña</label>
+                        <input type="number" id="dias-validez" value="90" min="30" max="365">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intentos-fallidos">Intentos fallidos antes de bloquear</label>
+                        <input type="number" id="intentos-fallidos" value="5" min="3" max="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tiempo-bloqueo">Tiempo de bloqueo (minutos)</label>
+                        <input type="number" id="tiempo-bloqueo" value="30" min="5" max="1440">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Requisitos de contraseña:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="requiere-mayusculas" checked> Requiere mayúsculas</label>
+                            <label><input type="checkbox" id="requiere-minusculas" checked> Requiere minúsculas</label>
+                            <label><input type="checkbox" id="requiere-numeros" checked> Requiere números</label>
+                            <label><input type="checkbox" id="requiere-simbolos"> Requiere símbolos especiales</label>
+                            <label><input type="checkbox" id="no-repetir-contraseñas"> No repetir últimas 3 contraseñas</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="session-timeout">Tiempo de expiración de sesión (minutos)</label>
+                        <input type="number" id="session-timeout" value="60" min="15" max="480">
+                    </div>
+                </div>
+
+                <!-- Pestaña Roles y Permisos -->
+                <div class="tab-content" id="tab-roles">
+                    <h3>Roles y Permisos del Sistema</h3>
+                    
+                    <div class="roles-container">
+                        <div class="role-card">
+                            <h4>Administrador</h4>
+                            <div class="permissions-list">
+                                <label><input type="checkbox" checked disabled> Gestionar usuarios</label>
+                                <label><input type="checkbox" checked disabled> Gestionar doctores</label>
+                                <label><input type="checkbox" checked disabled> Gestionar pacientes</label>
+                                <label><input type="checkbox" checked disabled> Ver reportes</label>
+                                <label><input type="checkbox" checked disabled> Configuración del sistema</label>
+                            </div>
+                        </div>
+
+                        <div class="role-card">
+                            <h4>Doctor</h4>
+                            <div class="permissions-list">
+                                <label><input type="checkbox" id="doc-ver-pacientes" checked> Ver pacientes</label>
+                                <label><input type="checkbox" id="doc-crear-citas" checked> Crear citas</label>
+                                <label><input type="checkbox" id="doc-ver-citas" checked> Ver citas</label>
+                                <label><input type="checkbox" id="doc-emitir-recetas" checked> Emitir recetas</label>
+                                <label><input type="checkbox" id="doc-ver-historial" checked> Ver historial médico</label>
+                            </div>
+                        </div>
+
+                        <div class="role-card">
+                            <h4>Paciente</h4>
+                            <div class="permissions-list">
+                                <label><input type="checkbox" id="pac-ver-citas" checked> Ver citas</label>
+                                <label><input type="checkbox" id="pac-agendar-citas" checked> Agendar citas</label>
+                                <label><input type="checkbox" id="pac-ver-recetas" checked> Ver recetas</label>
+                                <label><input type="checkbox" id="pac-ver-historial" checked> Ver historial propio</label>
+                                <label><input type="checkbox" id="pac-editar-perfil" checked> Editar perfil</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <button class="btn btn-success">Guardar Configuración</button>
+            <div class="form-actions">
+                <button class="btn btn-success" onclick="guardarConfiguracion()">
+                    <i class="fas fa-save"></i> Guardar Configuración
+                </button>
+                <button class="btn btn-secondary" onclick="cargarConfiguracion()">
+                    <i class="fas fa-sync"></i> Cargar Configuración Actual
+                </button>
+            </div>
         </div>
     </div>
 
