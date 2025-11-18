@@ -6,9 +6,10 @@
     <title>Panel de Doctor - Sistema Médico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/doctorIndex.css">
-    <!-- Librerías PDF -->
+    <!-- Librerías PDF-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://meet.jit.si/external_api.js"></script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -124,11 +125,6 @@
         <div id="consultations" class="content-section">
             <div class="section-header">
                 <h2 id="section-title">Consultas Virtuales</h2>
-                <div class="header-actions">
-                    <button class="btn btn-primary" id="btn-nueva-consulta">
-                        <i class="fas fa-video"></i> Nueva Consulta
-                    </button>
-                </div>
             </div>
 
             <div class="consultations-management">
@@ -165,6 +161,9 @@
 
                 <div class="consultation-detail-view">
                     <div id="vista-consulta-seleccionada">
+                        <head>
+                            <script src='https://meet.jit.si/external_api.js'></script>
+                        </head>
                         <div class="no-consultation-selected">
                             <div class="empty-state">
                                 <i class="fas fa-video-slash"></i>
@@ -230,6 +229,10 @@
                             <label for="validez-receta">Validez (días)</label>
                             <input type="number" id="validez-receta" min="1" max="90" value="30" class="form-control">
                         </div>
+                            <div class="form-group">
+                                <label for="id-consulta">ID de la consulta</label>
+                                <input type="number" id="id-consulta" class="form-control" placeholder="Ejemplo: 3001">
+                            </div>
                         <div class="form-actions">
                             <button class="btn btn-success" id="btnGenerarReceta">
                                 <i class="fas fa-file-pdf"></i> Generar PDF
@@ -240,20 +243,43 @@
                             <button class="btn" id="btnCancelarReceta">Cancelar</button>
                         </div>
                     </div>
+                    
                     <div id="lista-recetas" class="recetas-list">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3>Todas las Recetas Recientes</h3>
+                        <div class="recetas-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 id="titulo-lista-recetas">Todas las Recetas Recientes</h3>
+                            <button id="btn-todas-recetas" class="btn btn-secondary" style="display: none;">
+                                <i class="fas fa-list"></i> Ver Todas las Recetas
+                            </button>
                         </div>
                         <div id="contenedor-recetas"></div>
+                    </div>
+                    
+                    <div id="vista-previa-receta" style="display: none;">
+                        <div class="receta-preview-header">
+                            <h3>Vista Previa de Receta</h3>
+                            <div class="preview-actions">
+                                <button class="btn btn-success" id="btnDescargarReceta">
+                                    <i class="fas fa-download"></i> Descargar PDF
+                                </button>
+                                <button class="btn btn-primary" id="btnEditarReceta">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn" onclick="cancelarReceta()">
+                                    <i class="fas fa-times"></i> Cerrar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="receta-preview">
+                            <!-- La vista previa se generará aquí -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Notifications Section (dinámica con BD) -->
         <div id="notifications" class="content-section">
             <h2 class="section-title">Notificaciones</h2>
-            <div class="notifications-list">
+            <div class="notifications-list" id="lista-notificaciones-contenedor">
                 <div class="loading-state">
                     <i class="fas fa-spinner fa-spin"></i>
                     <p>Cargando notificaciones...</p>
@@ -261,54 +287,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Nueva Consulta -->
-    <div id="modalNuevaConsulta" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-video"></i> Programar Nueva Consulta Virtual</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            
-            <form id="formNuevaConsulta">
-                <div class="form-group">
-                    <label for="select-paciente-consulta">Seleccionar Paciente *</label>
-                    <select id="select-paciente-consulta" required>
-                        <option value="">Seleccione un paciente</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="fecha-consulta">Fecha y Hora *</label>
-                    <input type="datetime-local" id="fecha-consulta" required>
-                </div>
-                <div class="form-group">
-                    <label for="duracion-consulta">Duración Estimada</label>
-                    <select id="duracion-consulta">
-                        <option value="30">30 minutos</option>
-                        <option value="45">45 minutos</option>
-                        <option value="60" selected>1 hora</option>
-                        <option value="90">1 hora 30 minutos</option>
-                        <option value="120">2 horas</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="motivo-consulta">Motivo de la Consulta *</label>
-                    <textarea id="motivo-consulta" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="notas-consulta">Notas Adicionales</label>
-                    <textarea id="notas-consulta"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="btnCancelarConsulta">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-calendar-plus"></i> Programar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script src="js/doctorIndex.js"></script>
 </body>
 </html>
