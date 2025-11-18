@@ -1,4 +1,37 @@
 // Navigation
+async function cargarDatosDoctor() {
+    const idDoctor = 101; // <-- tu ID fijo
+
+    try {
+        const response = await fetch(
+            `/Telemedicina/DataBase/php/obtenerDoctor.php?id_doctor=${idDoctor}`
+        );
+
+        const doctor = await response.json();
+
+        if (!doctor || doctor.error) {
+            console.error("Error obteniendo doctor:", doctor.error);
+            return;
+        }
+
+        // Llenar Sidebar
+        document.getElementById("sidebar-doctor-nombre").textContent =
+            `Bienvenido, Dr. ${doctor.nombre_completo}`;
+
+        // Llenar Header (arriba)
+        document.getElementById("header-doctor-nombre").textContent =
+            `Dr. ${doctor.nombre_completo}`;
+
+        document.getElementById("header-doctor-especialidad").textContent =
+            doctor.especialidad ?? "";
+        
+    } catch (e) {
+        console.error("Error cargando info de doctor:", e);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", cargarDatosDoctor);
+//jhgfd
 document.querySelectorAll('.menu-item').forEach(item => {
     if (item.dataset.section) {
         item.addEventListener('click', function() {
@@ -35,6 +68,12 @@ function showSection(sectionId) {
     };
     
     document.getElementById('section-title').textContent = titles[sectionId] || 'Dashboard';
+
+    // --- MODIFICACIÓN ---
+    // Cargar datos específicos de la sección
+    if (sectionId === 'dashboard') {
+        cargarConsultasDashboard(); // Carga las citas del día
+    }
 }
 
 // Notifications - Mark as read
@@ -63,7 +102,17 @@ const recordsContent = document.querySelector('.records-content');
 // 1. Cargar todo cuando el HTML esté listo
 document.addEventListener('DOMContentLoaded', () => {
     // Por defecto, mostramos el dashboard
-    showSection('dashboard'); 
+    showSection('dashboard');
+    
+    // --- NUEVO ---
+    // Inicializar sistemas principales en segundo plano
+    console.log('🚀 Inicializando sistema médico completo...');
+    inicializarSistemaRecetas();
+    inicializarSistemaPacientes();
+    inicializarSistemaConsultas(); // Asegurarse de que se inicialice
+    
+    // Carga inicial de notificaciones
+    setTimeout(cargarNotificaciones, 1000);
 });
 
 // 2. Función para cargar la LISTA de pacientes
@@ -264,7 +313,7 @@ async function cargarPerfilPaciente(id) {
                 </div>
             </div>
         `;
-         
+        
     } catch (error) {
         console.error('Error al cargar perfil:', error);
         recordsContent.innerHTML = `
@@ -458,11 +507,6 @@ async function guardarCambiosExpediente(idPaciente) {
 let pacienteSeleccionadoReceta = null;
 let recetaActual = null;
 
-// Inicializar sistema de recetas cuando se carga la sección
-document.addEventListener('DOMContentLoaded', function() {
-    inicializarSistemaRecetas();
-});
-
 // Inicializar sistema de recetas - VERSIÓN MÁS SEGURA
 function inicializarSistemaRecetas() {
     console.log('🔧 Inicializando sistema de recetas...');
@@ -488,10 +532,14 @@ function inicializarSistemaRecetas() {
             cargarPacientesParaRecetas();
             cargarRecetasExistentes();
             
-            // POR DEFECTO: Mostrar lista de recetas al entrar
-            document.getElementById('formulario-receta').style.display = 'none';
-            document.getElementById('vista-previa-receta').style.display = 'none';
-            document.getElementById('lista-recetas').style.display = 'block';
+            // POR DEFECTO: Mostrar lista de recetas al entrar - CON VERIFICACIÓN
+            const formularioReceta = document.getElementById('formulario-receta');
+            const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+            const listaRecetas = document.getElementById('lista-recetas');
+            
+            if (formularioReceta) formularioReceta.style.display = 'none';
+            if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'none';
+            if (listaRecetas) listaRecetas.style.display = 'block';
         });
     }
     
@@ -516,6 +564,7 @@ function inicializarSistemaRecetas() {
     
     console.log('✅ Sistema de recetas inicializado');
 }
+
 // 1. Cargar pacientes para el sistema de recetas - VERSIÓN CORREGIDA
 async function cargarPacientesParaRecetas() {
     try {
@@ -619,31 +668,27 @@ function seleccionarPacienteReceta(idPaciente, nombrePaciente) {
         nombre: nombrePaciente 
     };
     
-    // Actualizar select
-    document.getElementById('select-paciente').value = idPaciente;
-    document.getElementById('titulo-formulario-receta').textContent = `Nueva Receta para ${nombrePaciente}`;
+    // Actualizar select - CON VERIFICACIÓN
+    const selectPaciente = document.getElementById('select-paciente');
+    const tituloFormulario = document.getElementById('titulo-formulario-receta');
+    const btnGenerar = document.getElementById('btnGenerarReceta');
     
-    // Habilitar botones
-    document.getElementById('btnGenerarReceta').disabled = false;
+    if (selectPaciente) selectPaciente.value = idPaciente;
+    if (tituloFormulario) tituloFormulario.textContent = `Nueva Receta para ${nombrePaciente}`;
+    if (btnGenerar) btnGenerar.disabled = false;
     
     console.log(`👤 Paciente seleccionado para receta: ${nombrePaciente} (ID: ${idPaciente})`);
-    
-    // IMPORTANTE: NO cambiar la vista aquí, solo preparar los datos
-    // La vista se cambiará dependiendo del contexto
-    
-    // Limpiar formulario para nueva receta si estamos en modo creación
-    if (document.getElementById('formulario-receta').style.display === 'block') {
-        document.getElementById('medicamentos').value = '';
-        document.getElementById('instrucciones').value = '';
-        document.getElementById('validez-receta').value = '30';
-    }
 }
 
-// 3. Mostrar formulario de receta
+// 3. Mostrar formulario de receta - VERSIÓN CORREGIDA
 function mostrarFormularioReceta() {
-    document.getElementById('formulario-receta').style.display = 'block';
-    document.getElementById('vista-previa-receta').style.display = 'none';
-    document.getElementById('lista-recetas').style.display = 'none';
+    const formularioReceta = document.getElementById('formulario-receta');
+    const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+    const listaRecetas = document.getElementById('lista-recetas');
+    
+    if (formularioReceta) formularioReceta.style.display = 'block';
+    if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'none';
+    if (listaRecetas) listaRecetas.style.display = 'none';
     
     // Limpiar formulario
     document.getElementById('medicamentos').value = '';
@@ -652,23 +697,92 @@ function mostrarFormularioReceta() {
     pacienteSeleccionadoReceta = null;
     
     // Resetear selección
-    document.getElementById('select-paciente').value = '';
+    const selectPaciente = document.getElementById('select-paciente');
+    if (selectPaciente) selectPaciente.value = '';
+    
     document.querySelectorAll('.patient-item-mini').forEach(item => item.classList.remove('active'));
     
     // Cargar pacientes si no están cargados
-    if (document.getElementById('select-paciente').options.length <= 1) {
+    if (selectPaciente && selectPaciente.options.length <= 1) {
         cargarPacientesParaRecetas();
     }
 }
 
-// 4. Cancelar receta
+// 4. Cancelar receta - VERSIÓN CORREGIDA
 function cancelarReceta() {
-    document.getElementById('formulario-receta').style.display = 'none';
-    document.getElementById('vista-previa-receta').style.display = 'none';
-    document.getElementById('lista-recetas').style.display = 'block';
+    const formularioReceta = document.getElementById('formulario-receta');
+    const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+    const listaRecetas = document.getElementById('lista-recetas');
+    
+    if (formularioReceta) formularioReceta.style.display = 'none';
+    if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'none';
+    if (listaRecetas) listaRecetas.style.display = 'block';
+    
     pacienteSeleccionadoReceta = null;
     recetaActual = null;
 }
+
+// ===== NUEVA FUNCIÓN AUXILIAR =====
+/**
+ * Lee los datos del formulario de receta y devuelve un objeto.
+ * Realiza validaciones básicas.
+ * @returns {object|null} Objeto con datos de la receta, or null si falla la validación.
+ */
+function buildRecetaDataFromForm() {
+    const pacienteId = document.getElementById('select-paciente').value;
+    const medicamentos = document.getElementById('medicamentos').value.trim();
+    const instrucciones = document.getElementById('instrucciones').value.trim();
+    const validez = document.getElementById('validez-receta').value;
+
+    // Validaciones
+    if (!pacienteId) {
+        alert('❌ Por favor seleccione un paciente');
+        return null;
+    }
+    if (!medicamentos) {
+        alert('❌ Por favor ingrese los medicamentos y tratamiento');
+        return null;
+    }
+    if (medicamentos.length < 10 && !instrucciones) {
+         alert('❌ La descripción del tratamiento es muy breve. Por favor sea más específico.');
+         return null;
+    }
+
+    const select = document.getElementById('select-paciente');
+    const nombrePaciente = select.options[select.selectedIndex].text.split(' - ')[0];
+
+    // Devolver el objeto completo
+    return {
+        paciente_id: pacienteId,
+        paciente_nombre: nombrePaciente,
+        medicamentos: medicamentos,
+        instrucciones: instrucciones,
+        validez_dias: validez,
+        fecha_emision: new Date().toISOString().split('T')[0],
+        
+        // --- DATOS ADICIONALES (Hardcoded por ahora) ---
+        // Estos valores deberían venir del formulario o del sistema de sesión
+        // Tu PHP usa 101, así que lo alineamos
+        doctor_id: 101, // Alineado con tu guardarReceta.php
+        consulta_id: null, 
+        
+        // Info para la VISTA PREVIA (no se guarda en BD)
+        // ESTO SE PUEDE QUEDAR ASÍ, ya que tu obtenerReceta.php
+        // jala los datos correctos del doctor al VER una receta guardada.
+        doctor_nombre: 'Dr. Laura Martínez',
+        doctor_especialidad: 'Cardióloga',
+        doctor_cedula: 'LIC-DF-2020-001',
+        consultorio: 'Centro Médico TeleMed',
+        direccion_consultorio: 'Av. Principal #123, Ciudad'
+    };
+}
+//funcion para obtner datos del doctor
+async function obtenerDatosDoctor(idDoctor) {
+    const url = `/Telemedicina/DataBase/php/obtenerDoctor.php?id_doctor=${idDoctor}`;
+    const response = await fetch(url);
+    return await response.json();
+}
+
 
 // FUNCIÓN QUE FALTA - Agregar esto ANTES de generarVistaPrevia
 function generarHTMLVistaPrevia(receta) {
@@ -736,59 +850,28 @@ function generarHTMLVistaPrevia(receta) {
     `;
 }
 
-// 5. Generar vista previa de receta (VERSIÓN CORREGIDA)
+// 5. Generar vista previa de receta (VERSIÓN CORREGIDA Y REFACTORIZADA)
 function generarVistaPrevia() {
-    const pacienteId = document.getElementById('select-paciente').value;
-    const medicamentos = document.getElementById('medicamentos').value.trim();
-    const instrucciones = document.getElementById('instrucciones').value.trim();
-    const validez = document.getElementById('validez-receta').value;
     
-    console.log('🔍 Datos del formulario:', {
-        pacienteId,
-        medicamentos,
-        instrucciones,
-        validez
-    });
+    // --- MODIFICADO ---
+    // Usar la nueva función auxiliar para obtener los datos
+    recetaActual = buildRecetaDataFromForm();
     
-    // Validaciones
-    if (!pacienteId) {
-        alert('❌ Por favor seleccione un paciente');
-        return;
+    if (!recetaActual) {
+        return; // La validación falló y ya mostró alerta
     }
-    
-    if (!medicamentos) {
-        alert('❌ Por favor ingrese los medicamentos y tratamiento');
-        return;
-    }
-    
-    if (medicamentos.length < 10) {
-        alert('❌ La descripción del tratamiento es muy breve. Por favor sea más específico.');
-        return;
-    }
-    
-    // Obtener nombre del paciente seleccionado
-    const select = document.getElementById('select-paciente');
-    const nombrePaciente = select.options[select.selectedIndex].text.split(' - ')[0];
-    
-    // CREAR EL OBJETO recetaActual CORRECTAMENTE
-    recetaActual = {
-        paciente_id: pacienteId,
-        paciente_nombre: nombrePaciente,
-        medicamentos: medicamentos,
-        instrucciones: instrucciones,
-        validez_dias: validez,
-        fecha_emision: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
-        doctor_nombre: 'Dr. Laura Martínez',
-        doctor_especialidad: 'Cardióloga',
-        doctor_cedula: 'LIC-DF-2020-001',
-        consultorio: 'Centro Médico TeleMed',
-        direccion_consultorio: 'Av. Principal #123, Ciudad'
-    };
-    
+    // --- FIN MODIFICADO ---
+
     console.log('✅ recetaActual creado:', recetaActual);
     
     // Mostrar loading
     const vistaPrevia = document.querySelector('.receta-preview');
+    if (!vistaPrevia) {
+        console.error('❌ Elemento .receta-preview no encontrado');
+        alert('Error: No se puede mostrar la vista previa');
+        return;
+    }
+    
     vistaPrevia.innerHTML = `
         <div style="text-align: center; padding: 40px;">
             <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #3498db;"></i>
@@ -802,9 +885,14 @@ function generarVistaPrevia() {
             // Generar vista previa MEJORADA
             vistaPrevia.innerHTML = generarHTMLVistaPrevia(recetaActual);
             
-            // Mostrar vista previa
-            document.getElementById('formulario-receta').style.display = 'none';
-            document.getElementById('vista-previa-receta').style.display = 'block';
+            // Mostrar vista previa - CON VERIFICACIÓN
+            const formularioReceta = document.getElementById('formulario-receta');
+            const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+            const listaRecetas = document.getElementById('lista-recetas');
+            
+            if (formularioReceta) formularioReceta.style.display = 'none';
+            if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'block';
+            if (listaRecetas) listaRecetas.style.display = 'none';
             
             console.log('📄 Vista previa generada correctamente');
             
@@ -815,27 +903,44 @@ function generarVistaPrevia() {
     }, 500);
 }
 
-// 6. Descargar receta como PDF (MEJORADA)
+// 6. Descargar receta como PDF (VERSIÓN CON VALIDACIÓN DE TEXTO)
 async function descargarRecetaPDF() {
     if (!recetaActual) {
-        alert('❌ No hay receta para descargar');
-        return;
+         // --- MODIFICADO ---
+        // Si recetaActual es null (ej. no se generó vista previa), intentar construirla desde el form.
+        recetaActual = buildRecetaDataFromForm();
+        if (!recetaActual) {
+             alert('❌ No hay receta para descargar. Completa el formulario.');
+            return;
+        }
+         // --- FIN MODIFICADO ---
     }
+
+    console.log('🔄 Iniciando generación de PDF...');
 
     // Mostrar loading
     const btnDescargar = document.getElementById('btnDescargarReceta');
-    const originalText = btnDescargar.innerHTML;
-    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
-    btnDescargar.disabled = true;
+    if (!btnDescargar) {
+        // Fallback por si se llama desde otro botón
+        console.warn('Botón de descarga no encontrado');
+    } else {
+        var originalText = btnDescargar.innerHTML;
+        btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+        btnDescargar.disabled = true;
+    }
+
 
     try {
-        // Verificar que jsPDF esté disponible
-        if (typeof jspdf === 'undefined') {
-            throw new Error('La librería PDF no está disponible. Recarga la página.');
+        // VERIFICACIÓN CORRECTA - jspdf.jsPDF es la función constructora
+        if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+            throw new Error('La librería jsPDF no está disponible correctamente.');
         }
 
-        // Crear instancia de jsPDF
+        console.log('✅ jsPDF disponible, creando instancia...');
+        
+        // CREAR INSTANCIA CORRECTAMENTE
         const doc = new jspdf.jsPDF();
+        console.log('✅ Instancia de jsPDF creada:', doc);
         
         // Configuración
         const margin = 20;
@@ -844,23 +949,33 @@ async function descargarRecetaPDF() {
         const pageHeight = doc.internal.pageSize.height;
         const contentWidth = pageWidth - (margin * 2);
         
+        // VALIDAR Y LIMPIAR DATOS
+        const pacienteNombre = recetaActual.paciente_nombre || 'Paciente no especificado';
+        const fechaEmision = recetaActual.fecha_emision || new Date().toISOString().split('T')[0];
+        const medicamentos = recetaActual.medicamentos || 'No se especificaron medicamentos';
+        const instrucciones = recetaActual.instrucciones || '';
+        const validezDias = recetaActual.validez_dias || '30';
+        
         // Calcular fecha de vencimiento
         const fechaVencimiento = new Date();
-        fechaVencimiento.setDate(fechaVencimiento.getDate() + parseInt(recetaActual.validez_dias));
+        fechaVencimiento.setDate(fechaVencimiento.getDate() + parseInt(validezDias));
         
         // --- ENCABEZADO ---
-        doc.setFillColor(0, 102, 204);
-        doc.rect(0, 0, pageWidth, 25, 'F');
+        doc.setFillColor(41, 128, 185);
+        doc.rect(0, 0, pageWidth, 30, 'F');
         
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
+        doc.setFontSize(18);
         doc.setFont('helvetica', 'bold');
-        doc.text(recetaActual.consultorio, pageWidth / 2, 12, { align: 'center' });
         
-        doc.setFontSize(8);
-        doc.text('Sistema de Telemedicina - Receta Digital', pageWidth / 2, 18, { align: 'center' });
+        // ENCABEZADO CON VALIDACIÓN
+        const consultorio = recetaActual.consultorio || 'Centro Médico';
+        doc.text(consultorio, pageWidth / 2, 15, { align: 'center' });
         
-        yPosition = 40;
+        doc.setFontSize(10);
+        doc.text('Sistema de Telemedicina - Receta Digital', pageWidth / 2, 22, { align: 'center' });
+        
+        yPosition = 45;
         doc.setTextColor(0, 0, 0);
         
         // --- INFORMACIÓN DEL PACIENTE ---
@@ -871,14 +986,15 @@ async function descargarRecetaPDF() {
         yPosition += 8;
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Nombre: ${recetaActual.paciente_nombre}`, margin, yPosition);
         
+        // TEXTO CON VALIDACIÓN
+        doc.text(`Nombre: ${pacienteNombre}`, margin, yPosition);
         yPosition += 5;
-        doc.text(`Fecha de emisión: ${recetaActual.fecha_emision}`, margin, yPosition);
         
+        doc.text(`Fecha de emisión: ${fechaEmision}`, margin, yPosition);
         yPosition += 5;
+        
         doc.text(`Válida hasta: ${fechaVencimiento.toLocaleDateString('es-ES')}`, margin, yPosition);
-        
         yPosition += 12;
         
         // Línea separadora
@@ -895,21 +1011,41 @@ async function descargarRecetaPDF() {
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         
-        // Dividir texto de medicamentos
-        const medicamentosLines = doc.splitTextToSize(recetaActual.medicamentos, contentWidth);
-        medicamentosLines.forEach(line => {
-            if (yPosition > pageHeight - 50) {
-                doc.addPage();
-                yPosition = margin;
+        // VALIDAR Y LIMPIAR TEXTO DE MEDICAMENTOS
+        const medicamentosLimpio = String(medicamentos).trim();
+        if (!medicamentosLimpio) {
+            doc.text('No se especificaron medicamentos', margin, yPosition);
+            yPosition += 10;
+        } else {
+            // Dividir texto de medicamentos con manejo de errores
+            try {
+                const medicamentosLines = doc.splitTextToSize(medicamentosLimpio, contentWidth);
+                medicamentosLines.forEach(line => {
+                    if (yPosition > pageHeight - 50) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+                    // Validar que la línea no esté vacía
+                    if (line && line.trim() !== '') {
+                        doc.text(line, margin, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            } catch (error) {
+                console.warn('Error al dividir texto, usando fallback:', error);
+                // Fallback: texto simple
+                doc.text('Medicamentos prescritos:', margin, yPosition);
+                yPosition += 5;
+                doc.text(medicamentosLimpio.substring(0, 100) + '...', margin, yPosition);
+                yPosition += 10;
             }
-            doc.text(line, margin, yPosition);
-            yPosition += 5;
-        });
+        }
         
         yPosition += 8;
         
         // --- INSTRUCCIONES ESPECIALES ---
-        if (recetaActual.instrucciones && recetaActual.instrucciones.trim() !== '') {
+        const instruccionesLimpio = String(instrucciones).trim();
+        if (instruccionesLimpio && instruccionesLimpio !== '') {
             if (yPosition > pageHeight - 80) {
                 doc.addPage();
                 yPosition = margin;
@@ -923,15 +1059,23 @@ async function descargarRecetaPDF() {
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             
-            const instruccionesLines = doc.splitTextToSize(recetaActual.instrucciones, contentWidth);
-            instruccionesLines.forEach(line => {
-                if (yPosition > pageHeight - 50) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                doc.text(line, margin, yPosition);
-                yPosition += 5;
-            });
+            try {
+                const instruccionesLines = doc.splitTextToSize(instruccionesLimpio, contentWidth);
+                instruccionesLines.forEach(line => {
+                    if (yPosition > pageHeight - 50) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+                    if (line && line.trim() !== '') {
+                        doc.text(line, margin, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            } catch (error) {
+                console.warn('Error al dividir instrucciones:', error);
+                doc.text(instruccionesLimpio.substring(0, 100) + '...', margin, yPosition);
+                yPosition += 10;
+            }
             
             yPosition += 8;
         }
@@ -952,163 +1096,165 @@ async function descargarRecetaPDF() {
         doc.text('MÉDICO TRATANTE', pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 7;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        
+        const doctorNombre = recetaActual.doctor_nombre || 'Dr. Médico';
+        doc.text(doctorNombre, pageWidth / 2, yPosition, { align: 'center' });
+        
+        yPosition += 5;
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text(recetaActual.doctor_nombre, pageWidth / 2, yPosition, { align: 'center' });
+        
+        const doctorEspecialidad = recetaActual.doctor_especialidad || 'Especialista';
+        doc.text(doctorEspecialidad, pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 5;
-        doc.text(recetaActual.doctor_especialidad, pageWidth / 2, yPosition, { align: 'center' });
-        
-        yPosition += 5;
-        doc.text(`Cédula Profesional: ${recetaActual.doctor_cedula}`, pageWidth / 2, yPosition, { align: 'center' });
+        const doctorCedula = recetaActual.doctor_cedula || 'Cédula no especificada';
+        doc.text(`Cédula Profesional: ${doctorCedula}`, pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 10;
-        doc.text(recetaActual.consultorio, pageWidth / 2, yPosition, { align: 'center' });
+        doc.text(consultorio, pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 5;
-        doc.text(recetaActual.direccion_consultorio, pageWidth / 2, yPosition, { align: 'center' });
+        const direccionConsultorio = recetaActual.direccion_consultorio || 'Dirección no especificada';
+        doc.text(direccionConsultorio, pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 15;
         
         // --- NOTAS FINALES ---
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Nota: Esta receta es válida por ${recetaActual.validez_dias} días a partir de la fecha de emisión.`, 
-                 pageWidth / 2, yPosition, { align: 'center' });
+        doc.text(`Nota: Esta receta es válida por ${validezDias} días a partir de la fecha de emisión.`, 
+            pageWidth / 2, yPosition, { align: 'center' });
         
         yPosition += 4;
         doc.text('Documento generado electrónicamente - Firma digital del médico', 
-                 pageWidth / 2, yPosition, { align: 'center' });
-        
-        // --- WATERMARK ---
-        doc.setFontSize(40);
-        doc.setTextColor(240, 240, 240);
-        doc.setFont('helvetica', 'bold');
-        doc.text('RECETA VIRTUAL', pageWidth / 2, pageHeight / 2, { 
-            align: 'center',
-            angle: 45
-        });
+            pageWidth / 2, yPosition, { align: 'center' });
         
         // Generar nombre del archivo
-        const fileName = `Receta_${recetaActual.paciente_nombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `Receta_${pacienteNombre.replace(/\s+/g, '_')}_${fechaEmision}.pdf`;
         
         // Descargar el PDF
         doc.save(fileName);
         
+        console.log('✅ PDF generado y descargado correctamente');
         alert('✅ Receta descargada en formato PDF correctamente');
         
     } catch (error) {
-        console.error('Error generando PDF:', error);
-        alert('❌ Error al generar el PDF: ' + error.message);
+        console.error('❌ Error generando PDF:', error);
+        
+        // Mensaje de error más detallado
+        let mensajeError = 'Error al generar el PDF:\n\n';
+        
+        if (error.message.includes('Invalid arguments')) {
+            mensajeError += 'Problema con el formato del texto. ';
+            mensajeError += 'Verifica que los campos de medicamentos e instrucciones contengan texto válido.';
+        } else {
+            mensajeError += error.message;
+        }
+        
+        alert(mensajeError);
     } finally {
         // Restaurar botón
-        btnDescargar.innerHTML = originalText;
-        btnDescargar.disabled = false;
+        if(btnDescargar) {
+            btnDescargar.innerHTML = originalText;
+            btnDescargar.disabled = false;
+        }
     }
 }
-
-// 7. Guardar receta en base de datos (VERSIÓN CON VALIDACIONES MEJORADAS)
+// 7. Guardar receta en base de datos - VERSIÓN CORREGIDA
 async function guardarReceta() {
-    console.log('🔄 Iniciando guardado de receta...');
-    
-    // VALIDACIÓN CRÍTICA: Verificar que recetaActual existe
-    if (!recetaActual) {
-        console.error('❌ recetaActual es null o undefined');
-        alert('❌ ERROR: No hay datos de receta para guardar. Por favor genere la vista previa primero.');
-        return;
-    }
-    
-    // Validar campos esenciales
-    if (!recetaActual.paciente_id) {
-        alert('❌ ERROR: No hay paciente seleccionado');
-        return;
-    }
-    
-    if (!recetaActual.medicamentos || recetaActual.medicamentos.trim().length === 0) {
-        alert('❌ ERROR: No hay medicamentos especificados');
-        return;
-    }
-    
-    console.log('✅ Validaciones pasadas. recetaActual:', recetaActual);
-    
+    console.log('🔄 Guardando receta...');
+
+    // Obtener datos del formulario
+    const dataFromForm = buildRecetaDataFromForm();
+    if (!dataFromForm) return;
+
+    recetaActual = dataFromForm;
+
     try {
-        // Mostrar loading
         const btnGuardar = document.getElementById('btnGuardarReceta');
         const originalText = btnGuardar.innerHTML;
         btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         btnGuardar.disabled = true;
 
-        // Preparar datos para enviar (SOLO los necesarios para el PHP)
+        // Construir texto completo de receta
+        let textoRecetaCompleta = "TRATAMIENTO PRESCRITO:\n" + recetaActual.medicamentos;
+
+        if (recetaActual.instrucciones.trim() !== "") {
+            textoRecetaCompleta += `\n\nINSTRUCCIONES ESPECIALES:\n${recetaActual.instrucciones}`;
+        }
+
+        textoRecetaCompleta += `\n\nVÁLIDA POR: ${recetaActual.validez_dias} días`;
+
+        // ⚠️ ESTE OBJETO YA ESTÁ COMPLETO PARA TU TABLA
         const datosReceta = {
-            paciente_id: parseInt(recetaActual.paciente_id),
-            medicamentos: recetaActual.medicamentos,
-            instrucciones: recetaActual.instrucciones || '',
-            validez_dias: parseInt(recetaActual.validez_dias) || 30
+            id_doctor: recetaActual.doctor_id,                 // 101 o el que venga de la sesión
+            id_paciente: parseInt(recetaActual.paciente_id),
+            id_consulta: parseInt(document.getElementById('id-consulta').value), // capturado del formulario
+            la_receta: textoRecetaCompleta,
+            url_pdf: "",                                       // lo puedes llenar luego
+            fecha_emision: recetaActual.fecha_emision
         };
 
-        console.log('📤 Enviando al servidor:', datosReceta);
+        console.log("📤 Enviando a guardarReceta.php:", datosReceta);
 
         const response = await fetch('DataBase/php/guardarReceta.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosReceta)
         });
 
-        console.log('📨 Respuesta del servidor - Status:', response.status);
+        const resultado = await response.json();
+        console.log("📥 Respuesta del servidor:", resultado);
 
-        // Verificar si la respuesta es JSON válido
-        const responseText = await response.text();
-        console.log('📄 Respuesta cruda:', responseText);
+        if (!resultado.success) throw new Error(resultado.error);
 
-        let resultado;
-        try {
-            resultado = JSON.parse(responseText);
-        } catch (e) {
-            console.error('❌ Error parseando JSON:', e);
-            throw new Error('Respuesta inválida del servidor: ' + responseText);
-        }
+        alert('✅ Receta guardada exitosamente');
 
-        console.log('✅ Resultado parseado:', resultado);
+        // Limpiar formulario
+        document.getElementById('medicamentos').value = '';
+        document.getElementById('instrucciones').value = '';
+        document.getElementById('validez-receta').value = '30';
+        document.getElementById('select-paciente').value = '';
+        document.getElementById('id-consulta').value = '';
 
-        if (resultado.success) {
-            alert('✅ Receta guardada exitosamente con ID: ' + resultado.id_receta);
-            
-            // ESPERAR a que se carguen las recetas antes de mostrar la lista
-            await cargarRecetasExistentes();
-            
-            // Cambiar a la vista de lista
-            document.getElementById('vista-previa-receta').style.display = 'none';
-            document.getElementById('formulario-receta').style.display = 'none';
-            document.getElementById('lista-recetas').style.display = 'block';
-            
-            console.log('🎉 Receta guardada y lista actualizada');
-            
-        } else {
-            throw new Error(resultado.error || 'Error desconocido al guardar');
-        }
-        
+        recetaActual = null;
+
+        await cargarRecetasExistentes();
+
     } catch (error) {
-        console.error('❌ Error guardando receta:', error);
-        alert('❌ Error al guardar la receta: ' + error.message);
+        console.error("❌ Error guardando receta:", error);
+        alert("Error: " + error.message);
+
     } finally {
-        // Restaurar botón
         const btnGuardar = document.getElementById('btnGuardarReceta');
-        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar Receta';
+        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar';
         btnGuardar.disabled = false;
     }
 }
 
-// 8. Editar receta
+// 8. Editar receta - VERSIÓN CORREGIDA
 function editarReceta() {
-    document.getElementById('vista-previa-receta').style.display = 'none';
-    document.getElementById('formulario-receta').style.display = 'block';
+    const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+    const formularioReceta = document.getElementById('formulario-receta');
+    const listaRecetas = document.getElementById('lista-recetas');
+    
+    if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'none';
+    if (formularioReceta) formularioReceta.style.display = 'block';
+    if (listaRecetas) listaRecetas.style.display = 'none';
     
     if (recetaActual) {
         document.getElementById('medicamentos').value = recetaActual.medicamentos;
         document.getElementById('instrucciones').value = recetaActual.instrucciones || '';
         document.getElementById('validez-receta').value = recetaActual.validez_dias;
+        // --- MODIFICADO ---
+        // Asegurarse de seleccionar el paciente correcto
+        if(document.getElementById('select-paciente')) {
+            document.getElementById('select-paciente').value = recetaActual.paciente_id;
+        }
+        // --- FIN MODIFICADO ---
     }
 }
 
@@ -1199,8 +1345,13 @@ async function cargarRecetasExistentes(pacienteId = null) {
             // Extraer preview del contenido
             let preview = 'Receta médica';
             if (receta.la_receta) {
+                // --- MODIFICADO ---
+                // Tu PHP ya te da el preview en 'la_receta' (aunque aún no está procesado)
+                // Tomar solo la primera línea de 'la_receta' como preview
                 const lineas = receta.la_receta.split('\n');
-                preview = lineas.find(line => line.trim().length > 0) || 'Receta médica';
+                // Buscar la primera línea que NO sea la etiqueta
+                preview = lineas.find(line => line.trim().length > 0 && !line.startsWith('TRATAMIENTO PRESCRITO:')) || 'Receta médica';
+                // --- FIN MODIFICADO ---
                 if (preview.length > 80) {
                     preview = preview.substring(0, 80) + '...';
                 }
@@ -1269,13 +1420,40 @@ async function verRecetaCompleta(idReceta) {
         }
         
         if (receta) {
-            recetaActual = receta;
-            const vistaPrevia = document.querySelector('.receta-preview');
-            vistaPrevia.innerHTML = generarHTMLVistaPrevia(receta);
+            // --- MODIFICADO ---
+            // Ya no partimos la receta aquí. Tu PHP 'obtenerReceta.php'
+            // ya devuelve 'medicamentos', 'instrucciones' y 'validez_dias'
+            // como campos separados en el JSON.
             
-            document.getElementById('formulario-receta').style.display = 'none';
-            document.getElementById('vista-previa-receta').style.display = 'block';
-            document.getElementById('lista-recetas').style.display = 'none';
+            // Asignamos directamente los campos que devuelve el PHP
+            recetaActual = {
+                ...receta, // Trae id_receta_medica, paciente_nombre, doctor_nombre, etc.
+                medicamentos: receta.medicamentos || '', // Campo del PHP
+                instrucciones: receta.instrucciones || '', // Campo del PHP
+                validez_dias: receta.validez_dias || 30, // Campo del PHP
+                
+                // Info para la VISTA PREVIA (ya viene de tu PHP)
+                doctor_nombre: receta.doctor_nombre || 'Dr. Médico',
+                doctor_especialidad: receta.doctor_especialidad || 'Especialista',
+                doctor_cedula: receta.doctor_cedula || 'N/A',
+                consultorio: 'Centro Médico TeleMed', // Puedes añadir esto al PHP si quieres
+                direccion_consultorio: 'Av. Principal #123, Ciudad' // Puedes añadir esto al PHP
+            };
+            // --- FIN MODIFICADO ---
+
+            const vistaPrevia = document.querySelector('.receta-preview');
+            if (vistaPrevia) {
+                vistaPrevia.innerHTML = generarHTMLVistaPrevia(recetaActual);
+            }
+            
+            // CON VERIFICACIÓN
+            const formularioReceta = document.getElementById('formulario-receta');
+            const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+            const listaRecetas = document.getElementById('lista-recetas');
+            
+            if (formularioReceta) formularioReceta.style.display = 'none';
+            if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'block';
+            if (listaRecetas) listaRecetas.style.display = 'none';
         }
     } catch (error) {
         console.error('Error cargando receta:', error);
@@ -1286,6 +1464,11 @@ async function verRecetaCompleta(idReceta) {
 // 11. Descargar receta existente
 async function descargarRecetaExistente(idReceta) {
     try {
+        const btnDescargar = event.target.closest('button'); // Asegurarse de obtener el botón
+        const originalText = btnDescargar.innerHTML;
+        btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btnDescargar.disabled = true;
+
         const response = await fetch(`DataBase/php/obtenerReceta.php?id=${idReceta}`);
         
         if (!response.ok) {
@@ -1299,12 +1482,33 @@ async function descargarRecetaExistente(idReceta) {
         }
         
         if (receta) {
-            recetaActual = receta;
+             // --- MODIFICADO (Igual que en verRecetaCompleta) ---
+            // Tu PHP ya devuelve los campos separados
+            recetaActual = {
+                ...receta,
+                medicamentos: receta.medicamentos || '',
+                instrucciones: receta.instrucciones || '',
+                validez_dias: receta.validez_dias || 30, 
+                doctor_nombre: receta.doctor_nombre || 'Dr. Médico',
+                doctor_especialidad: receta.doctor_especialidad || 'Especialista',
+                doctor_cedula: receta.doctor_cedula || 'N/A',
+                consultorio: 'Centro Médico TeleMed',
+                direccion_consultorio: 'Av. Principal #123, Ciudad'
+            };
+            // --- FIN MODIFICADO ---
+            
             await descargarRecetaPDF();
         }
     } catch (error) {
         console.error('Error descargando receta:', error);
         alert('Error al descargar la receta: ' + error.message);
+    } finally {
+        // Restaurar botón
+        const btnDescargar = event.target.closest('button');
+        if (btnDescargar) {
+            btnDescargar.innerHTML = '<i class="fas fa-download"></i> PDF'; // Texto original del botón
+            btnDescargar.disabled = false;
+        }
     }
 }
 
@@ -1315,15 +1519,39 @@ async function reutilizarReceta(idReceta) {
         const receta = await response.json();
         
         if (receta) {
+            // --- MODIFICADO (Igual que en verRecetaCompleta) ---
+            // Usar los campos que ya procesó el PHP
+            const medicamentos = receta.medicamentos || '';
+            const instrucciones = receta.instrucciones || '';
+            // --- FIN MODIFICADO ---
+
             // Llenar el formulario con los datos de la receta existente
-            document.getElementById('medicamentos').value = receta.medicamentos || '';
-            document.getElementById('instrucciones').value = receta.instrucciones || '';
+            document.getElementById('medicamentos').value = medicamentos;
+            document.getElementById('instrucciones').value = instrucciones;
             document.getElementById('validez-receta').value = receta.validez_dias || 30;
             
-            // Mostrar formulario
-            document.getElementById('lista-recetas').style.display = 'none';
-            document.getElementById('vista-previa-receta').style.display = 'none';
-            document.getElementById('formulario-receta').style.display = 'block';
+            // --- NUEVO ---
+            // Seleccionar al paciente
+            const selectPaciente = document.getElementById('select-paciente');
+            if(selectPaciente) {
+                selectPaciente.value = receta.id_paciente;
+                // Si el paciente no está en la lista (raro), cargarlos
+                if (selectPaciente.value !== receta.id_paciente) {
+                    await cargarPacientesParaRecetas();
+                    selectPaciente.value = receta.id_paciente;
+                }
+            }
+            seleccionarPacienteReceta(receta.id_paciente, receta.paciente_nombre);
+            // --- FIN NUEVO ---
+
+            // Mostrar formulario - CON VERIFICACIÓN
+            const listaRecetas = document.getElementById('lista-recetas');
+            const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+            const formularioReceta = document.getElementById('formulario-receta');
+            
+            if (listaRecetas) listaRecetas.style.display = 'none';
+            if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'none';
+            if (formularioReceta) formularioReceta.style.display = 'block';
             
             alert('📝 Formulario cargado con receta existente. Modifica y guarda como nueva.');
         }
@@ -1350,6 +1578,24 @@ function mostrarTodasLasRecetas() {
     
     console.log('📋 Mostrando todas las recetas');
 }
+
+// Función para diagnosticar problemas con los datos de la receta
+function diagnosticarRecetaActual() {
+    console.log('🔍 Diagnóstico de recetaActual:', {
+        existe: !!recetaActual,
+        paciente_nombre: recetaActual?.paciente_nombre,
+        paciente_nombre_tipo: typeof recetaActual?.paciente_nombre,
+        medicamentos: recetaActual?.medicamentos?.substring(0, 50) + '...',
+        medicamentos_tipo: typeof recetaActual?.medicamentos,
+        instrucciones: recetaActual?.instrucciones?.substring(0, 50) + '...',
+        instrucciones_tipo: typeof recetaActual?.instrucciones,
+        recetaCompleta: recetaActual
+    });
+}
+
+// Llama a esta función antes de generar el PDF para ver qué datos tienes
+// Ya no es tan necesario aquí, se puede llamar en las funciones de descarga/guardado si falla
+// diagnosticarRecetaActual(); 
 
 // ===== SISTEMA COMPLETO DE GESTIÓN DE PACIENTES =====
 
@@ -1804,134 +2050,285 @@ function generarReportePaciente(idPaciente) {
     // Aquí puedes implementar la generación de reportes
 }
 
-// ===== INICIALIZACIÓN FINAL =====
-
-// Actualizar la inicialización principal
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando sistema médico completo...');
-    
-    // Inicializar sistemas
-    inicializarSistemaRecetas();
-    inicializarSistemaPacientes();
-    
-    // Mostrar dashboard por defecto
-    showSection('dashboard');
-    
-    console.log('✅ Sistema médico inicializado correctamente');
-});
-
-// Función de diagnóstico (opcional - remover en producción)
-function diagnosticarSistemaPacientes() {
-    console.log('🔍 Diagnóstico del sistema de pacientes:');
-    
-    const elementos = [
-        'lista-pacientes-completa',
-        'vista-paciente-seleccionado', 
-        'search-patient',
-        'btn-nuevo-paciente',
-        'contador-pacientes'
-    ];
-    
-    elementos.forEach(id => {
-        const elem = document.getElementById(id);
-        console.log(`- ${id}:`, elem ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
-    });
-    
-    console.log('- Función inicializarSistemaPacientes:', typeof inicializarSistemaPacientes);
-    console.log('- Función cargarListaPacientesCompleta:', typeof cargarListaPacientesCompleta);
-    console.log('- Función mostrarDetallesPaciente:', typeof mostrarDetallesPaciente);
-}
-
-// ===== SISTEMA DE NOTIFICACIONES =====
+// ===== SISTEMA DE NOTIFICACIONES - VERSIÓN DEBUG =====
+let isLoading = false;
+let notificacionesCache = [];
 
 async function cargarNotificaciones() {
+    if (isLoading) return;
+    isLoading = true;
+    
     try {
-        const response = await fetch('DataBase/php/obtenerNotificaciones.php');
+        console.log('🔄 Iniciando carga de notificaciones...');
+        const response = await fetch('DataBase/php/obtenerNotificaciones.php?_=' + Date.now());
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
         const notificaciones = await response.json();
+        console.log('📨 Notificaciones recibidas:', notificaciones);
+        notificacionesCache = notificaciones;
 
         renderizarNotificaciones(notificaciones);
-
-        // 🔔 Actualizar contador
-        const badge = document.querySelector('.notification-badge');
-        const noLeidas = notificaciones.filter(n => n.leido == 0).length;
-        badge.textContent = noLeidas;
-        badge.style.display = noLeidas > 0 ? 'inline-block' : 'none';
+        actualizarContadorNotificaciones();
 
     } catch (error) {
         console.error('❌ Error cargando notificaciones:', error);
+        if (notificacionesCache.length > 0) {
+            renderizarNotificaciones(notificacionesCache);
+        }
+    } finally {
+        isLoading = false;
     }
 }
 
-function renderizarNotificaciones(lista) {
-    const contenedor = document.querySelector('.notifications-list');
-    if (!contenedor) return;
-
-    contenedor.innerHTML = '';
-
-    if (lista.length === 0) {
-        contenedor.innerHTML = `
-            <div class="notification-item">
-                <div class="notification-content">
-                    <p>🎉 No tienes notificaciones nuevas</p>
-                </div>
-            </div>
-        `;
+function renderizarNotificaciones(notificaciones) {
+    const listaNotificaciones = document.getElementById('lista-notificaciones-contenedor');
+    if (!listaNotificaciones) {
+        console.error('❌ No se encontró el contenedor de notificaciones');
         return;
     }
 
-    lista.forEach(n => {
+    console.log('🎨 Renderizando notificaciones...');
+    const fragment = document.createDocumentFragment();
+    
+    notificaciones.forEach((notificacion, index) => {
         const item = document.createElement('div');
-        item.className = 'notification-item' + (n.leido == 0 ? ' unread' : '');
+        item.className = `notificacion-item ${notificacion.leido == 1 ? 'leido' : ''}`;
+        item.dataset.id = notificacion.id; // Para debug
+        
         item.innerHTML = `
-            <div class="notification-icon">
-                <i class="fas fa-${obtenerIconoNotificacion(n.tipo_notificacion)}"></i>
-            </div>
-            <div class="notification-content">
-                <h4>${n.tipo_notificacion}</h4>
-                <p>${n.mensaje}</p>
-                <p class="notification-time">${n.fecha}</p>
-            </div>
+            <div class="notificacion-icono">${notificacion.tipo_notificacion === 'cita' ? '<i class="fas fa-calendar"></i>' : '<i class="fas fa-bell"></i>'}</div>
+            <div class="notificacion-mensaje">${notificacion.mensaje}</div>
+            <div class="notificacion-fecha">${notificacion.fecha}</div>
         `;
 
-        // Al hacer clic, marcar como leída
-        item.addEventListener('click', () => marcarNotificacionLeida(n.id, item));
-        contenedor.appendChild(item);
+        console.log(`📝 Notificación ${index}: ID=${notificacion.id}, Leído=${notificacion.leido}`);
+
+        // VERSIÓN SIMPLE - Sin remover eventos
+        if (notificacion.leido == 0) {
+            item.style.cursor = 'pointer'; // Para que se vea que es clickeable
+            item.addEventListener('click', function() {
+                console.log('🖱️ CLICK DETECTADO en notificación:', notificacion.id);
+                marcarNotificacionComoLeida(notificacion.id, item);
+            });
+        } else {
+            item.style.cursor = 'default';
+        }
+
+        fragment.appendChild(item);
     });
+    
+    listaNotificaciones.innerHTML = '';
+    listaNotificaciones.appendChild(fragment);
+    console.log('✅ Renderizado completado');
 }
 
-async function marcarNotificacionLeida(id, elemento) {
+async function marcarNotificacionComoLeida(idNotificacion, elementoHTML) {
+    console.log('🚀 Ejecutando marcarNotificacionComoLeida...');
+    
+    // Actualizar UI inmediatamente
+    elementoHTML.classList.add('leido');
+    elementoHTML.style.cursor = 'default';
+    console.log('✅ Clase "leido" agregada al elemento');
+    
+    // Actualizar contador inmediatamente
+    actualizarContadorNotificaciones();
+    
     try {
+        console.log('📡 Enviando solicitud al servidor...');
         const response = await fetch('DataBase/php/marcarNotificacionLeida.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
+            body: JSON.stringify({ id_notificacion: idNotificacion })
         });
-        const result = await response.json();
 
-        if (result.success) {
-            elemento.classList.remove('unread');
-            cargarNotificaciones(); // refrescar contador
+        const result = await response.json();
+        console.log('📨 Respuesta del servidor:', result);
+
+        if (!result.success) {
+            console.error('❌ Error al marcar como leída:', result.error);
+            elementoHTML.classList.remove('leido');
+            elementoHTML.style.cursor = 'pointer';
+            actualizarContadorNotificaciones();
+        } else {
+            console.log('✅ Notificación actualizada en la BD.');
         }
     } catch (error) {
-        console.error('Error al marcar notificación:', error);
+        console.error('❌ Error de red:', error);
+        elementoHTML.classList.remove('leido');
+        elementoHTML.style.cursor = 'pointer';
+        actualizarContadorNotificaciones();
     }
 }
 
-function obtenerIconoNotificacion(tipo) {
-    const iconos = {
-        'Nueva Cita': 'calendar-plus',
-        'Cancelación': 'calendar-times',
-        'Mensaje': 'envelope',
-        'Bienvenida': 'smile',
-        'Recordatorio': 'bell'
-    };
-    return iconos[tipo] || 'info-circle';
+function actualizarContadorNotificaciones() {
+    const badge = document.querySelector('.notification-badge');
+    if (!badge) {
+        console.error('❌ No se encontró el badge de notificaciones');
+        return;
+    }
+    
+    const notificacionesNoLeidas = document.querySelectorAll('.notificacion-item:not(.leido)').length;
+    console.log(`🔢 Actualizando contador: ${notificacionesNoLeidas} no leídas`);
+    
+    badge.textContent = notificacionesNoLeidas;
+    badge.style.display = notificacionesNoLeidas > 0 ? 'inline-block' : 'none';
 }
 
-// 🔁 Recargar notificaciones cada 30 segundos
-setInterval(cargarNotificaciones, 30000);
+// Event listeners para debug
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.notificacion-item')) {
+        console.log('🎯 Evento click global capturado en:', e.target);
+    }
+});
+
+// Recargar cada 60 segundos
+setInterval(cargarNotificaciones, 60000);
+
+
+// ===============================================
+// ===== LÓGICA DEL DASHBOARD (NUEVO) =====
+// ===============================================
+
+/**
+ * Carga y muestra las consultas programadas para el día de hoy en el Dashboard.
+ */
+async function cargarConsultasDashboard() {
+    const dashboardList = document.querySelector('#dashboard .appointments-list');
+    if (!dashboardList) {
+        console.error('❌ Contenedor .appointments-list no encontrado en Dashboard');
+        return;
+    }
+
+    console.log('🔄 Cargando consultas del día para el Dashboard...');
+
+    // Mostrar estado de carga
+    dashboardList.innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando citas del día...</p>
+        </div>`;
+
+    try {
+        // Usamos el mismo endpoint de consultas
+        const response = await fetch('DataBase/php/obtenerConsultas.php?_=' + Date.now());
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const todasLasConsultasApi = await response.json();
+
+        // Filtrar solo las de hoy
+        const ahora = new Date();
+        const consultasHoy = todasLasConsultasApi.filter(consulta => {
+            const fecha = new Date(consulta.fecha_programada);
+            // Comparamos solo la fecha (año, mes, día), ignorando la hora
+            return fecha.toDateString() === ahora.toDateString();
+        });
+
+        console.log(`✅ Consultas encontradas para hoy: ${consultasHoy.length}`);
+
+        // Renderizar las consultas de hoy
+        renderizarConsultasDashboard(consultasHoy, dashboardList);
+
+    } catch (error) {
+        console.error('❌ Error cargando consultas del dashboard:', error);
+        dashboardList.innerHTML = `
+            <div class="error-message-compact">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>No se pudo cargar la agenda.</p>
+                <button class="btn btn-sm" onclick="cargarConsultasDashboard()">Reintentar</button>
+            </div>`;
+    }
+}
+
+/**
+ * Renderiza la lista de consultas de hoy en el contenedor del dashboard.
+ */
+function renderizarConsultasDashboard(consultas, container) {
+    if (consultas.length === 0) {
+        container.innerHTML = `
+            <div class="no-data-compact">
+                <i class="fas fa-calendar-check"></i>
+                <p>No hay citas programadas para hoy.</p>
+                <small>¡Disfruta de tu día!</small>
+            </div>`;
+        return;
+    }
+
+    // Ordenar por hora
+    consultas.sort((a, b) => new Date(a.fecha_programada) - new Date(b.fecha_programada));
+
+    container.innerHTML = ''; // Limpiar el loading
+    
+    consultas.forEach(consulta => {
+        const item = document.createElement('div');
+        item.className = `appointment-item-card status-${consulta.estado}`;
+        
+        const fecha = new Date(consulta.fecha_programada);
+        const hora = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        
+        // Determinar qué botón mostrar
+        let actionButton = '';
+        if (consulta.enlace_meet && (consulta.estado === 'programado' || consulta.estado === 'en-curso' || consulta.estado === 'confirmada')) {
+            // Botón para unirse si es virtual y está programada/en curso
+            actionButton = `<button class="btn btn-sm btn-success" onclick="irAPerfilConsulta(${consulta.id})"><i class="fas fa-video"></i> Unir</button>`;
+        } else if (consulta.estado === 'completada') {
+            // Botón de ver expediente si ya se completó
+            actionButton = `<button class="btn btn-sm btn-secondary" onclick="irAExpediente(${consulta.paciente_id})"><i class="fas fa-notes-medical"></i> Ver Exp.</button>`;
+        } else {
+            // Botón de ver perfil de consulta por defecto
+            actionButton = `<button class="btn btn-sm btn-info" onclick="irAPerfilConsulta(${consulta.id})"><i class="fas fa-eye"></i> Ver</button>`;
+        }
+
+        item.innerHTML = `
+            <div class="appointment-time">${hora}</div>
+            <div class="appointment-details">
+                <h4>${consulta.paciente_nombre || 'Paciente'}</h4>
+                <p>${consulta.motivo || 'Consulta'} (${obtenerTextoTipo(consulta.tipo)})</p>
+            </div>
+            <div class="appointment-actions">
+                ${actionButton}
+            </div>
+        `;
+        
+        // Evento para ir a la consulta (si no es el botón)
+        item.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) {
+                irAPerfilConsulta(consulta.id);
+            }
+        });
+
+        container.appendChild(item);
+    });
+}
+
+/**
+ * Función auxiliar para navegar a la sección de consultas y ver una específica.
+ */
+function irAPerfilConsulta(idConsulta) {
+    console.log('Navegando al perfil de la consulta:', idConsulta);
+    
+    // Navegar a la sección de consultas
+    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+    document.querySelector('[data-section="consultations"]').classList.add('active');
+    showSection('consultations');
+    
+    // Esperar un momento para que la UI se actualice y cargue las consultas
+    setTimeout(() => {
+        // Asegurarse de que las consultas estén cargadas
+        if (todasLasConsultas.length === 0) {
+            // Si no están cargadas, forzar la carga y luego seleccionar
+            cargarConsultas().then(() => {
+                seleccionarConsultaEnLista(idConsulta);
+                mostrarDetallesConsulta(idConsulta);
+            });
+        } else {
+            // Si ya están cargadas, solo seleccionar
+            seleccionarConsultaEnLista(idConsulta);
+            mostrarDetallesConsulta(idConsulta);
+        }
+    }, 300); // 300ms de espera
+}
 
 
 // ===== SISTEMA DE CONSULTAS VIRTUALES =====
@@ -1939,35 +2336,24 @@ setInterval(cargarNotificaciones, 30000);
 // Variables globales
 let consultaSeleccionada = null;
 let todasLasConsultas = [];
+let jitsiApi = null;
 
 // Inicializar sistema de consultas
 function inicializarSistemaConsultas() {
     console.log('🔄 Inicializando sistema de consultas...');
 
+    // Cargar consultas cuando se accede a la sección
     const consultationsSection = document.querySelector('[data-section="consultations"]');
     if (consultationsSection) {
-        consultationsSection.addEventListener('click', function () {
-            console.log('🎥 Accediendo a sección de consultas');
+        consultationsSection.addEventListener('click', function() {
+            console.log('🩺 Accediendo a sección de Consultas');
             cargarConsultas();
         });
     }
 
-    // Event listeners para botones
-    document.getElementById('btn-nueva-consulta')?.addEventListener('click', mostrarModalNuevaConsulta);
-    document.getElementById('btnCancelarConsulta')?.addEventListener('click', cerrarModalNuevaConsulta);
-    document.querySelector('.close-modal')?.addEventListener('click', cerrarModalNuevaConsulta);
-
-    // Event listener para el formulario
-    document.getElementById('formNuevaConsulta')?.addEventListener('submit', programarNuevaConsulta);
-
-    // Filtros
+    // Event listeners para filtros
     document.getElementById('filter-status')?.addEventListener('change', filtrarConsultas);
     document.getElementById('search-consultation')?.addEventListener('input', filtrarConsultas);
-
-    // Cerrar modal al hacer clic fuera
-    document.getElementById('modalNuevaConsulta')?.addEventListener('click', function (e) {
-        if (e.target === this) cerrarModalNuevaConsulta();
-    });
 }
 
 // ==========================
@@ -1979,6 +2365,7 @@ async function cargarConsultas() {
         const listaConsultas = document.getElementById('lista-consultas');
         if (!listaConsultas) return;
 
+        // Mostrar loading state
         listaConsultas.innerHTML = `
             <div class="loading-state">
                 <i class="fas fa-spinner fa-spin"></i>
@@ -1986,20 +2373,28 @@ async function cargarConsultas() {
             </div>
         `;
 
-        const response = await fetch('DataBase/php/obtenerConsultas.php');
+        const response = await fetch('DataBase/php/obtenerConsultas.php?_=' + Date.now());
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
         const consultas = await response.json();
         todasLasConsultas = consultas;
-        console.log(`✅ ${consultas.length} consultas cargadas`);
+        console.log(`✅ ${consultas.length} consultas cargadas:`, consultas);
 
+        // Actualizar contador
         const contador = document.getElementById('contador-consultas');
         if (contador) {
-            const programadas = consultas.filter(c => c.estado === 'programado').length;
+            const programadas = consultas.filter(consulta => consulta.estado === 'programado').length;
             contador.textContent = programadas;
+            contador.style.display = programadas > 0 ? 'inline-block' : 'none';
         }
 
         renderizarListaConsultas(consultas);
+        
+        // Si hay una consulta seleccionada, actualizar detalles
+        if (consultaSeleccionada) {
+            mostrarDetallesConsulta(consultaSeleccionada);
+        }
+        
     } catch (error) {
         console.error('❌ Error cargando consultas:', error);
         const listaConsultas = document.getElementById('lista-consultas');
@@ -2030,27 +2425,28 @@ function renderizarListaConsultas(consultas) {
             <div class="no-data">
                 <i class="fas fa-video-slash"></i>
                 <p>No hay consultas programadas</p>
-                <small>Usa el botón "Nueva Consulta" para programar una</small>
             </div>
         `;
         return;
     }
 
+    // Ordenar por fecha (más cercanas primero)
     consultas.sort((a, b) => new Date(a.fecha_programada) - new Date(b.fecha_programada));
     listaConsultas.innerHTML = '';
 
     consultas.forEach(consulta => {
         const item = document.createElement('div');
-        item.className = 'consultation-item';
+        item.className = `consultation-item ${consultaSeleccionada === consulta.id ? 'active' : ''}`;
         item.dataset.consultaId = consulta.id;
 
         const fecha = new Date(consulta.fecha_programada);
         const ahora = new Date();
         const esHoy = fecha.toDateString() === ahora.toDateString();
+        const esPasada = fecha < ahora;
 
         item.innerHTML = `
             <div class="consultation-item-header">
-                <div class="consultation-patient">${consulta.paciente_nombre}</div>
+                <div class="consultation-patient">${consulta.paciente_nombre || 'Paciente'}</div>
                 <div class="consultation-status status-${consulta.estado}">
                     ${obtenerTextoEstado(consulta.estado)}
                 </div>
@@ -2063,7 +2459,8 @@ function renderizarListaConsultas(consultas) {
                 </span>
                 <span class="consultation-type">${obtenerTextoTipo(consulta.tipo)}</span>
             </div>
-            <div class="consultation-reason">${consulta.motivo}</div>
+            <div class="consultation-reason">${consulta.motivo || 'Sin motivo especificado'}</div>
+            ${consulta.enlace_meet ? '<div class="consultation-badge-virtual"><i class="fas fa-video"></i> Virtual</div>' : ''}
         `;
 
         item.addEventListener('click', function () {
@@ -2086,9 +2483,23 @@ function seleccionarConsultaEnLista(idConsulta) {
 }
 
 function mostrarDetallesConsulta(idConsulta) {
-    const consulta = todasLasConsultas.find(c => c.id === idConsulta);
+    const consulta = todasLasConsultas.find(consulta => consulta.id === idConsulta);
     const vistaConsulta = document.getElementById('vista-consulta-seleccionada');
-    if (!consulta || !vistaConsulta) return;
+    if (!consulta || !vistaConsulta) {
+        console.warn('❌ No se encontró consulta o contenedor de detalles');
+        // Limpiar vista si la consulta no se encuentra (ej. después de filtrar)
+        if (vistaConsulta) {
+            vistaConsulta.innerHTML = `
+                <div class="no-consultation-selected">
+                    <div class="empty-state">
+                        <i class="fas fa-video-slash"></i>
+                        <h3>Selecciona una consulta</h3>
+                        <p>Haz clic en una consulta de la lista para ver los detalles</p>
+                    </div>
+                </div>`;
+        }
+        return;
+    }
 
     const fecha = new Date(consulta.fecha_programada);
     const esPasada = fecha < new Date();
@@ -2096,19 +2507,24 @@ function mostrarDetallesConsulta(idConsulta) {
     vistaConsulta.innerHTML = generarHTMLDetallesConsulta(consulta, esPasada);
 }
 
+
 function generarHTMLDetallesConsulta(consulta, esPasada) {
     const fecha = new Date(consulta.fecha_programada);
     const esHoy = fecha.toDateString() === new Date().toDateString();
+    const esFutura = fecha > new Date();
+    const enProgreso = !esPasada && !esFutura; // Simplificación
+    const puedeUnirse = consulta.estado === 'programado' || consulta.estado === 'en-curso' || consulta.estado === 'confirmada';
 
     return `
         <div class="consultation-detail-container">
             <div class="consultation-detail-header">
                 <div class="consultation-main-info">
-                    <h2>Consulta con ${consulta.paciente_nombre}</h2>
+                    <h2>Consulta con ${consulta.paciente_nombre || 'Paciente'}</h2>
                     <div class="consultation-meta">
                         <div class="status-badge status-${consulta.estado}">
                             ${obtenerTextoEstado(consulta.estado)}
                         </div>
+                        ${consulta.enlace_meet ? '<div class="virtual-badge"><i class="fas fa-video"></i> Consulta Virtual</div>' : ''}
                     </div>
                 </div>
             </div>
@@ -2125,7 +2541,7 @@ function generarHTMLDetallesConsulta(consulta, esPasada) {
                     </div>
                     <div class="info-item">
                         <span class="info-label">Duración:</span>
-                        <span class="info-value">${consulta.duracion} minutos</span>
+                        <span class="info-value">${consulta.duracion || 30} minutos</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Tipo:</span>
@@ -2137,7 +2553,7 @@ function generarHTMLDetallesConsulta(consulta, esPasada) {
                     <h3><i class="fas fa-stethoscope"></i> Detalles Médicos</h3>
                     <div class="info-item">
                         <span class="info-label">Motivo:</span>
-                        <span class="info-value">${consulta.motivo}</span>
+                        <span class="info-value">${consulta.motivo || 'No especificado'}</span>
                     </div>
                     ${consulta.notas ? `
                     <div class="info-item">
@@ -2147,160 +2563,287 @@ function generarHTMLDetallesConsulta(consulta, esPasada) {
                 </div>
             </div>
 
-            ${consulta.enlace_meet ? `
-            <div class="meet-link-container">
-                <h3><i class="fas fa-video"></i> Enlace de Consulta Virtual</h3>
-                <p>Comparte este enlace con el paciente:</p>
-                <div class="meet-link">${consulta.enlace_meet}</div>
-                <div class="meet-actions">
-                    <button class="btn btn-success" onclick="unirseAConsulta('${consulta.enlace_meet}')">
-                        <i class="fas fa-video"></i> Unirse
-                    </button>
-                    <button class="btn btn-primary" onclick="copiarEnlaceMeet('${consulta.enlace_meet}')">
-                        <i class="fas fa-copy"></i> Copiar Enlace
-                    </button>
-                </div>
+            <!-- BOTONES DE ACCIÓN -->
+            <div class="consultation-actions">
+                ${consulta.enlace_meet && puedeUnirse && !esPasada ? `
+                <button class="btn btn-success btn-lg" onclick="unirseAConsulta('${consulta.enlace_meet}', ${consulta.id})">
+                    <i class="fas fa-video"></i> Unirse a Videollamada
+                </button>
+                ` : ''}
+                
+                <button class="btn btn-secondary" onclick="cargarConsultas()">
+                    <i class="fas fa-sync"></i> Actualizar
+                </button>
             </div>
-            ` : ''}
         </div>
     `;
 }
-
 // ==========================
-// NUEVA CONSULTA
+// VIDEOCONFERENCIA JITSI - MEJORADA
 // ==========================
-function mostrarModalNuevaConsulta() {
-    const modal = document.getElementById('modalNuevaConsulta');
-    if (modal) {
-        modal.style.display = 'flex';
-        cargarPacientesParaConsulta();
-
-        const fechaInput = document.getElementById('fecha-consulta');
-        const ahora = new Date();
-        ahora.setMinutes(ahora.getMinutes() + 30);
-        fechaInput.min = ahora.toISOString().slice(0, 16);
+function unirseAConsulta(roomName, idConsulta) {
+    console.log(`🎥 Uniéndose a la sala: ${roomName}`);
+    
+    // Validar que haya sala configurada
+    if (!roomName || roomName === 'null' || roomName === 'undefined') {
+        alert('❌ No hay sala de videoconferencia configurada para esta consulta');
+        return;
     }
+
+    const vistaConsulta = document.getElementById('vista-consulta-seleccionada');
+    if (!vistaConsulta) return;
+
+    // Mostrar mensaje de carga
+    vistaConsulta.innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Iniciando videollamada...</p>
+        </div>
+    `;
+
+    // Pequeño delay para mostrar el loading
+    setTimeout(() => {
+        iniciarVideollamada(roomName, idConsulta);
+    }, 1000);
 }
 
-function cerrarModalNuevaConsulta() {
-    const modal = document.getElementById('modalNuevaConsulta');
-    if (modal) {
-        modal.style.display = 'none';
-        document.getElementById('formNuevaConsulta').reset();
-    }
-}
+function iniciarVideollamada(roomName, idConsulta) {
+    const vistaConsulta = document.getElementById('vista-consulta-seleccionada');
+    
+    // Crear interfaz de Jitsi
+    vistaConsulta.innerHTML = `
+        <div class="jitsi-wrapper">
+            <div class="jitsi-header">
+                <h3><i class="fas fa-video"></i> Consulta en curso - Dr. ${obtenerNombreDoctor()}</h3>
+                <div class="jitsi-room-info">
+                    <strong>Paciente:</strong> ${obtenerNombrePaciente(idConsulta)}
+                    <button class="btn btn-sm btn-outline" onclick="copiarEnlaceMeet('${roomName}')">
+                        <i class="fas fa-copy"></i> Copiar enlace
+                    </button>
+                </div>
+            </div>
+            <div id="jitsi-container-embed"></div>
+            <div class="jitsi-controls">
+                <button class="btn btn-danger btn-lg" id="btn-colgar-jitsi">
+                    <i class="fas fa-phone-slash"></i> Finalizar consulta
+                </button>
+                <button class="btn btn-secondary" onclick="volverADetallesConsulta(${idConsulta})">
+                    <i class="fas fa-arrow-left"></i> Volver a detalles
+                </button>
+            </div>
+        </div>
+    `;
 
-async function cargarPacientesParaConsulta() {
+    // Configuración optimizada para consultas médicas
+    const domain = 'meet.jit.si';
+    const options = {
+        roomName: roomName,
+        width: '100%',
+        height: 500,
+        parentNode: document.querySelector('#jitsi-container-embed'),
+        userInfo: {
+            displayName: 'Doctor',
+            email: '' // Puedes agregar email si lo tienes
+        },
+        configOverwrite: {
+            prejoinPageEnabled: false, // Entrar directamente a la sala
+            disableInviteFunctions: true, // No permitir invitar
+            defaultLanguage: 'es',
+            enableWelcomePage: false,
+            startWithAudioMuted: false, // Audio activado por defecto
+            startWithVideoMuted: false, // Video activado por defecto
+            enableNoAudioDetection: true,
+            enableNoisyMicDetection: true,
+            resolution: 720, // Calidad HD
+            constraints: {
+                video: {
+                    height: { ideal: 720, max: 1080, min: 240 }
+                }
+            }
+        },
+        interfaceConfigOverwrite: {
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_WATERMARK_FOR_GUESTS: false,
+            TOOLBAR_BUTTONS: [
+                'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                'settings', 'raisehand', 'videoquality', 'filmstrip', 'shortcuts',
+                'tileview', 'videobackgroundblur', 'help', 'mute-everyone'
+            ],
+            SETTINGS_SECTIONS: ['devices', 'language', 'moderator', 'profile', 'calendar'],
+            SHOW_CHROME_EXTENSION_BANNER: false
+        }
+    };
+
     try {
-        const select = document.getElementById('select-paciente-consulta');
-        if (!select) return;
+        // Verificar que la API de Jitsi esté disponible
+        if (typeof JitsiMeetExternalAPI === 'undefined') {
+            throw new Error('Jitsi Meet API no está cargada. Verifica el script.');
+        }
 
-        const response = await fetch('DataBase/php/listaPacientes.php');
-        const pacientes = await response.json();
-
-        select.innerHTML = '<option value="">Seleccione un paciente</option>';
-        pacientes.forEach(p => {
-            const option = document.createElement('option');
-            option.value = p.id_paciente;
-            option.textContent = `${p.nombre_completo} - ${p.edad} años`;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error('❌ Error cargando pacientes:', error);
-    }
-}
-
-async function programarNuevaConsulta(event) {
-    event.preventDefault();
-
-    try {
-        const pacienteId = document.getElementById('select-paciente-consulta').value;
-        if (!pacienteId) return alert('Seleccione un paciente.');
-
-        const enlaceMeet = generarEnlaceMeet();
-
-        const nuevaConsulta = {
-            paciente_id: parseInt(pacienteId),
-            fecha_programada: document.getElementById('fecha-consulta').value,
-            duracion: parseInt(document.getElementById('duracion-consulta').value),
-            motivo: document.getElementById('motivo-consulta').value,
-            notas: document.getElementById('notas-consulta').value,
-            url_video: enlaceMeet
-        };
-
-        const response = await fetch('DataBase/php/crearConsulta.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevaConsulta)
+        jitsiApi = new JitsiMeetExternalAPI(domain, options);
+        
+        // Event listeners importantes
+        jitsiApi.addEventListener('videoConferenceJoined', () => {
+            console.log('✅ Doctor se unió a la videollamada');
+            actualizarEstadoConsulta(idConsulta, 'en-curso');
         });
 
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error || 'Error desconocido');
+        jitsiApi.addEventListener('videoConferenceLeft', () => {
+            console.log('👋 Doctor salió de la videollamada');
+            actualizarEstadoConsulta(idConsulta, 'completada');
+            volverADetallesConsulta(idConsulta);
+        });
 
-        alert('✅ Consulta programada correctamente');
-        cerrarModalNuevaConsulta();
-        cargarConsultas();
+        jitsiApi.addEventListener('participantJoined', (participant) => {
+            console.log('👤 Paciente se unió:', participant);
+            // Aquí puedes mostrar notificación o actualizar UI
+        });
+
+        jitsiApi.addEventListener('participantLeft', (participant) => {
+            console.log('👤 Paciente salió:', participant);
+        });
+
+        // Botón para finalizar llamada
+        document.getElementById('btn-colgar-jitsi').addEventListener('click', () => {
+            finalizarConsulta(idConsulta);
+        });
+
+        // Manejar errores de Jitsi
+        jitsiApi.addEventListener('connectionFailed', () => {
+            console.error('❌ Error de conexión con Jitsi');
+            alert('Error de conexión. Verifica tu internet.');
+        });
+
     } catch (error) {
-        console.error('❌ Error al programar consulta:', error);
-        alert('❌ ' + error.message);
+        console.error('❌ Error iniciando Jitsi:', error);
+        vistaConsulta.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>Error al conectar con la videollamada</h4>
+                <p>${error.message}</p>
+                <div class="consultation-actions">
+                    <button class="btn btn-primary" onclick="unirseAConsulta('${roomName}', ${idConsulta})">
+                        <i class="fas fa-redo"></i> Reintentar
+                    </button>
+                    <button class="btn btn-secondary" onclick="volverADetallesConsulta(${idConsulta})">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+            </div>
+        `;
     }
 }
 
 // ==========================
 // FUNCIONES AUXILIARES
 // ==========================
-function generarEnlaceMeet() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    const grupos = [];
-    for (let i = 0; i < 3; i++) {
-        let parte = '';
-        for (let j = 0; j < 3; j++) parte += chars.charAt(Math.floor(Math.random() * chars.length));
-        grupos.push(parte);
-    }
-    return `https://meet.google.com/${grupos.join('-')}`;
-}
-
 function obtenerTextoEstado(estado) {
     const estados = {
-        programado: 'Programada',
-        completada: 'Completada',
-        cancelada: 'Cancelada',
-        'en-curso': 'En Curso'
+        'programado': 'Programada',
+        'completada': 'Completada',
+        'cancelada': 'Cancelada',
+        'en-curso': 'En Curso',
+        'confirmada': 'Confirmada'
     };
     return estados[estado] || estado;
 }
 
 function obtenerTextoTipo(tipo) {
     const tipos = {
-        virtual: 'Virtual',
-        'en_persona': 'Presencial',
-        'primera-vez': 'Primera Vez',
-        seguimiento: 'Seguimiento',
-        urgencia: 'Urgencia',
-        control: 'Control'
+        'virtual': 'Virtual',
+        'presencial': 'Presencial',
+        'primera_vez': 'Primera Vez',
+        'seguimiento': 'Seguimiento',
+        'urgencia': 'Urgencia',
+        'control': 'Control'
     };
     return tipos[tipo] || tipo;
 }
 
 function filtrarConsultas() {
-    const estado = document.getElementById('filter-status').value;
-    const busqueda = document.getElementById('search-consultation').value.toLowerCase();
+    const estado = document.getElementById('filter-status')?.value || 'all';
+    const busqueda = document.getElementById('search-consultation')?.value.toLowerCase() || '';
 
     let filtradas = todasLasConsultas;
-    if (estado !== 'all') filtradas = filtradas.filter(c => c.estado === estado);
+    
+    if (estado !== 'all') {
+        filtradas = filtradas.filter(consulta => consulta.estado === estado);
+    }
+    
     if (busqueda) {
-        filtradas = filtradas.filter(c =>
-            c.paciente_nombre.toLowerCase().includes(busqueda) ||
-            c.motivo.toLowerCase().includes(busqueda)
+        filtradas = filtradas.filter(consulta =>
+            (consulta.paciente_nombre && consulta.paciente_nombre.toLowerCase().includes(busqueda)) ||
+            (consulta.motivo && consulta.motivo.toLowerCase().includes(busqueda))
         );
     }
+    
     renderizarListaConsultas(filtradas);
 }
 
-function unirseAConsulta(enlace) {
-    window.open(enlace, '_blank');
+// ==========================
+// FUNCIONES DE APOYO PARA CONSULTAS
+// ==========================
+
+function obtenerNombreDoctor() {
+    // Aquí puedes obtener el nombre del doctor de tu sistema
+    // Por ahora retornamos un valor por defecto
+    return 'Médico';
 }
 
-function copiarEnlaceMeet(enlace) {
-    navigator.clipboard.writeText(enlace).then(() => alert('✅ Enlace copiado'));
+function obtenerNombrePaciente(idConsulta) {
+    const consulta = todasLasConsultas.find(c => c.id === idConsulta);
+    return consulta ? consulta.paciente_nombre : 'Paciente';
+}
+
+async function actualizarEstadoConsulta(idConsulta, nuevoEstado) {
+    try {
+        const response = await fetch('DataBase/php/actualizarEstadoConsulta.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                consulta_id: idConsulta,
+                estado: nuevoEstado
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            console.log(`✅ Estado actualizado a: ${nuevoEstado}`);
+            // Actualizar la consulta en el array local
+            const consultaIndex = todasLasConsultas.findIndex(c => c.id === idConsulta);
+            if (consultaIndex !== -1) {
+                todasLasConsultas[consultaIndex].estado = nuevoEstado;
+            }
+            // Recargar la lista en la pestaña de consultas (si está visible)
+            if (document.getElementById('consultations').classList.contains('active')) {
+                renderizarListaConsultas(todasLasConsultas);
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error actualizando estado:', error);
+    }
+}
+
+function finalizarConsulta(idConsulta) {
+    if (confirm('¿Está seguro de que desea finalizar la consulta?')) {
+        if (jitsiApi) {
+            jitsiApi.executeCommand('hangup');
+        } else {
+             // Si Jitsi no está, solo actualiza el estado y vuelve
+            actualizarEstadoConsulta(idConsulta, 'completada');
+            volverADetallesConsulta(idConsulta);
+        }
+    }
+}
+
+function volverADetallesConsulta(idConsulta) {
+    if (jitsiApi) {
+        jitsiApi.dispose();
+        jitsiApi = null;
+    }
+    // Recargar la consulta específica para ver el estado actualizado
+    cargarConsultas().then(() => {
+        mostrarDetallesConsulta(idConsulta);
+    });
 }
