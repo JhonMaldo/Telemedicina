@@ -776,6 +776,12 @@ function buildRecetaDataFromForm() {
         direccion_consultorio: 'Av. Principal #123, Ciudad'
     };
 }
+//funcion para obtner datos del doctor
+async function obtenerDatosDoctor(idDoctor) {
+    const url = `/Telemedicina/DataBase/php/obtenerDoctor.php?id_doctor=${idDoctor}`;
+    const response = await fetch(url);
+    return await response.json();
+}
 
 
 // FUNCIÓN QUE FALTA - Agregar esto ANTES de generarVistaPrevia
