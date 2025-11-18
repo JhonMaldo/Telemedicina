@@ -6,6 +6,79 @@
     <title>Panel de Paciente - Sistema Médico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/index.css">
+    <style>
+        /* Ocultar inicialmente especialidad y médico */
+        .form-group.hidden {
+            display: none;
+        }
+        
+        /* Estilos para notificaciones */
+        .notificacion-item {
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+
+        .notificacion-item.leida {
+            opacity: 0.7;
+            border-left-color: #6c757d;
+        }
+
+        .notificacion-item.no-leida {
+            background-color: #f8f9fa;
+            border-left-color: #28a745;
+        }
+
+        .notificacion-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .notificacion-header .fa-bell { color: #007bff; }
+        .notificacion-header .fa-user-plus { color: #28a745; }
+        .notificacion-header .fa-calendar-alt { color: #ffc107; }
+        .notificacion-header .fa-stethoscope { color: #17a2b8; }
+        .notificacion-header .fa-clock { color: #6c757d; }
+
+        .notificacion-fecha {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-left: auto;
+        }
+
+        .notificacion-mensaje {
+            line-height: 1.5;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .leida-badge {
+            color: #28a745;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .notification-badge {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
+        .notifications-controls {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <!-- Menu orientado a la izquierda -->
@@ -68,6 +141,11 @@
                     <h3>Agendar Cita</h3>
                     <p>Solicitar una nueva cita médica</p>
                 </div>
+                <div class="card" onclick="showSection('appointments')">
+                    <i class="fas fa-bell"></i>
+                    <h3>Mis Notificaciones</h3>
+                    <p>Revisa tus alertas y mensajes</p>
+                </div>
                 <div class="card" onclick="showSection('chatbot')">
                     <i class="fas fa-robot"></i>
                     <h3>Asistente Virtual</h3>
@@ -88,49 +166,36 @@
 
         <!-- Appointments Section - Menu orientado a la derecha -->
         <div id="appointments" class="content-section">
-            <h2 class="section-title">Modulo de notificaciones</h2>
-            <div class="appointments-list">
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Consulta General</h4>
-                        <p><i class="far fa-calendar"></i> 15 Oct, 2023 - 10:00 AM</p>
-                        <p><i class="fas fa-user-md"></i> Dr. María González</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 204</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
+            <h2 class="section-title">Mis Notificaciones</h2>
+            
+            <!-- Filtros y controles -->
+            <div class="notifications-controls">
+                <button class="btn" onclick="cargarNotificacionesPacientes()">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+                <button class="btn btn-success" onclick="marcarTodasComoLeidas()">
+                    <i class="fas fa-check-double"></i> Marcar todas como leídas
+                </button>
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+                    <span id="notificaciones-contador" class="notification-badge" style="display: none;">0</span>
+                    <small id="estado-carga">Listo</small>
                 </div>
+            </div>
+            
+            <!-- Contenedor de notificaciones -->
+            <div class="appointments-list" id="notificaciones-container">
+                <!-- Las notificaciones se cargarán dinámicamente aquí -->
                 <div class="appointment-item">
                     <div class="appointment-info">
-                        <h4>Control Cardiológico</h4>
-                        <p><i class="far fa-calendar"></i> 20 Oct, 2023 - 3:30 PM</p>
-                        <p><i class="fas fa-user-md"></i> Dr. Carlos Rodríguez</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 105</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
-                    </div>
-                </div>
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <h4>Dermatología</h4>
-                        <p><i class="far fa-calendar"></i> 25 Oct, 2023 - 11:15 AM</p>
-                        <p><i class="fas fa-user-md"></i> Dra. Laura Martínez</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Consultorio 312</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button class="btn btn-success">Confirmar</button>
-                        <button class="btn btn-warning">Reagendar</button>
-                        <button class="btn">Cancelar</button>
+                        <h4>Bienvenido al sistema de notificaciones</h4>
+                        <p>Haz clic en "Actualizar" para cargar tus notificaciones.</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Las otras secciones (schedule, chatbot, video-consultation, prescriptions) -->
+        <!-- Mantén el código original de estas secciones que ya tenías -->
 
         <!-- Schedule Appointment Section -->
         <div id="schedule" class="content-section">
@@ -147,7 +212,7 @@
                     </select>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group hidden" id="specialty-group">
                     <label for="specialty">Especialidad (si aplica)</label>
                     <select id="specialty">
                         <option value="">Selecciona especialidad</option>
@@ -159,14 +224,10 @@
                     </select>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group hidden" id="doctor-group">
                     <label for="doctor">Médico (opcional)</label>
                     <select id="doctor">
                         <option value="">Selecciona médico</option>
-                        <option value="1">Dr. María González</option>
-                        <option value="2">Dr. Carlos Rodríguez</option>
-                        <option value="3">Dra. Laura Martínez</option>
-                        <option value="4">Dr. Javier López</option>
                     </select>
                 </div>
                 
@@ -381,6 +442,28 @@
         </div>
     </div>
 
+    <!-- SOLO ESTE SCRIPT -->
     <script src="js/index.js"></script>
+    
+    <!-- Script de verificación -->
+    <script>
+        console.log('🔍 VERIFICANDO CARGA DE ARCHIVOS...');
+        console.log('✅ HTML cargado correctamente');
+        console.log('📁 Ruta del JS:', 'js/index.js');
+        
+        // Verificar después de que cargue todo
+        window.addEventListener('load', function() {
+            console.log('🚀 Página completamente cargada');
+            console.log('Función cargarNotificacionesPacientes:', typeof cargarNotificacionesPacientes);
+            console.log('Función marcarTodasComoLeidas:', typeof marcarTodasComoLeidas);
+            
+            // Verificar elementos
+            const elementos = ['notificaciones-container', 'estado-carga', 'notificaciones-contador'];
+            elementos.forEach(id => {
+                const elem = document.getElementById(id);
+                console.log(`Elemento ${id}:`, elem ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
+            });
+        });
+    </script>
 </body>
 </html>

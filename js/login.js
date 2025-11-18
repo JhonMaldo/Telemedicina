@@ -166,11 +166,11 @@
             }
         });
         
-        // Funciones de validación
         function validateLoginForm() {
             let isValid = true;
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
+            const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
             
             // Validar email
             if (!validateEmail(email)) {
@@ -188,7 +188,37 @@
                 hideError('login-password-error');
             }
             
-            return isValid;
+            if (isValid) {
+                // Enviar datos al servidor
+                loginUser(email, password, activeType);
+            }
+            
+            return false; // Prevenir envío normal del formulario
+        }
+
+        function loginUser(email, password, userType) {
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('user_type', userType);
+            
+            fetch('login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                } else {
+                    showError('login-password-error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('login-password-error', 'Error de conexión');
+            });
         }
         
         function validatePatientRegisterForm() {
@@ -457,3 +487,58 @@
         
         // Inicializar la interfaz
         updateLoginUI();
+
+        // En la función updateLoginUI, agregar:
+function updateLoginUI() {
+    const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+    document.getElementById('login-user-type').value = activeType;
+    // ... resto del código
+}
+
+// En la función updateRegisterForm, agregar:
+function updateRegisterForm() {
+    const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+    // Actualizar los hidden fields en cada formulario
+    document.querySelectorAll('input[name="user_type"]').forEach(input => {
+        input.value = activeType;
+    });
+    // ... resto del código
+}
+
+// Función para manejar registro
+function registerUser(formData, userType) {
+    fetch('register.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response:', data);
+        if (data.success) {
+            alert(data.message);
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión: ' + error.message);
+    });
+}
+
+// En cada formulario de registro, actualiza el event listener:
+document.getElementById('patient-register-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (validatePatientRegisterForm()) {
+        const formData = new FormData(this);
+        registerUser(formData, 'patient');
+    }
+});
