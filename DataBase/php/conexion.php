@@ -2,7 +2,7 @@
 // conexion.php
 $host = "localhost";
 $user = "root";        // cambia si usas otro usuario
-$pass = "";            // agrega tu contraseña si tienes una
+$pass = "root";            // agrega tu contraseña si tienes una
 $db = "telemed";       // nombre de tu base de datos
 
 $conn = new mysqli($host, $user, $pass, $db);

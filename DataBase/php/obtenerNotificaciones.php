@@ -2,8 +2,14 @@
 header('Content-Type: application/json');
 include 'conexion.php';
 
-// ⚙️ Aquí pondrías el ID del doctor logueado
-// (si usas sesiones puedes obtenerlo de $_SESSION['id_usuario'])
+// ⚡ AGREGAR HEADERS DE CACHE
+header("Cache-Control: no-cache, must-revalidate");
+header("Expires: 0");
+
+// ⚡ AGREGAR COMPRESIÓN GZIP (si el servidor lo soporta)
+if (ob_get_level()) ob_end_clean();
+ob_start('ob_gzhandler');
+
 $idUsuario = 2; // Ejemplo: ID del doctor conectado
 
 try {
@@ -15,17 +21,25 @@ try {
             leido,
             DATE_FORMAT(creado_en, '%d/%m/%Y %H:%i') AS fecha
         FROM notificaciones
-        WHERE id_usuario = :idUsuario
+        WHERE id_usuario = ?
         ORDER BY creado_en DESC
         LIMIT 10
     ";
 
-    $stmt = $conexion->prepare($sql);
-    $stmt->execute([':idUsuario' => $idUsuario]);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $idUsuario);
+    $stmt->execute();
 
-    $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($notificaciones, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    $resultado = $stmt->get_result();
+    $notificaciones = $resultado->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    // ⚡ QUITAR JSON_PRETTY_PRINT EN PRODUCCIÓN
+    echo json_encode($notificaciones, JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
-    echo json_encode(["error" => $e->getMessage()]);
+    // ⚡ MEJOR MANEJO DE ERRORES
+    http_response_code(500);
+    echo json_encode(["error" => "Error interno del servidor"]);
 }
+?>
