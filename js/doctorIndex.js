@@ -2847,3 +2847,20 @@ function volverADetallesConsulta(idConsulta) {
         mostrarDetallesConsulta(idConsulta);
     });
 }
+
+document.getElementById('logout-btn').addEventListener('click', function(e) {
+    e.preventDefault(); // Prevenir comportamiento por defecto
+    e.stopPropagation(); // Evitar que el evento se propague a otros listeners
+    
+    if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+        // Limpiar almacenamiento local
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Redirección al login - AJUSTA ESTA RUTA SEGÚN TU ESTRUCTURA
+        window.location.href = "http://localhost/Telemedicina/login.html";
+        // Si login.html está en la misma carpeta que index.html, usa: "login.html"
+        // Si está en la carpeta padre, usa: "../login.html"
+        // Si está dos niveles arriba, usa: "../../login.html"
+    }
+});

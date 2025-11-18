@@ -22,6 +22,7 @@ document.getElementById('show-register').addEventListener('click', function(e) {
 document.getElementById('show-forgot').addEventListener('click', function(e) {
     e.preventDefault();
     showSection('forgot-section');
+    resetForgotForms(); // Resetear formularios al mostrar
 });
 
 document.getElementById('show-login').addEventListener('click', function(e) {
@@ -42,10 +43,8 @@ userTypeSelector.forEach(type => {
         userTypeSelector.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         
-        // Actualizar la interfaz según el tipo de usuario
         updateLoginUI();
         
-        // Si estamos en la sección de registro, actualizar el formulario
         if (document.getElementById('register-section').classList.contains('active')) {
             updateRegisterForm();
         }
@@ -59,7 +58,6 @@ function showSection(sectionId) {
     });
     document.getElementById(sectionId).classList.add('active');
     
-    // Actualizar la interfaz según el tipo de usuario
     if (sectionId === 'login-section') {
         updateLoginUI();
     }
@@ -69,13 +67,11 @@ function showSection(sectionId) {
 function updateRegisterForm() {
     const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
     
-    // Ocultar todos los formularios primero
     patientRegisterForm.classList.add('hidden');
     doctorRegisterForm.classList.add('hidden');
     adminRegisterForm.classList.add('hidden');
     adminRegisterInfo.classList.add('hidden');
     
-    // Mostrar el formulario correspondiente
     if (activeType === 'patient') {
         patientRegisterForm.classList.remove('hidden');
         registerTitle.textContent = 'Registrarse como Paciente';
@@ -85,7 +81,7 @@ function updateRegisterForm() {
         registerTitle.textContent = 'Registrarse como Doctor';
         registerSubtitle.textContent = 'Crea una nueva cuenta de doctor';
     } else if (activeType === 'admin') {
-        adminRegisterForm.classList.add('hidden'); // Ocultar registro de admin
+        adminRegisterForm.classList.add('hidden');
         adminRegisterInfo.classList.remove('hidden');
         registerTitle.textContent = 'Registro no disponible';
         registerSubtitle.textContent = 'El registro de administradores no está disponible';
@@ -114,15 +110,20 @@ function updateLoginUI() {
     }
 }
 
-// ========== FUNCIONES DE LOGIN CON PHP ==========
+// ========== FUNCIONES DE LOGIN ==========
 
-// Login
 document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     if (validateLoginForm()) {
         const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
+        
+        const btn = this.querySelector('.btn');
+        const originalText = btn.textContent;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading">⏳ Verificando...</span>';
         
         try {
             const response = await fetch('DataBase/php/login.php', {
@@ -132,23 +133,26 @@ document.getElementById('login-form').addEventListener('submit', async function(
                 },
                 body: JSON.stringify({
                     email: email,
-                    password: password
+                    password: password,
+                    tipo: activeType
                 })
             });
             
             const result = await response.json();
             
             if (result.success) {
-                // Guardar datos del usuario en localStorage
                 localStorage.setItem('user', JSON.stringify(result.user));
-                alert('Login exitoso');
+                alert(result.message);
                 window.location.href = result.redirect;
             } else {
-                alert('Error: ' + result.message);
+                alert(result.message);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión');
+            alert('❌ Error de conexión. Verifica tu internet.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
         }
     }
 });
@@ -165,8 +169,8 @@ document.getElementById('patient-register-form').addEventListener('submit', asyn
             telefono: document.getElementById('patient-phone').value,
             fecha_nacimiento: document.getElementById('patient-birthdate').value,
             genero: document.getElementById('patient-gender').value,
-            direccion: '', // Puedes agregar campo si lo necesitas
-            contacto_emergencia: '' // Puedes agregar campo si lo necesitas
+            direccion: '',
+            contacto_emergencia: ''
         };
         
         try {
@@ -205,11 +209,11 @@ document.getElementById('doctor-register-form').addEventListener('submit', async
             telefono: document.getElementById('doctor-phone').value,
             especialidad: document.getElementById('doctor-specialty').value,
             licencia: document.getElementById('doctor-license').value,
-            bio: '' // Puedes agregar campo si lo necesitas
+            bio: ''
         };
         
         try {
-            const response = await fetch('register.php', {
+            const response = await fetch('DataBase/php/register.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -238,7 +242,173 @@ document.getElementById('admin-register-form').addEventListener('submit', functi
     alert('El registro de administradores no está disponible para el público.');
 });
 
-// ========== FUNCIONES DE VALIDACIÓN (MANTENIDAS) ==========
+// ========== FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA ==========
+
+document.getElementById('forgot-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (validateForgotForm()) {
+        const email = document.getElementById('forgot-email').value;
+        const btn = this.querySelector('.btn');
+        const originalText = btn.textContent;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading">⏳ Enviando código...</span>';
+
+        try {
+            const response = await fetch('DataBase/php/recuperar.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            });
+
+            // Verificar si la respuesta es OK (status 200-299)
+            if (!response.ok) {
+                // Si el servidor devuelve un error, intentar leer el mensaje de error
+                const errorText = await response.text();
+                throw new Error(`Error del servidor: ${response.status} - ${errorText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('forgot-email-section').style.display = 'none';
+                document.getElementById('forgot-code-section').style.display = 'block';
+
+                document.getElementById('forgot-code-section').dataset.email = email;
+                document.getElementById('user-email-display').textContent = email;
+
+                alert('✅ ' + result.message);
+            } else {
+                alert('❌ ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error completo:', error);
+            // Mostrar el mensaje de error específico si está disponible
+            alert('❌ ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+});
+// Formulario de código de verificación
+// Formulario de código de verificación - VERSIÓN CORREGIDA
+document.getElementById('code-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    console.log('🔍 Iniciando restablecimiento de contraseña...');
+    
+    const email = document.getElementById('forgot-code-section').dataset.email;
+    const codigo = document.getElementById('verification-code').value;
+    const nuevaPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-new-password').value;
+    const btn = this.querySelector('.btn');
+    const originalText = btn.textContent;
+    
+    // Validaciones
+    if (!codigo || codigo.length !== 6) {
+        alert('❌ Por favor ingresa un código de 6 dígitos');
+        return;
+    }
+    
+    if (!nuevaPassword || !confirmPassword) {
+        alert('❌ Por favor completa ambos campos de contraseña');
+        return;
+    }
+    
+    if (nuevaPassword !== confirmPassword) {
+        alert('❌ Las contraseñas no coinciden');
+        return;
+    }
+    
+    if (nuevaPassword.length < 8) {
+        alert('❌ La contraseña debe tener al menos 8 caracteres');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading">⏳ Actualizando contraseña...</span>';
+    
+    try {
+        console.log('📤 Enviando petición a reset-password.php');
+        console.log('📧 Email:', email);
+        console.log('🔢 Código:', codigo);
+        
+        const response = await fetch('DataBase/php/reset-password.php', {
+            method: 'POST',
+            headers: {  
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                codigo: codigo,
+                nueva_password: nuevaPassword
+            })
+        });
+        
+        console.log('📨 Status de respuesta:', response.status);
+        
+        // Obtener la respuesta como texto primero
+        const responseText = await response.text();
+        console.log('📄 Respuesta cruda:', responseText);
+        
+        if (!responseText.trim()) {
+            throw new Error('El servidor devolvió una respuesta vacía');
+        }
+        
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('❌ Error parseando JSON:', parseError);
+            throw new Error('El servidor devolvió una respuesta inválida');
+        }
+        
+        console.log('✅ JSON parseado correctamente:', result);
+        
+        if (result.success) {
+            alert('✅ ' + result.message);
+            showSection('login-section');
+            resetForgotForms();
+            
+            // Limpiar campos del login por si acaso
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            
+        } else {
+            alert('❌ ' + result.message);
+        }
+        
+    } catch (error) {
+        console.error('💥 Error completo:', error);
+        alert('❌ Error: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+});
+
+// Volver al formulario de email
+document.getElementById('back-to-email').addEventListener('click', function(e) {
+    e.preventDefault();
+    resetForgotForms();
+});
+
+// Función para resetear formularios de recuperación
+function resetForgotForms() {
+    document.getElementById('forgot-email-section').style.display = 'block';
+    document.getElementById('forgot-code-section').style.display = 'none';
+    document.getElementById('forgot-email').value = '';
+    document.getElementById('verification-code').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-new-password').value = '';
+    document.getElementById('user-email-display').textContent = '';
+}
+
+// ========== FUNCIONES DE VALIDACIÓN ==========
 
 function validateLoginForm() {
     let isValid = true;
@@ -425,113 +595,6 @@ function showError(elementId, message) {
 function hideError(elementId) {
     const errorElement = document.getElementById(elementId);
     errorElement.style.display = 'none';
-}
-
-
-// ========== FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA ==========
-
-document.getElementById('forgot-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    if (validateForgotForm()) {
-        const email = document.getElementById('forgot-email').value;
-        
-        try {
-            const response = await fetch('DataBase/php/recuperar.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // Ocultar formulario de email y mostrar formulario de código
-                document.getElementById('forgot-form').style.display = 'none';
-                document.getElementById('code-form').style.display = 'block';
-                document.getElementById('forgot-success').style.display = 'none';
-                
-                // Guardar el email para usarlo después
-                document.getElementById('code-form').dataset.email = email;
-                
-                // Mostrar código en desarrollo (quitar en producción)
-                if (result.codigo) {
-                    alert(`Código de verificación (solo desarrollo): ${result.codigo}`);
-                }
-                
-                alert('Código de recuperación enviado a tu email');
-            } else {
-                alert('Error: ' + result.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error de conexión');
-        }
-    }
-});
-
-// Formulario de código de verificación
-document.getElementById('code-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = this.dataset.email;
-    const codigo = document.getElementById('verification-code').value;
-    const nuevaPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-new-password').value;
-    
-    if (!codigo || !nuevaPassword || !confirmPassword) {
-        alert('Todos los campos son requeridos');
-        return;
-    }
-    
-    if (nuevaPassword !== confirmPassword) {
-        alert('Las contraseñas no coinciden');
-        return;
-    }
-    
-    if (!validatePassword(nuevaPassword)) {
-        alert('La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, un número y un carácter especial');
-        return;
-    }
-    
-    try {
-        const response = await fetch('DataBase/php/reset_password.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                codigo: codigo,
-                nueva_password: nuevaPassword
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('Contraseña actualizada exitosamente');
-            showSection('login-section');
-            // Resetear formularios
-            resetForgotForms();
-        } else {
-            alert('Error: ' + result.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error de conexión');
-    }
-});
-
-function resetForgotForms() {
-    document.getElementById('forgot-form').style.display = 'block';
-    document.getElementById('code-form').style.display = 'none';
-    document.getElementById('forgot-email').value = '';
-    document.getElementById('verification-code').value = '';
-    document.getElementById('new-password').value = '';
-    document.getElementById('confirm-new-password').value = '';
 }
 
 // Inicializar la interfaz

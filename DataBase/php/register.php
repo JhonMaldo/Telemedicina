@@ -1,8 +1,5 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
 require_once 'conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -26,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check_stmt->execute();
     
     if ($check_stmt->get_result()->num_rows > 0) {
-        echo json_encode(['success' => false, 'message' => 'El email ya está registrado']);
+        echo json_encode(['success' => false, 'message' => '❌ El email ya está registrado']);
         $check_stmt->close();
         exit;
     }
@@ -35,13 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Hash de la contraseña
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
     
-    // Determinar el rol según tu ENUM
+    // Determinar el rol según el tipo - CORREGIDO para que coincida con login
     if ($tipo === 'doctor') {
         $role = 'Doctor';
     } elseif ($tipo === 'admin') {
         $role = 'Administrador';
     } else {
-        $role = 'Paciente';
+        $role = 'Paciente';  // ← Ahora es 'Paciente' en lugar de 'patient'
     }
     
     // Insertar usuario en la tabla usuarios
@@ -58,18 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Convertir género al formato de tu ENUM (M/F)
             $genero_db = '';
-            if ($genero === 'male') $genero_db = 'M';  // ✅ CORRECTO
-            elseif ($genero === 'female') $genero_db = 'F';  // ✅ CORRECTO
+            if ($genero === 'male') $genero_db = 'M';
+            elseif ($genero === 'female') $genero_db = 'F';
             else $genero_db = 'M';
             
-            // Buscar el último ID de paciente para continuar la secuencia
+            // Buscar el último ID de paciente
             $last_patient = $conn->query("SELECT MAX(id_paciente) as max_id FROM pacientes");
-            $last_id = 1; // Valor por defecto
+            $last_id = 1;
             if ($last_patient && $row = $last_patient->fetch_assoc()) {
                 $last_id = $row['max_id'] ? $row['max_id'] + 1 : 1;
             }
             
-            // Campos adicionales para pacientes
             $direccion = $data['direccion'] ?? null;
             $contacto_emergencia = $data['contacto_emergencia'] ?? null;
             
@@ -77,11 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $paciente_stmt->bind_param("iisssss", $last_id, $user_id, $fecha_nacimiento, $genero_db, $telefono, $direccion, $contacto_emergencia);
             
             if ($paciente_stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Registro exitoso como paciente']);
+                echo json_encode(['success' => true, 'message' => '✅ Registro exitoso como paciente']);
             } else {
-                // Si hay error, eliminar el usuario creado
                 $conn->query("DELETE FROM usuarios WHERE id_usuario = $user_id");
-                echo json_encode(['success' => false, 'message' => 'Error al crear perfil de paciente: ' . $paciente_stmt->error]);
+                echo json_encode(['success' => false, 'message' => '❌ Error al crear perfil de paciente: ' . $paciente_stmt->error]);
             }
             $paciente_stmt->close();
             
@@ -89,34 +84,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $especialidad = $data['especialidad'] ?? '';
             $licencia = $data['licencia'] ?? '';
             
-            // Buscar el último ID de doctor para continuar la secuencia
+            // Buscar el último ID de doctor
             $last_doctor = $conn->query("SELECT MAX(id_doctor) as max_id FROM doctores");
-            $last_id = 1; // Valor por defecto
+            $last_id = 1;
             if ($last_doctor && $row = $last_doctor->fetch_assoc()) {
                 $last_id = $row['max_id'] ? $row['max_id'] + 1 : 1;
             }
             
-            // Campos adicionales para doctores
             $bio = $data['bio'] ?? null;
             
             $doctor_stmt = $conn->prepare("INSERT INTO doctores (id_doctor, id_usuario, numero_licencia, especialidad, bio, telefono_doctor) VALUES (?, ?, ?, ?, ?, ?)");
             $doctor_stmt->bind_param("iissss", $last_id, $user_id, $licencia, $especialidad, $bio, $telefono);
             
             if ($doctor_stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Registro exitoso como doctor']);
+                echo json_encode(['success' => true, 'message' => '✅ Registro exitoso como doctor']);
             } else {
-                // Si hay error, eliminar el usuario creado
                 $conn->query("DELETE FROM usuarios WHERE id_usuario = $user_id");
-                echo json_encode(['success' => false, 'message' => 'Error al crear perfil de doctor: ' . $doctor_stmt->error]);
+                echo json_encode(['success' => false, 'message' => '❌ Error al crear perfil de doctor: ' . $doctor_stmt->error]);
             }
             $doctor_stmt->close();
         } else {
-            // Para administradores, solo creamos el usuario en la tabla usuarios
-            echo json_encode(['success' => true, 'message' => 'Registro exitoso como administrador']);
+            // Para administradores, solo creamos el usuario
+            echo json_encode(['success' => true, 'message' => '✅ Registro exitoso como administrador']);
         }
         
     } else {
-        echo json_encode(['success' => false, 'message' => 'Error en el registro: ' . $stmt->error]);
+        echo json_encode(['success' => false, 'message' => '❌ Error en el registro: ' . $stmt->error]);
     }
     
     $stmt->close();
