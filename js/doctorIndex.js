@@ -1,4 +1,37 @@
 // Navigation
+async function cargarDatosDoctor() {
+    const idDoctor = 101; // <-- tu ID fijo
+
+    try {
+        const response = await fetch(
+            `/Telemedicina/DataBase/php/obtenerDoctor.php?id_doctor=${idDoctor}`
+        );
+
+        const doctor = await response.json();
+
+        if (!doctor || doctor.error) {
+            console.error("Error obteniendo doctor:", doctor.error);
+            return;
+        }
+
+        // Llenar Sidebar
+        document.getElementById("sidebar-doctor-nombre").textContent =
+            `Bienvenido, Dr. ${doctor.nombre_completo}`;
+
+        // Llenar Header (arriba)
+        document.getElementById("header-doctor-nombre").textContent =
+            `Dr. ${doctor.nombre_completo}`;
+
+        document.getElementById("header-doctor-especialidad").textContent =
+            doctor.especialidad ?? "";
+        
+    } catch (e) {
+        console.error("Error cargando info de doctor:", e);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", cargarDatosDoctor);
+//jhgfd
 document.querySelectorAll('.menu-item').forEach(item => {
     if (item.dataset.section) {
         item.addEventListener('click', function() {
