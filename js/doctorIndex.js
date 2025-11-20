@@ -115,24 +115,66 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(cargarNotificaciones, 1000);
 });
 
-// 2. Función para cargar la LISTA de pacientes
+// 2. Función para cargar la LISTA de pacientes - CON DEBUGGING
 async function cargarListaPacientes() {
     try {
-        console.log('Cargando lista de pacientes...');
+        console.log('🔄 Cargando lista de pacientes...');
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p>Cargando...</p>';
         
-        // RUTA CORREGIDA - mismo directorio
-        const response = await fetch('DataBase/php/listaPacientes.php');
+        // ⬇️⬇️⬇️ DEBUGGING DETALLADO ⬇️⬇️⬇️
+        console.log('=== DEBUG LOCALSTORAGE ===');
+        const userData = localStorage.getItem('user');
+        console.log('user en localStorage:', userData);
         
+        if (!userData) {
+            throw new Error('No hay datos de usuario en localStorage');
+        }
+        
+        const user = JSON.parse(userData);
+        console.log('user parseado:', user);
+        console.log('user.id:', user.id);
+        console.log('=== FIN DEBUG ===');
+
+        if (!user || !user.id) {
+            throw new Error('No se encontraron datos de usuario válidos');
+        }
+
+        console.log('📤 Enviando petición con id_usuario:', user.id);
+
+        const response = await fetch('DataBase/php/listaPacientes.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: user.id
+            })
+        });
+        
+        console.log('📨 Status de respuesta:', response.status);
+        console.log('📨 OK?:', response.ok);
+
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
         const text = await response.text();
-        console.log('Respuesta cruda:', text);
+        console.log('📄 Respuesta cruda:', text);
         
-        const pacientes = JSON.parse(text);
-        console.log('Pacientes cargados:', pacientes);
+        // Verificar si la respuesta está vacía
+        if (!text.trim()) {
+            throw new Error('El servidor devolvió una respuesta vacía');
+        }
+        
+        let pacientes;
+        try {
+            pacientes = JSON.parse(text);
+        } catch (parseError) {
+            console.error('❌ Error parseando JSON:', parseError);
+            throw new Error('El servidor devolvió una respuesta inválida: ' + text);
+        }
+        
+        console.log('✅ JSON parseado correctamente:', pacientes);
 
         // Limpiamos la lista
         recordsSidebar.innerHTML = '<h3>Pacientes</h3>';
@@ -140,8 +182,11 @@ async function cargarListaPacientes() {
         if (pacientes.length === 0) {
             recordsSidebar.innerHTML += '<p>No hay pacientes registrados</p>';
             recordsContent.innerHTML = '<div class="loading-message"><p>No hay pacientes disponibles</p></div>';
+            console.log('ℹ️ No hay pacientes para mostrar');
             return;
         }
+
+        console.log(`✅ ${pacientes.length} pacientes cargados`);
 
         // Creamos un item por cada paciente
         pacientes.forEach(paciente => {
@@ -161,13 +206,20 @@ async function cargarListaPacientes() {
         recordsContent.innerHTML = '<div class="loading-message"><p>Selecciona un paciente para ver su expediente</p></div>';
 
     } catch (error) {
-        console.error('Error cargando lista de pacientes:', error);
-        recordsSidebar.innerHTML = '<h3>Pacientes</h3><p class="error">Error al cargar pacientes</p>';
+        console.error('❌ Error cargando lista de pacientes:', error);
+        recordsSidebar.innerHTML = `
+            <h3>Pacientes</h3>
+            <p class="error">Error al cargar pacientes</p>
+            <button class="btn btn-sm" onclick="cargarListaPacientes()">
+                Reintentar
+            </button>
+        `;
         recordsContent.innerHTML = `
             <div class="error-message">
                 <h3>Error de conexión</h3>
                 <p>No se pudo cargar la lista de pacientes: ${error.message}</p>
                 <p>Verifica la consola para más detalles.</p>
+                <button class="btn" onclick="cargarListaPacientes()">Reintentar</button>
             </div>
         `;
     }
@@ -187,7 +239,7 @@ recordsSidebar.addEventListener('click', function(e) {
     cargarPerfilPaciente(patientId);
 });
 
-// 4. Función para cargar el PERFIL de un paciente
+// 4. Función para cargar el PERFIL de un paciente - CORREGIDA
 async function cargarPerfilPaciente(id) {
     // Mostrar estado de carga
     recordsContent.innerHTML = `
@@ -199,8 +251,18 @@ async function cargarPerfilPaciente(id) {
 
     try {
         console.log('Cargando perfil del paciente ID:', id);
-        // RUTA CORREGIDA - mismo directorio
-        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${id}`);
+        
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario. Por favor, inicie sesión nuevamente.');
+        }
+
+        console.log('👤 Usuario logueado:', userData);
+        console.log('🔑 ID de usuario:', userData.id);
+
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario como parámetro ⬇️⬇️⬇️
+        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${id}&id_usuario=${userData.id}`);
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -448,9 +510,15 @@ function activarModoEdicion(idPaciente) {
     `;
 }
 
-// Función para guardar cambios
+// Función para guardar cambios - MODIFICADA
 async function guardarCambiosExpediente(idPaciente) {
     try {
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario. Por favor, inicie sesión nuevamente.');
+        }
+
         // Obtener todos los valores editados
         const telefono = document.getElementById('telefono').value;
         const direccion = document.getElementById('direccion').value;
@@ -461,6 +529,7 @@ async function guardarCambiosExpediente(idPaciente) {
 
         console.log('Enviando datos al servidor...', {
             id_paciente: idPaciente,
+            id_usuario: userData.id, // ⬅️ NUEVO
             telefono,
             direccion,
             contacto_emergencia,
@@ -475,6 +544,7 @@ async function guardarCambiosExpediente(idPaciente) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 id_paciente: parseInt(idPaciente),
+                id_usuario: userData.id, // ⬅️ NUEVO: Enviar ID del usuario
                 telefono_paciente: telefono,
                 direccion: direccion,
                 contacto_de_emergencia: contacto_emergencia,
@@ -1369,17 +1439,7 @@ async function cargarRecetasExistentes(pacienteId = null) {
                 <div class="receta-contenido">
                     ${preview}
                 </div>
-                <div class="receta-actions">
-                    <button class="btn btn-sm btn-info" onclick="verRecetaCompleta(${receta.id_receta_medica})">
-                        <i class="fas fa-eye"></i> Ver
-                    </button>
-                    <button class="btn btn-sm btn-success" onclick="descargarRecetaExistente(${receta.id_receta_medica})">
-                        <i class="fas fa-download"></i> PDF
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="reutilizarReceta(${receta.id_receta_medica})">
-                        <i class="fas fa-copy"></i> Reusar
-                    </button>
-                </div>
+                
             `;
             contenedor.appendChild(item);
         });
@@ -2357,11 +2417,24 @@ function inicializarSistemaConsultas() {
 }
 
 // ==========================
-// CARGAR CONSULTAS DESDE BD
+// CARGAR CONSULTAS DESDE BD - CORREGIDA
 // ==========================
 async function cargarConsultas() {
     try {
         console.log('🔄 Cargando consultas desde la base de datos...');
+        
+        // ⬇️⬇️⬇️ CORREGIDO: Leer correctamente del localStorage ⬇️⬇️⬇️
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+            throw new Error('No se encontraron datos de usuario. Por favor, inicie sesión nuevamente.');
+        }
+        
+        const user = JSON.parse(userData);
+        const idUsuario = user.id; // ⬅️ Ahora sí obtenemos el ID correcto
+        
+        console.log('👤 Usuario logueado:', user);
+        console.log('🔑 ID de usuario:', idUsuario);
+
         const listaConsultas = document.getElementById('lista-consultas');
         if (!listaConsultas) return;
 
@@ -2373,10 +2446,26 @@ async function cargarConsultas() {
             </div>
         `;
 
-        const response = await fetch('DataBase/php/obtenerConsultas.php?_=' + Date.now());
+        console.log(`👨‍⚕️ Cargando consultas para el usuario ID: ${idUsuario}`);
+
+        const response = await fetch('DataBase/php/obtenerConsultas.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: idUsuario
+            })
+        });
+
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
         const consultas = await response.json();
+        
+        if (consultas.error) {
+            throw new Error(consultas.error);
+        }
+
         todasLasConsultas = consultas;
         console.log(`✅ ${consultas.length} consultas cargadas:`, consultas);
 
@@ -2390,7 +2479,6 @@ async function cargarConsultas() {
 
         renderizarListaConsultas(consultas);
         
-        // Si hay una consulta seleccionada, actualizar detalles
         if (consultaSeleccionada) {
             mostrarDetallesConsulta(consultaSeleccionada);
         }
@@ -2571,9 +2659,7 @@ function generarHTMLDetallesConsulta(consulta, esPasada) {
                 </button>
                 ` : ''}
                 
-                <button class="btn btn-secondary" onclick="cargarConsultas()">
-                    <i class="fas fa-sync"></i> Actualizar
-                </button>
+
             </div>
         </div>
     `;
@@ -2786,9 +2872,13 @@ function filtrarConsultas() {
 // ==========================
 
 function obtenerNombreDoctor() {
-    // Aquí puedes obtener el nombre del doctor de tu sistema
-    // Por ahora retornamos un valor por defecto
-    return 'Médico';
+    // ⬇️⬇️⬇️ CORREGIDO: Obtener nombre del objeto user ⬇️⬇️⬇️
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        const user = JSON.parse(userData);
+        return user.name || 'Doctor';
+    }
+    return 'Doctor';
 }
 
 function obtenerNombrePaciente(idConsulta) {

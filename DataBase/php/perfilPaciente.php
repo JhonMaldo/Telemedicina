@@ -13,18 +13,44 @@ include 'conexion.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Obtenemos el ID del paciente desde la URL
+// ⬇️⬇️⬇️ MODIFICADO: Obtener ID del paciente y del usuario ⬇️⬇️⬇️
 $id_paciente = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$id_usuario = isset($_GET['id_usuario']) ? intval($_GET['id_usuario']) : 0;
 
-if ($id_paciente == 0) {
+if ($id_paciente == 0 || $id_usuario == 0) {
     http_response_code(400);
-    echo json_encode(["error" => "ID de paciente no válido"]);
+    echo json_encode(["error" => "Datos inválidos: se requiere ID de paciente y usuario"]);
     exit;
 }
 
 $respuesta = [];
 
 try {
+    // ⬇️⬇️⬇️ NUEVO: Validar que el doctor tiene acceso a este paciente ⬇️⬇️⬇️
+    $sql_validate = "SELECT d.id_doctor 
+                     FROM doctores d 
+                     INNER JOIN citas c ON d.id_doctor = c.id_doctor 
+                     WHERE d.id_usuario = ? AND c.id_paciente = ? 
+                     LIMIT 1";
+    $stmt_validate = $conn->prepare($sql_validate);
+    if (!$stmt_validate) {
+        throw new Exception("Error preparando validación: " . $conn->error);
+    }
+    
+    $stmt_validate->bind_param("ii", $id_usuario, $id_paciente);
+    $stmt_validate->execute();
+    $result_validate = $stmt_validate->get_result();
+    
+    if ($result_validate->num_rows === 0) {
+        http_response_code(403);
+        echo json_encode(["error" => "No tienes permisos para acceder a este expediente"]);
+        exit;
+    }
+    
+    $doctor = $result_validate->fetch_assoc();
+    $id_doctor = $doctor['id_doctor'];
+    $stmt_validate->close();
+
     // 1. Obtener Info General del Paciente
     $sql_info = "SELECT u.nombre_completo, p.fecha_nacimiento, p.genero, p.telefono_paciente, p.direccion, p.contacto_de_emergencia
                  FROM pacientes p

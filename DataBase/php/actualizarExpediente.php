@@ -5,6 +5,7 @@ include 'conexion.php';
 $data = json_decode(file_get_contents("php://input"), true);
 
 $id_paciente = intval($data['id_paciente'] ?? 0);
+$id_usuario = intval($data['id_usuario'] ?? 0); // ⬅️ NUEVO: ID del doctor logueado
 $telefono = $data['telefono_paciente'] ?? '';
 $direccion = $data['direccion'] ?? '';
 $contacto = $data['contacto_de_emergencia'] ?? '';
@@ -12,12 +13,32 @@ $historial_medico = $data['historial_medico'] ?? '';
 $medicacion = $data['medicacion'] ?? '';
 $alergias = $data['alergias'] ?? '';
 
-if (!$id_paciente) {
-    echo json_encode(["error" => "ID de paciente inválido"]);
+if (!$id_paciente || !$id_usuario) {
+    echo json_encode(["error" => "Datos inválidos: se requiere ID de paciente y usuario"]);
     exit;
 }
 
 try {
+    // ⬇️⬇️⬇️ NUEVO: Validar que el doctor atiende a este paciente ⬇️⬇️⬇️
+    $sql_validate = "SELECT d.id_doctor 
+                     FROM doctores d 
+                     INNER JOIN citas c ON d.id_doctor = c.id_doctor 
+                     WHERE d.id_usuario = ? AND c.id_paciente = ? 
+                     LIMIT 1";
+    $stmt_validate = $conn->prepare($sql_validate);
+    $stmt_validate->bind_param("ii", $id_usuario, $id_paciente);
+    $stmt_validate->execute();
+    $result_validate = $stmt_validate->get_result();
+    
+    if ($result_validate->num_rows === 0) {
+        echo json_encode(["error" => "No tienes permisos para modificar este expediente"]);
+        exit;
+    }
+    
+    $doctor = $result_validate->fetch_assoc();
+    $id_doctor = $doctor['id_doctor'];
+    $stmt_validate->close();
+
     // Iniciar transacción
     $conn->begin_transaction();
 
@@ -46,11 +67,11 @@ try {
         }
         $delete_stmt->close();
 
-        // Insertar NUEVO registro
-        $insert_historial_sql = "INSERT INTO historial_medico (id_paciente, tipo_registro, descripcion, creado_en) 
-                                VALUES (?, 'Actualización', ?, NOW())";
+        // Insertar NUEVO registro (ahora con id_doctor)
+        $insert_historial_sql = "INSERT INTO historial_medico (id_paciente, id_doctor, tipo_registro, descripcion, creado_en) 
+                                VALUES (?, ?, 'Actualización', ?, NOW())";
         $insert_stmt = $conn->prepare($insert_historial_sql);
-        $insert_stmt->bind_param("is", $id_paciente, $historial_medico);
+        $insert_stmt->bind_param("iis", $id_paciente, $id_doctor, $historial_medico);
         
         if (!$insert_stmt->execute()) {
             throw new Exception("Error al guardar historial médico: " . $conn->error);
@@ -71,11 +92,11 @@ try {
         }
         $delete_stmt->close();
 
-        // Insertar NUEVA receta
-        $insert_medicacion_sql = "INSERT INTO receta_medica (id_paciente, la_receta, fecha_emision) 
-                                 VALUES (?, ?, NOW())";
+        // Insertar NUEVA receta (ahora con id_doctor)
+        $insert_medicacion_sql = "INSERT INTO receta_medica (id_paciente, id_doctor, la_receta, fecha_emision) 
+                                 VALUES (?, ?, ?, NOW())";
         $insert_stmt = $conn->prepare($insert_medicacion_sql);
-        $insert_stmt->bind_param("is", $id_paciente, $medicacion);
+        $insert_stmt->bind_param("iis", $id_paciente, $id_doctor, $medicacion);
         
         if (!$insert_stmt->execute()) {
             throw new Exception("Error al guardar medicación: " . $conn->error);
@@ -96,11 +117,11 @@ try {
         }
         $delete_stmt->close();
 
-        // Insertar NUEVA alergia
-        $insert_alergias_sql = "INSERT INTO historial_medico (id_paciente, tipo_registro, descripcion, creado_en) 
-                               VALUES (?, 'Alergia', ?, NOW())";
+        // Insertar NUEVA alergia (ahora con id_doctor)
+        $insert_alergias_sql = "INSERT INTO historial_medico (id_paciente, id_doctor, tipo_registro, descripcion, creado_en) 
+                               VALUES (?, ?, 'Alergia', ?, NOW())";
         $insert_stmt = $conn->prepare($insert_alergias_sql);
-        $insert_stmt->bind_param("is", $id_paciente, $alergias);
+        $insert_stmt->bind_param("iis", $id_paciente, $id_doctor, $alergias);
         
         if (!$insert_stmt->execute()) {
             throw new Exception("Error al guardar alergias: " . $conn->error);

@@ -1,0 +1,15 @@
+=== INICIO listaPacientes.php ===
+Método: POST
+Input recibido: {"id_usuario":11}
+id_usuario: 11
+Filas encontradas en doctores: 1
+id_doctor encontrado: 104
+Filas encontradas en pacientes: 1
+Pacientes a enviar: 1
+=== FIN listaPacientes.php ===
+
+=== INICIO listaPacientes.php ===
+Método: GET
+Input recibido: 
+id_usuario: 
+ERROR: Se requiere el ID del usuario
