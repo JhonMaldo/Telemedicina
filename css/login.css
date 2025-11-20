@@ -202,35 +202,3 @@
                 padding: 8px 5px;
             }
         }
-
-        /* Estilos para el formulario de código */
-            #code-form {
-                transition: all 0.3s ease;
-            }
-
-            .hidden {
-                display: none !important;
-            }
-
-            /* Mejora los mensajes de éxito */
-            .success-message {
-                background-color: #d4edda;
-                border: 1px solid #c3e6cb;
-                color: #155724;
-                padding: 12px;
-                border-radius: 5px;
-                margin-top: 15px;
-                text-align: center;
-            }
-
-            /* Estilos para información de desarrollo */
-            .dev-info {
-                background-color: #fff3cd;
-                border: 1px solid #ffeaa7;
-                color: #856404;
-                padding: 10px;
-                border-radius: 5px;
-                margin-bottom: 15px;
-                font-size: 12px;
-                text-align: center;
-            }

@@ -10,15 +10,7 @@ header("Expires: 0");
 if (ob_get_level()) ob_end_clean();
 ob_start('ob_gzhandler');
 
-// ⬇️⬇️⬇️ CORREGIDO: Obtener ID del usuario desde el frontend ⬇️⬇️⬇️
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
-$idUsuario = $data['id_usuario'] ?? null;
-
-if (!$idUsuario) {
-    echo json_encode(["error" => "Se requiere el ID del usuario"]);
-    exit;
-}
+$idUsuario = 2; // Ejemplo: ID del doctor conectado
 
 try {
     $sql = "
@@ -42,9 +34,11 @@ try {
     $notificaciones = $resultado->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
+    // ⚡ QUITAR JSON_PRETTY_PRINT EN PRODUCCIÓN
     echo json_encode($notificaciones, JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
+    // ⚡ MEJOR MANEJO DE ERRORES
     http_response_code(500);
     echo json_encode(["error" => "Error interno del servidor"]);
 }

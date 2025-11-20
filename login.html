@@ -234,69 +234,35 @@
                 </div>
             </div>
             
-            <!-- Formulario de Recuperación de Contraseña - CORREGIDO -->
+            <!-- Formulario de Recuperación de Contraseña -->
             <div id="forgot-section" class="form-section">
                 <div class="form-header">
                     <h1>Recuperar Contraseña</h1>
-                    <p>Te enviaremos un código de verificación a tu email</p>
+                    <p>Ingresa tu correo para recuperar tu contraseña</p>
                 </div>
                 
-                <!-- Formulario para solicitar código -->
-                <div id="forgot-email-section">
-                    <form id="forgot-form">
-                        <div class="form-group">
-                            <label for="forgot-email">Correo Electrónico</label>
-                            <input type="email" id="forgot-email" required placeholder="tu@email.com">
-                            <div class="error-message" id="forgot-email-error"></div>
-                        </div>
-                        
-                        <button type="submit" class="btn">Enviar Código de Verificación</button>
-                    </form>
-                </div>
-                
-                <!-- Formulario para ingresar código y nueva contraseña -->
-                <div id="forgot-code-section" style="display: none;">
-                    <div class="admin-info">
-                        <strong>📧 Código enviado a:</strong> 
-                        <span id="user-email-display" style="color: #3498db;"></span>
+                <form id="forgot-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Correo Electrónico</label>
+                        <input type="email" id="forgot-email" required>
+                        <div class="error-message" id="forgot-email-error"></div>
                     </div>
                     
-                    <form id="code-form">
-                        <div class="form-group">
-                            <label for="verification-code">Código de 6 Dígitos</label>
-                            <input type="text" id="verification-code" required 
-                                   placeholder="123456" maxlength="6" pattern="[0-9]{6}"
-                                   title="Ingresa el código de 6 dígitos que recibiste">
-                            <div class="error-message" id="code-error"></div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="new-password">Nueva Contraseña</label>
-                            <input type="password" id="new-password" required>
-                            <div class="error-message" id="new-password-error"></div>
-                            <div class="password-requirements">
-                                La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, un número y un carácter especial.
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="confirm-new-password">Confirmar Nueva Contraseña</label>
-                            <input type="password" id="confirm-new-password" required>
-                            <div class="error-message" id="confirm-new-password-error"></div>
-                        </div>
-                        
-                        <button type="submit" class="btn">Restablecer Contraseña</button>
-                        <button type="button" id="back-to-email" class="btn btn-secondary" style="margin-top: 10px; background: #6c757d;">Volver al Email</button>
-                    </form>
+                    <button type="submit" class="btn">Enviar Instrucciones</button>
+                </form>
+                
+                <div class="success-message" id="forgot-success">
+                    Se han enviado las instrucciones para recuperar tu contraseña a tu correo electrónico.
                 </div>
                 
                 <div class="form-footer">
-                    <a href="#" id="show-login-from-forgot">← Volver al inicio de sesión</a>
+                    <a href="#" id="show-login-from-forgot">Volver al inicio de sesión</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/login.js"></script>
+    <script src="js/login.js">
+    </script>
 </body>
 </html>

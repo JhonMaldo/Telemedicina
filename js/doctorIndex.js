@@ -115,34 +115,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(cargarNotificaciones, 1000);
 });
 
-// 2. Función para cargar la LISTA de pacientes - LIMPIA
+// 2. Función para cargar la LISTA de pacientes
 async function cargarListaPacientes() {
     try {
-        console.log('🔄 Cargando lista de pacientes...');
+        console.log('Cargando lista de pacientes...');
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p>Cargando...</p>';
         
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (!userData || !userData.id) {
-            throw new Error('No se encontraron datos de usuario válidos');
-        }
-
-        const response = await fetch('DataBase/php/listaPacientes.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id_usuario: userData.id
-            })
-        });
+        // RUTA CORREGIDA - mismo directorio
+        const response = await fetch('DataBase/php/listaPacientes.php');
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
         const text = await response.text();
+        console.log('Respuesta cruda:', text);
+        
         const pacientes = JSON.parse(text);
+        console.log('Pacientes cargados:', pacientes);
 
+        // Limpiamos la lista
         recordsSidebar.innerHTML = '<h3>Pacientes</h3>';
         
         if (pacientes.length === 0) {
@@ -151,6 +143,7 @@ async function cargarListaPacientes() {
             return;
         }
 
+        // Creamos un item por cada paciente
         pacientes.forEach(paciente => {
             const item = document.createElement('div');
             item.className = 'record-item';
@@ -164,16 +157,17 @@ async function cargarListaPacientes() {
             recordsSidebar.appendChild(item);
         });
 
+        // Limpiar el contenido principal
         recordsContent.innerHTML = '<div class="loading-message"><p>Selecciona un paciente para ver su expediente</p></div>';
 
     } catch (error) {
-        console.error('❌ Error cargando lista de pacientes:', error);
+        console.error('Error cargando lista de pacientes:', error);
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p class="error">Error al cargar pacientes</p>';
         recordsContent.innerHTML = `
             <div class="error-message">
                 <h3>Error de conexión</h3>
-                <p>${error.message}</p>
-                <button class="btn" onclick="cargarListaPacientes()">Reintentar</button>
+                <p>No se pudo cargar la lista de pacientes: ${error.message}</p>
+                <p>Verifica la consola para más detalles.</p>
             </div>
         `;
     }
@@ -193,7 +187,7 @@ recordsSidebar.addEventListener('click', function(e) {
     cargarPerfilPaciente(patientId);
 });
 
-// 4. Función para cargar el PERFIL de un paciente - CORREGIDA
+// 4. Función para cargar el PERFIL de un paciente
 async function cargarPerfilPaciente(id) {
     // Mostrar estado de carga
     recordsContent.innerHTML = `
@@ -205,18 +199,8 @@ async function cargarPerfilPaciente(id) {
 
     try {
         console.log('Cargando perfil del paciente ID:', id);
-        
-        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (!userData || !userData.id) {
-            throw new Error('No se encontraron datos de usuario. Por favor, inicie sesión nuevamente.');
-        }
-
-        console.log('👤 Usuario logueado:', userData);
-        console.log('🔑 ID de usuario:', userData.id);
-
-        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario como parámetro ⬇️⬇️⬇️
-        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${id}&id_usuario=${userData.id}`);
+        // RUTA CORREGIDA - mismo directorio
+        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${id}`);
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -464,15 +448,9 @@ function activarModoEdicion(idPaciente) {
     `;
 }
 
-// Función para guardar cambios - MODIFICADA
+// Función para guardar cambios
 async function guardarCambiosExpediente(idPaciente) {
     try {
-        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (!userData || !userData.id) {
-            throw new Error('No se encontraron datos de usuario. Por favor, inicie sesión nuevamente.');
-        }
-
         // Obtener todos los valores editados
         const telefono = document.getElementById('telefono').value;
         const direccion = document.getElementById('direccion').value;
@@ -483,7 +461,6 @@ async function guardarCambiosExpediente(idPaciente) {
 
         console.log('Enviando datos al servidor...', {
             id_paciente: idPaciente,
-            id_usuario: userData.id, // ⬅️ NUEVO
             telefono,
             direccion,
             contacto_emergencia,
@@ -498,7 +475,6 @@ async function guardarCambiosExpediente(idPaciente) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 id_paciente: parseInt(idPaciente),
-                id_usuario: userData.id, // ⬅️ NUEVO: Enviar ID del usuario
                 telefono_paciente: telefono,
                 direccion: direccion,
                 contacto_de_emergencia: contacto_emergencia,
@@ -1393,7 +1369,17 @@ async function cargarRecetasExistentes(pacienteId = null) {
                 <div class="receta-contenido">
                     ${preview}
                 </div>
-                
+                <div class="receta-actions">
+                    <button class="btn btn-sm btn-info" onclick="verRecetaCompleta(${receta.id_receta_medica})">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="descargarRecetaExistente(${receta.id_receta_medica})">
+                        <i class="fas fa-download"></i> PDF
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="reutilizarReceta(${receta.id_receta_medica})">
+                        <i class="fas fa-copy"></i> Reusar
+                    </button>
+                </div>
             `;
             contenedor.appendChild(item);
         });
@@ -2064,7 +2050,7 @@ function generarReportePaciente(idPaciente) {
     // Aquí puedes implementar la generación de reportes
 }
 
-// ===== SISTEMA DE NOTIFICACIONES - VERSIÓN CORREGIDA =====
+// ===== SISTEMA DE NOTIFICACIONES - VERSIÓN DEBUG =====
 let isLoading = false;
 let notificacionesCache = [];
 
@@ -2074,27 +2060,7 @@ async function cargarNotificaciones() {
     
     try {
         console.log('🔄 Iniciando carga de notificaciones...');
-        
-        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (!userData || !userData.id) {
-            console.warn('⚠️ No se pudieron cargar notificaciones: usuario no logueado');
-            return;
-        }
-
-        console.log('👤 Usuario logueado:', userData.id);
-        
-        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario al servidor ⬇️⬇️⬇️
-        const response = await fetch('DataBase/php/obtenerNotificaciones.php?_=' + Date.now(), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id_usuario: userData.id
-            })
-        });
-        
+        const response = await fetch('DataBase/php/obtenerNotificaciones.php?_=' + Date.now());
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
         const notificaciones = await response.json();
@@ -2129,11 +2095,8 @@ function renderizarNotificaciones(notificaciones) {
         item.className = `notificacion-item ${notificacion.leido == 1 ? 'leido' : ''}`;
         item.dataset.id = notificacion.id; // Para debug
         
-        // ⬇️⬇️⬇️ MEJORADO: Iconos más específicos según el tipo ⬇️⬇️⬇️
-        const icono = obtenerIconoPorTipo(notificacion.tipo_notificacion);
-        
         item.innerHTML = `
-            <div class="notificacion-icono">${icono}</div>
+            <div class="notificacion-icono">${notificacion.tipo_notificacion === 'cita' ? '<i class="fas fa-calendar"></i>' : '<i class="fas fa-bell"></i>'}</div>
             <div class="notificacion-mensaje">${notificacion.mensaje}</div>
             <div class="notificacion-fecha">${notificacion.fecha}</div>
         `;
@@ -2157,22 +2120,6 @@ function renderizarNotificaciones(notificaciones) {
     listaNotificaciones.innerHTML = '';
     listaNotificaciones.appendChild(fragment);
     console.log('✅ Renderizado completado');
-}
-
-// ⬇️⬇️⬇️ NUEVA FUNCIÓN: Obtener icono según tipo de notificación ⬇️⬇️⬇️
-function obtenerIconoPorTipo(tipo) {
-    const iconos = {
-        'Bienvenida': '<i class="fas fa-hand-wave"></i>',
-        'Recordatorio': '<i class="fas fa-clock"></i>',
-        'NuevoPaciente': '<i class="fas fa-user-plus"></i>',
-        'Consulta completada': '<i class="fas fa-check-circle"></i>',
-        'Consulta registrada': '<i class="fas fa-file-medical"></i>',
-        'Informe': '<i class="fas fa-file-alt"></i>',
-        'AvisoSistema': '<i class="fas fa-cog"></i>',
-        'cita': '<i class="fas fa-calendar"></i>'
-    };
-    
-    return iconos[tipo] || '<i class="fas fa-bell"></i>';
 }
 
 async function marcarNotificacionComoLeida(idNotificacion, elementoHTML) {
@@ -2204,12 +2151,6 @@ async function marcarNotificacionComoLeida(idNotificacion, elementoHTML) {
             actualizarContadorNotificaciones();
         } else {
             console.log('✅ Notificación actualizada en la BD.');
-            
-            // ⬇️⬇️⬇️ NUEVO: Actualizar el cache local ⬇️⬇️⬇️
-            const notificacionIndex = notificacionesCache.findIndex(n => n.id == idNotificacion);
-            if (notificacionIndex !== -1) {
-                notificacionesCache[notificacionIndex].leido = 1;
-            }
         }
     } catch (error) {
         console.error('❌ Error de red:', error);
@@ -2226,18 +2167,11 @@ function actualizarContadorNotificaciones() {
         return;
     }
     
-    // ⬇️⬇️⬇️ MEJORADO: Contar desde el cache para mayor precisión ⬇️⬇️⬇️
-    const notificacionesNoLeidas = notificacionesCache.filter(n => n.leido == 0).length;
+    const notificacionesNoLeidas = document.querySelectorAll('.notificacion-item:not(.leido)').length;
     console.log(`🔢 Actualizando contador: ${notificacionesNoLeidas} no leídas`);
     
     badge.textContent = notificacionesNoLeidas;
     badge.style.display = notificacionesNoLeidas > 0 ? 'inline-block' : 'none';
-}
-
-// ⬇️⬇️⬇️ NUEVA FUNCIÓN: Forzar recarga de notificaciones ⬇️⬇️⬇️
-function forzarRecargaNotificaciones() {
-    notificacionesCache = []; // Limpiar cache
-    cargarNotificaciones();
 }
 
 // Event listeners para debug
@@ -2249,12 +2183,6 @@ document.addEventListener('click', function(e) {
 
 // Recargar cada 60 segundos
 setInterval(cargarNotificaciones, 60000);
-
-// ⬇️⬇️⬇️ NUEVO: Cargar notificaciones al iniciar la página ⬇️⬇️⬇️
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando sistema de notificaciones...');
-    setTimeout(cargarNotificaciones, 1000); // Pequeño delay para asegurar que el DOM esté listo
-});
 
 
 // ===============================================
@@ -2429,24 +2357,11 @@ function inicializarSistemaConsultas() {
 }
 
 // ==========================
-// CARGAR CONSULTAS DESDE BD - CORREGIDA
+// CARGAR CONSULTAS DESDE BD
 // ==========================
 async function cargarConsultas() {
     try {
         console.log('🔄 Cargando consultas desde la base de datos...');
-        
-        // ⬇️⬇️⬇️ CORREGIDO: Leer correctamente del localStorage ⬇️⬇️⬇️
-        const userData = localStorage.getItem('user');
-        if (!userData) {
-            throw new Error('No se encontraron datos de usuario. Por favor, inicie sesión nuevamente.');
-        }
-        
-        const user = JSON.parse(userData);
-        const idUsuario = user.id; // ⬅️ Ahora sí obtenemos el ID correcto
-        
-        console.log('👤 Usuario logueado:', user);
-        console.log('🔑 ID de usuario:', idUsuario);
-
         const listaConsultas = document.getElementById('lista-consultas');
         if (!listaConsultas) return;
 
@@ -2458,26 +2373,10 @@ async function cargarConsultas() {
             </div>
         `;
 
-        console.log(`👨‍⚕️ Cargando consultas para el usuario ID: ${idUsuario}`);
-
-        const response = await fetch('DataBase/php/obtenerConsultas.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id_usuario: idUsuario
-            })
-        });
-
+        const response = await fetch('DataBase/php/obtenerConsultas.php?_=' + Date.now());
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
         const consultas = await response.json();
-        
-        if (consultas.error) {
-            throw new Error(consultas.error);
-        }
-
         todasLasConsultas = consultas;
         console.log(`✅ ${consultas.length} consultas cargadas:`, consultas);
 
@@ -2491,6 +2390,7 @@ async function cargarConsultas() {
 
         renderizarListaConsultas(consultas);
         
+        // Si hay una consulta seleccionada, actualizar detalles
         if (consultaSeleccionada) {
             mostrarDetallesConsulta(consultaSeleccionada);
         }
@@ -2671,7 +2571,9 @@ function generarHTMLDetallesConsulta(consulta, esPasada) {
                 </button>
                 ` : ''}
                 
-
+                <button class="btn btn-secondary" onclick="cargarConsultas()">
+                    <i class="fas fa-sync"></i> Actualizar
+                </button>
             </div>
         </div>
     `;
@@ -2884,13 +2786,9 @@ function filtrarConsultas() {
 // ==========================
 
 function obtenerNombreDoctor() {
-    // ⬇️⬇️⬇️ CORREGIDO: Obtener nombre del objeto user ⬇️⬇️⬇️
-    const userData = localStorage.getItem('user');
-    if (userData) {
-        const user = JSON.parse(userData);
-        return user.name || 'Doctor';
-    }
-    return 'Doctor';
+    // Aquí puedes obtener el nombre del doctor de tu sistema
+    // Por ahora retornamos un valor por defecto
+    return 'Médico';
 }
 
 function obtenerNombrePaciente(idConsulta) {
@@ -2949,20 +2847,3 @@ function volverADetallesConsulta(idConsulta) {
         mostrarDetallesConsulta(idConsulta);
     });
 }
-
-document.getElementById('logout-btn').addEventListener('click', function(e) {
-    e.preventDefault(); // Prevenir comportamiento por defecto
-    e.stopPropagation(); // Evitar que el evento se propague a otros listeners
-    
-    if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-        // Limpiar almacenamiento local
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Redirección al login - AJUSTA ESTA RUTA SEGÚN TU ESTRUCTURA
-        window.location.href = "http://localhost/Telemedicina/login.html";
-        // Si login.html está en la misma carpeta que index.html, usa: "login.html"
-        // Si está en la carpeta padre, usa: "../login.html"
-        // Si está dos niveles arriba, usa: "../../login.html"
-    }
-});

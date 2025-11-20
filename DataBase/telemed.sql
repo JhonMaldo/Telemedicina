@@ -348,16 +348,3 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-11-06 22:34:01
-
-
--- Código de recuperación 
-CREATE TABLE IF NOT EXISTS `codigos_recuperacion` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `email` VARCHAR(150) NOT NULL,
-    `codigo` VARCHAR(10) NOT NULL,
-    `expiracion` DATETIME NOT NULL,
-    `usado` TINYINT(1) DEFAULT 0,
-    `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_email (email),
-    INDEX idx_expiracion (expiracion)
-);
