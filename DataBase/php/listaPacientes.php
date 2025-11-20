@@ -1,5 +1,5 @@
 <?php
-// listaPacientes.php - CON DEBUGGING
+// listaPacientes.php
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -13,47 +13,26 @@ include 'conexion.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ⬇️⬇️⬇️ DEBUGGING TEMPORAL ⬇️⬇️⬇️
-file_put_contents('debug_log.txt', "=== INICIO listaPacientes.php ===\n", FILE_APPEND);
-file_put_contents('debug_log.txt', "Método: " . $_SERVER['REQUEST_METHOD'] . "\n", FILE_APPEND);
-
 try {
-    // Obtener datos del POST
+    // Obtener ID del usuario desde el frontend
     $input = file_get_contents('php://input');
-    file_put_contents('debug_log.txt', "Input recibido: " . $input . "\n", FILE_APPEND);
-    
     $data = json_decode($input, true);
     $id_usuario = $data['id_usuario'] ?? null;
 
-    file_put_contents('debug_log.txt', "id_usuario: " . $id_usuario . "\n", FILE_APPEND);
-
     if (!$id_usuario) {
-        $error = "Se requiere el ID del usuario";
-        file_put_contents('debug_log.txt', "ERROR: " . $error . "\n", FILE_APPEND);
-        echo json_encode(["error" => $error]);
+        echo json_encode(["error" => "Se requiere el ID del usuario"]);
         exit;
     }
 
     // Obtener id_doctor del usuario
     $sql_doctor = "SELECT id_doctor FROM doctores WHERE id_usuario = ?";
     $stmt_doctor = $conn->prepare($sql_doctor);
-    
-    if (!$stmt_doctor) {
-        $error = "Error preparando consulta de doctor: " . $conn->error;
-        file_put_contents('debug_log.txt', "ERROR: " . $error . "\n", FILE_APPEND);
-        throw new Exception($error);
-    }
-    
     $stmt_doctor->bind_param("i", $id_usuario);
     $stmt_doctor->execute();
     $result_doctor = $stmt_doctor->get_result();
     
-    file_put_contents('debug_log.txt', "Filas encontradas en doctores: " . $result_doctor->num_rows . "\n", FILE_APPEND);
-    
     if ($result_doctor->num_rows === 0) {
-        $error = "Usuario no es un doctor válido. id_usuario: " . $id_usuario;
-        file_put_contents('debug_log.txt', "ERROR: " . $error . "\n", FILE_APPEND);
-        echo json_encode(["error" => $error]);
+        echo json_encode(["error" => "Usuario no es un doctor válido"]);
         exit;
     }
     
@@ -61,9 +40,6 @@ try {
     $id_doctor_logueado = $doctor['id_doctor'];
     $stmt_doctor->close();
 
-    file_put_contents('debug_log.txt', "id_doctor encontrado: " . $id_doctor_logueado . "\n", FILE_APPEND);
-
-    // Consulta principal
     $sql = "SELECT DISTINCT 
                 p.id_paciente, 
                 u.nombre_completo,
@@ -79,16 +55,12 @@ try {
     $stmt = $conn->prepare($sql);
     
     if (!$stmt) {
-        $error = "Error preparando la consulta: " . $conn->error;
-        file_put_contents('debug_log.txt', "ERROR: " . $error . "\n", FILE_APPEND);
-        throw new Exception($error);
+        throw new Exception("Error preparando la consulta: " . $conn->error);
     }
     
     $stmt->bind_param("i", $id_doctor_logueado);
     $stmt->execute();
     $resultado = $stmt->get_result();
-
-    file_put_contents('debug_log.txt', "Filas encontradas en pacientes: " . $resultado->num_rows . "\n", FILE_APPEND);
 
     $pacientes = [];
     while ($fila = $resultado->fetch_assoc()) {
@@ -105,9 +77,6 @@ try {
         $pacientes[] = $fila;
     }
 
-    file_put_contents('debug_log.txt', "Pacientes a enviar: " . count($pacientes) . "\n", FILE_APPEND);
-    file_put_contents('debug_log.txt', "=== FIN listaPacientes.php ===\n\n", FILE_APPEND);
-
     if (empty($pacientes)) {
         echo json_encode(["message" => "No se encontraron pacientes"]);
     } else {
@@ -117,7 +86,6 @@ try {
     $stmt->close();
 
 } catch (Exception $e) {
-    file_put_contents('debug_log.txt', "EXCEPCIÓN: " . $e->getMessage() . "\n", FILE_APPEND);
     http_response_code(500);
     echo json_encode(["error" => "Error en el servidor: " . $e->getMessage()]);
 }

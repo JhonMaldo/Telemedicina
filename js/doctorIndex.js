@@ -115,31 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(cargarNotificaciones, 1000);
 });
 
-// 2. Función para cargar la LISTA de pacientes - CON DEBUGGING
+// 2. Función para cargar la LISTA de pacientes - LIMPIA
 async function cargarListaPacientes() {
     try {
         console.log('🔄 Cargando lista de pacientes...');
         recordsSidebar.innerHTML = '<h3>Pacientes</h3><p>Cargando...</p>';
         
-        // ⬇️⬇️⬇️ DEBUGGING DETALLADO ⬇️⬇️⬇️
-        console.log('=== DEBUG LOCALSTORAGE ===');
-        const userData = localStorage.getItem('user');
-        console.log('user en localStorage:', userData);
-        
-        if (!userData) {
-            throw new Error('No hay datos de usuario en localStorage');
-        }
-        
-        const user = JSON.parse(userData);
-        console.log('user parseado:', user);
-        console.log('user.id:', user.id);
-        console.log('=== FIN DEBUG ===');
-
-        if (!user || !user.id) {
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
             throw new Error('No se encontraron datos de usuario válidos');
         }
-
-        console.log('📤 Enviando petición con id_usuario:', user.id);
 
         const response = await fetch('DataBase/php/listaPacientes.php', {
             method: 'POST',
@@ -147,48 +132,25 @@ async function cargarListaPacientes() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                id_usuario: user.id
+                id_usuario: userData.id
             })
         });
         
-        console.log('📨 Status de respuesta:', response.status);
-        console.log('📨 OK?:', response.ok);
-
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
         const text = await response.text();
-        console.log('📄 Respuesta cruda:', text);
-        
-        // Verificar si la respuesta está vacía
-        if (!text.trim()) {
-            throw new Error('El servidor devolvió una respuesta vacía');
-        }
-        
-        let pacientes;
-        try {
-            pacientes = JSON.parse(text);
-        } catch (parseError) {
-            console.error('❌ Error parseando JSON:', parseError);
-            throw new Error('El servidor devolvió una respuesta inválida: ' + text);
-        }
-        
-        console.log('✅ JSON parseado correctamente:', pacientes);
+        const pacientes = JSON.parse(text);
 
-        // Limpiamos la lista
         recordsSidebar.innerHTML = '<h3>Pacientes</h3>';
         
         if (pacientes.length === 0) {
             recordsSidebar.innerHTML += '<p>No hay pacientes registrados</p>';
             recordsContent.innerHTML = '<div class="loading-message"><p>No hay pacientes disponibles</p></div>';
-            console.log('ℹ️ No hay pacientes para mostrar');
             return;
         }
 
-        console.log(`✅ ${pacientes.length} pacientes cargados`);
-
-        // Creamos un item por cada paciente
         pacientes.forEach(paciente => {
             const item = document.createElement('div');
             item.className = 'record-item';
@@ -202,23 +164,15 @@ async function cargarListaPacientes() {
             recordsSidebar.appendChild(item);
         });
 
-        // Limpiar el contenido principal
         recordsContent.innerHTML = '<div class="loading-message"><p>Selecciona un paciente para ver su expediente</p></div>';
 
     } catch (error) {
         console.error('❌ Error cargando lista de pacientes:', error);
-        recordsSidebar.innerHTML = `
-            <h3>Pacientes</h3>
-            <p class="error">Error al cargar pacientes</p>
-            <button class="btn btn-sm" onclick="cargarListaPacientes()">
-                Reintentar
-            </button>
-        `;
+        recordsSidebar.innerHTML = '<h3>Pacientes</h3><p class="error">Error al cargar pacientes</p>';
         recordsContent.innerHTML = `
             <div class="error-message">
                 <h3>Error de conexión</h3>
-                <p>No se pudo cargar la lista de pacientes: ${error.message}</p>
-                <p>Verifica la consola para más detalles.</p>
+                <p>${error.message}</p>
                 <button class="btn" onclick="cargarListaPacientes()">Reintentar</button>
             </div>
         `;
@@ -2110,7 +2064,7 @@ function generarReportePaciente(idPaciente) {
     // Aquí puedes implementar la generación de reportes
 }
 
-// ===== SISTEMA DE NOTIFICACIONES - VERSIÓN DEBUG =====
+// ===== SISTEMA DE NOTIFICACIONES - VERSIÓN CORREGIDA =====
 let isLoading = false;
 let notificacionesCache = [];
 
@@ -2120,7 +2074,27 @@ async function cargarNotificaciones() {
     
     try {
         console.log('🔄 Iniciando carga de notificaciones...');
-        const response = await fetch('DataBase/php/obtenerNotificaciones.php?_=' + Date.now());
+        
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            console.warn('⚠️ No se pudieron cargar notificaciones: usuario no logueado');
+            return;
+        }
+
+        console.log('👤 Usuario logueado:', userData.id);
+        
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario al servidor ⬇️⬇️⬇️
+        const response = await fetch('DataBase/php/obtenerNotificaciones.php?_=' + Date.now(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: userData.id
+            })
+        });
+        
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
         const notificaciones = await response.json();
@@ -2155,8 +2129,11 @@ function renderizarNotificaciones(notificaciones) {
         item.className = `notificacion-item ${notificacion.leido == 1 ? 'leido' : ''}`;
         item.dataset.id = notificacion.id; // Para debug
         
+        // ⬇️⬇️⬇️ MEJORADO: Iconos más específicos según el tipo ⬇️⬇️⬇️
+        const icono = obtenerIconoPorTipo(notificacion.tipo_notificacion);
+        
         item.innerHTML = `
-            <div class="notificacion-icono">${notificacion.tipo_notificacion === 'cita' ? '<i class="fas fa-calendar"></i>' : '<i class="fas fa-bell"></i>'}</div>
+            <div class="notificacion-icono">${icono}</div>
             <div class="notificacion-mensaje">${notificacion.mensaje}</div>
             <div class="notificacion-fecha">${notificacion.fecha}</div>
         `;
@@ -2180,6 +2157,22 @@ function renderizarNotificaciones(notificaciones) {
     listaNotificaciones.innerHTML = '';
     listaNotificaciones.appendChild(fragment);
     console.log('✅ Renderizado completado');
+}
+
+// ⬇️⬇️⬇️ NUEVA FUNCIÓN: Obtener icono según tipo de notificación ⬇️⬇️⬇️
+function obtenerIconoPorTipo(tipo) {
+    const iconos = {
+        'Bienvenida': '<i class="fas fa-hand-wave"></i>',
+        'Recordatorio': '<i class="fas fa-clock"></i>',
+        'NuevoPaciente': '<i class="fas fa-user-plus"></i>',
+        'Consulta completada': '<i class="fas fa-check-circle"></i>',
+        'Consulta registrada': '<i class="fas fa-file-medical"></i>',
+        'Informe': '<i class="fas fa-file-alt"></i>',
+        'AvisoSistema': '<i class="fas fa-cog"></i>',
+        'cita': '<i class="fas fa-calendar"></i>'
+    };
+    
+    return iconos[tipo] || '<i class="fas fa-bell"></i>';
 }
 
 async function marcarNotificacionComoLeida(idNotificacion, elementoHTML) {
@@ -2211,6 +2204,12 @@ async function marcarNotificacionComoLeida(idNotificacion, elementoHTML) {
             actualizarContadorNotificaciones();
         } else {
             console.log('✅ Notificación actualizada en la BD.');
+            
+            // ⬇️⬇️⬇️ NUEVO: Actualizar el cache local ⬇️⬇️⬇️
+            const notificacionIndex = notificacionesCache.findIndex(n => n.id == idNotificacion);
+            if (notificacionIndex !== -1) {
+                notificacionesCache[notificacionIndex].leido = 1;
+            }
         }
     } catch (error) {
         console.error('❌ Error de red:', error);
@@ -2227,11 +2226,18 @@ function actualizarContadorNotificaciones() {
         return;
     }
     
-    const notificacionesNoLeidas = document.querySelectorAll('.notificacion-item:not(.leido)').length;
+    // ⬇️⬇️⬇️ MEJORADO: Contar desde el cache para mayor precisión ⬇️⬇️⬇️
+    const notificacionesNoLeidas = notificacionesCache.filter(n => n.leido == 0).length;
     console.log(`🔢 Actualizando contador: ${notificacionesNoLeidas} no leídas`);
     
     badge.textContent = notificacionesNoLeidas;
     badge.style.display = notificacionesNoLeidas > 0 ? 'inline-block' : 'none';
+}
+
+// ⬇️⬇️⬇️ NUEVA FUNCIÓN: Forzar recarga de notificaciones ⬇️⬇️⬇️
+function forzarRecargaNotificaciones() {
+    notificacionesCache = []; // Limpiar cache
+    cargarNotificaciones();
 }
 
 // Event listeners para debug
@@ -2243,6 +2249,12 @@ document.addEventListener('click', function(e) {
 
 // Recargar cada 60 segundos
 setInterval(cargarNotificaciones, 60000);
+
+// ⬇️⬇️⬇️ NUEVO: Cargar notificaciones al iniciar la página ⬇️⬇️⬇️
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando sistema de notificaciones...');
+    setTimeout(cargarNotificaciones, 1000); // Pequeño delay para asegurar que el DOM esté listo
+});
 
 
 // ===============================================
