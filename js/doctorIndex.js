@@ -1611,7 +1611,7 @@ function diagnosticarRecetaActual() {
 // Ya no es tan necesario aquí, se puede llamar en las funciones de descarga/guardado si falla
 // diagnosticarRecetaActual(); 
 
-// ===== SISTEMA COMPLETO DE GESTIÓN DE PACIENTES =====
+// ===== SISTEMA COMPLETO DE GESTIÓN DE PACIENTES - CORREGIDO =====
 
 // Variables globales
 let pacienteSeleccionado = null;
@@ -1646,7 +1646,7 @@ function inicializarSistemaPacientes() {
     }
 }
 
-// Cargar lista completa de pacientes
+// Cargar lista completa de pacientes - CORREGIDA
 async function cargarListaPacientesCompleta() {
     try {
         console.log('🔄 Cargando lista completa de pacientes...');
@@ -1665,7 +1665,24 @@ async function cargarListaPacientesCompleta() {
             </div>
         `;
         
-        const response = await fetch('DataBase/php/listaPacientes.php');
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario válidos');
+        }
+
+        console.log('👤 Usuario logueado:', userData.id);
+        
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario al servidor ⬇️⬇️⬇️
+        const response = await fetch('DataBase/php/listaPacientes.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: userData.id
+            })
+        });
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -1803,7 +1820,7 @@ function filtrarPacientes(searchTerm) {
     }
 }
 
-// Mostrar detalles del paciente seleccionado
+// Mostrar detalles del paciente seleccionado - CORREGIDA
 async function mostrarDetallesPaciente(idPaciente) {
     try {
         const vistaPaciente = document.getElementById('vista-paciente-seleccionado');
@@ -1821,7 +1838,14 @@ async function mostrarDetallesPaciente(idPaciente) {
             </div>
         `;
         
-        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${idPaciente}`);
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario válidos');
+        }
+
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario como parámetro ⬇️⬇️⬇️
+        const response = await fetch(`DataBase/php/perfilPaciente.php?id=${idPaciente}&id_usuario=${userData.id}`);
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -2063,7 +2087,6 @@ function generarReportePaciente(idPaciente) {
     alert(`📊 Generar reporte para paciente ID: ${idPaciente}\n\nEsta funcionalidad estará disponible en la próxima actualización.`);
     // Aquí puedes implementar la generación de reportes
 }
-
 // ===== SISTEMA DE NOTIFICACIONES - VERSIÓN CORREGIDA =====
 let isLoading = false;
 let notificacionesCache = [];
