@@ -593,7 +593,23 @@ function inicializarSistemaRecetas() {
 async function cargarPacientesParaRecetas() {
     try {
         console.log('🔄 Cargando pacientes para recetas...');
-        const response = await fetch('DataBase/php/listaPacientes.php');
+        
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario válidos');
+        }
+
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario al servidor ⬇️⬇️⬇️
+        const response = await fetch('DataBase/php/listaPacientes.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: userData.id
+            })
+        });
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -752,7 +768,7 @@ function cancelarReceta() {
  * Realiza validaciones básicas.
  * @returns {object|null} Objeto con datos de la receta, or null si falla la validación.
  */
-function buildRecetaDataFromForm() {
+async function buildRecetaDataFromForm() {
     const pacienteId = document.getElementById('select-paciente').value;
     const medicamentos = document.getElementById('medicamentos').value.trim();
     const instrucciones = document.getElementById('instrucciones').value.trim();
@@ -775,6 +791,15 @@ function buildRecetaDataFromForm() {
     const select = document.getElementById('select-paciente');
     const nombrePaciente = select.options[select.selectedIndex].text.split(' - ')[0];
 
+    // ⬇️⬇️⬇️ NUEVO: Obtener datos del doctor logueado ⬇️⬇️⬇️
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (!userData || !userData.id) {
+        throw new Error('No se encontraron datos de usuario válidos');
+    }
+
+    // Obtener información del doctor
+    const doctorData = await obtenerDatosDoctor(userData.id);
+    
     // Devolver el objeto completo
     return {
         paciente_id: pacienteId,
@@ -784,22 +809,16 @@ function buildRecetaDataFromForm() {
         validez_dias: validez,
         fecha_emision: new Date().toISOString().split('T')[0],
         
-        // --- DATOS ADICIONALES (Hardcoded por ahora) ---
-        // Estos valores deberían venir del formulario o del sistema de sesión
-        // Tu PHP usa 101, así que lo alineamos
-        doctor_id: 101, // Alineado con tu guardarReceta.php
-        consulta_id: null, 
-        
-        // Info para la VISTA PREVIA (no se guarda en BD)
-        // ESTO SE PUEDE QUEDAR ASÍ, ya que tu obtenerReceta.php
-        // jala los datos correctos del doctor al VER una receta guardada.
-        doctor_nombre: 'Dr. Laura Martínez',
-        doctor_especialidad: 'Cardióloga',
-        doctor_cedula: 'LIC-DF-2020-001',
+        // --- DATOS DEL DOCTOR LOGEADO ---
+        doctor_id: doctorData.id_doctor,
+        doctor_nombre: doctorData.nombre_completo || userData.name,
+        doctor_especialidad: doctorData.especialidad || 'Médico',
+        doctor_cedula: doctorData.numero_licencia || 'N/A',
         consultorio: 'Centro Médico TeleMed',
         direccion_consultorio: 'Av. Principal #123, Ciudad'
     };
 }
+
 //funcion para obtner datos del doctor
 async function obtenerDatosDoctor(idDoctor) {
     const url = `/Telemedicina/DataBase/php/obtenerDoctor.php?id_doctor=${idDoctor}`;
@@ -874,57 +893,60 @@ function generarHTMLVistaPrevia(receta) {
     `;
 }
 
-// 5. Generar vista previa de receta (VERSIÓN CORREGIDA Y REFACTORIZADA)
-function generarVistaPrevia() {
-    
-    // --- MODIFICADO ---
-    // Usar la nueva función auxiliar para obtener los datos
-    recetaActual = buildRecetaDataFromForm();
-    
-    if (!recetaActual) {
-        return; // La validación falló y ya mostró alerta
-    }
-    // --- FIN MODIFICADO ---
 
-    console.log('✅ recetaActual creado:', recetaActual);
-    
-    // Mostrar loading
-    const vistaPrevia = document.querySelector('.receta-preview');
-    if (!vistaPrevia) {
-        console.error('❌ Elemento .receta-preview no encontrado');
-        alert('Error: No se puede mostrar la vista previa');
-        return;
-    }
-    
-    vistaPrevia.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #3498db;"></i>
-            <p style="margin-top: 15px;">Generando vista previa...</p>
-        </div>
-    `;
-    
-    // Pequeño delay para mejor UX
-    setTimeout(() => {
-        try {
-            // Generar vista previa MEJORADA
-            vistaPrevia.innerHTML = generarHTMLVistaPrevia(recetaActual);
-            
-            // Mostrar vista previa - CON VERIFICACIÓN
-            const formularioReceta = document.getElementById('formulario-receta');
-            const vistaPreviaReceta = document.getElementById('vista-previa-receta');
-            const listaRecetas = document.getElementById('lista-recetas');
-            
-            if (formularioReceta) formularioReceta.style.display = 'none';
-            if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'block';
-            if (listaRecetas) listaRecetas.style.display = 'none';
-            
-            console.log('📄 Vista previa generada correctamente');
-            
-        } catch (error) {
-            console.error('❌ Error generando vista previa:', error);
-            alert('Error al generar la vista previa: ' + error.message);
+// 5. Generar vista previa de receta (VERSIÓN CORREGIDA Y REFACTORIZADA)
+async function generarVistaPrevia() {
+    try {
+        // ⬇️⬇️⬇️ MODIFICADO: Usar función async ⬇️⬇️⬇️
+        recetaActual = await buildRecetaDataFromForm();
+        
+        if (!recetaActual) {
+            return; // La validación falló y ya mostró alerta
         }
-    }, 500);
+
+        console.log('✅ recetaActual creado:', recetaActual);
+        
+        // Mostrar loading
+        const vistaPrevia = document.querySelector('.receta-preview');
+        if (!vistaPrevia) {
+            console.error('❌ Elemento .receta-preview no encontrado');
+            alert('Error: No se puede mostrar la vista previa');
+            return;
+        }
+        
+        vistaPrevia.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #3498db;"></i>
+                <p style="margin-top: 15px;">Generando vista previa...</p>
+            </div>
+        `;
+        
+        // Pequeño delay para mejor UX
+        setTimeout(() => {
+            try {
+                // Generar vista previa MEJORADA
+                vistaPrevia.innerHTML = generarHTMLVistaPrevia(recetaActual);
+                
+                // Mostrar vista previa - CON VERIFICACIÓN
+                const formularioReceta = document.getElementById('formulario-receta');
+                const vistaPreviaReceta = document.getElementById('vista-previa-receta');
+                const listaRecetas = document.getElementById('lista-recetas');
+                
+                if (formularioReceta) formularioReceta.style.display = 'none';
+                if (vistaPreviaReceta) vistaPreviaReceta.style.display = 'block';
+                if (listaRecetas) listaRecetas.style.display = 'none';
+                
+                console.log('📄 Vista previa generada correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error generando vista previa:', error);
+                alert('Error al generar la vista previa: ' + error.message);
+            }
+        }, 500);
+    } catch (error) {
+        console.error('❌ Error en generarVistaPrevia:', error);
+        alert('Error: ' + error.message);
+    }
 }
 
 // 6. Descargar receta como PDF (VERSIÓN CON VALIDACIÓN DE TEXTO)
@@ -1187,17 +1209,16 @@ async function descargarRecetaPDF() {
         }
     }
 }
+
 // 7. Guardar receta en base de datos - VERSIÓN CORREGIDA
 async function guardarReceta() {
     console.log('🔄 Guardando receta...');
 
-    // Obtener datos del formulario
-    const dataFromForm = buildRecetaDataFromForm();
-    if (!dataFromForm) return;
-
-    recetaActual = dataFromForm;
-
     try {
+        // ⬇️⬇️⬇️ MODIFICADO: Usar función async para obtener datos ⬇️⬇️⬇️
+        recetaActual = await buildRecetaDataFromForm();
+        if (!recetaActual) return;
+
         const btnGuardar = document.getElementById('btnGuardarReceta');
         const originalText = btnGuardar.innerHTML;
         btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
@@ -1212,13 +1233,13 @@ async function guardarReceta() {
 
         textoRecetaCompleta += `\n\nVÁLIDA POR: ${recetaActual.validez_dias} días`;
 
-        // ⚠️ ESTE OBJETO YA ESTÁ COMPLETO PARA TU TABLA
+        // Datos para guardar en BD
         const datosReceta = {
-            id_doctor: recetaActual.doctor_id,                 // 101 o el que venga de la sesión
+            id_doctor: recetaActual.doctor_id,
             id_paciente: parseInt(recetaActual.paciente_id),
-            id_consulta: parseInt(document.getElementById('id-consulta').value), // capturado del formulario
+            id_consulta: null, // Puedes modificar esto si tienes consultas asociadas
             la_receta: textoRecetaCompleta,
-            url_pdf: "",                                       // lo puedes llenar luego
+            url_pdf: "",
             fecha_emision: recetaActual.fecha_emision
         };
 
@@ -1242,10 +1263,13 @@ async function guardarReceta() {
         document.getElementById('instrucciones').value = '';
         document.getElementById('validez-receta').value = '30';
         document.getElementById('select-paciente').value = '';
-        document.getElementById('id-consulta').value = '';
+        
+        // Limpiar selección de paciente
+        document.querySelectorAll('.patient-item-mini').forEach(item => item.classList.remove('active'));
 
         recetaActual = null;
 
+        // Recargar lista de recetas
         await cargarRecetasExistentes();
 
     } catch (error) {
@@ -1254,10 +1278,13 @@ async function guardarReceta() {
 
     } finally {
         const btnGuardar = document.getElementById('btnGuardarReceta');
-        btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar';
-        btnGuardar.disabled = false;
+        if (btnGuardar) {
+            btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar';
+            btnGuardar.disabled = false;
+        }
     }
 }
+
 
 // 8. Editar receta - VERSIÓN CORREGIDA
 function editarReceta() {
@@ -1282,6 +1309,7 @@ function editarReceta() {
     }
 }
 
+
 // 9. Cargar recetas existentes - VERSIÓN CORREGIDA
 async function cargarRecetasExistentes(pacienteId = null) {
     try {
@@ -1299,12 +1327,27 @@ async function cargarRecetasExistentes(pacienteId = null) {
             console.warn('⚠️ Botón btn-todas-recetas no encontrado');
         }
         
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario válidos');
+        }
+
         let url = 'DataBase/php/obtenerRecetas.php';
         if (pacienteId) {
             url += `?paciente_id=${pacienteId}`;
         }
         
-        const response = await fetch(url);
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario al servidor ⬇️⬇️⬇️
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: userData.id
+            })
+        });
         
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -1369,13 +1412,8 @@ async function cargarRecetasExistentes(pacienteId = null) {
             // Extraer preview del contenido
             let preview = 'Receta médica';
             if (receta.la_receta) {
-                // --- MODIFICADO ---
-                // Tu PHP ya te da el preview en 'la_receta' (aunque aún no está procesado)
-                // Tomar solo la primera línea de 'la_receta' como preview
                 const lineas = receta.la_receta.split('\n');
-                // Buscar la primera línea que NO sea la etiqueta
                 preview = lineas.find(line => line.trim().length > 0 && !line.startsWith('TRATAMIENTO PRESCRITO:')) || 'Receta médica';
-                // --- FIN MODIFICADO ---
                 if (preview.length > 80) {
                     preview = preview.substring(0, 80) + '...';
                 }
@@ -1393,7 +1431,17 @@ async function cargarRecetasExistentes(pacienteId = null) {
                 <div class="receta-contenido">
                     ${preview}
                 </div>
-                
+                <div class="receta-actions">
+                    <button class="btn btn-sm btn-info" onclick="verRecetaCompleta(${receta.id_receta_medica})">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="descargarRecetaExistente(${receta.id_receta_medica})">
+                        <i class="fas fa-download"></i> PDF
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="reutilizarReceta(${receta.id_receta_medica})">
+                        <i class="fas fa-copy"></i> Reutilizar
+                    </button>
+                </div>
             `;
             contenedor.appendChild(item);
         });
@@ -2279,9 +2327,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(cargarNotificaciones, 1000); // Pequeño delay para asegurar que el DOM esté listo
 });
 
-
 // ===============================================
-// ===== LÓGICA DEL DASHBOARD (NUEVO) =====
+// ===== LÓGICA DEL DASHBOARD (CORREGIDA) =====
 // ===============================================
 
 /**
@@ -2304,13 +2351,35 @@ async function cargarConsultasDashboard() {
         </div>`;
 
     try {
-        // Usamos el mismo endpoint de consultas
-        const response = await fetch('DataBase/php/obtenerConsultas.php?_=' + Date.now());
+        // ⬇️⬇️⬇️ NUEVO: Obtener datos del usuario logueado ⬇️⬇️⬇️
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData.id) {
+            throw new Error('No se encontraron datos de usuario válidos');
+        }
+
+        console.log('👤 Usuario logueado:', userData.id);
+
+        // ⬇️⬇️⬇️ MODIFICADO: Enviar id_usuario al servidor ⬇️⬇️⬇️
+        const response = await fetch('DataBase/php/obtenerConsultas.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_usuario: userData.id
+            })
+        });
+        
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const todasLasConsultasApi = await response.json();
+        
+        // ⬇️⬇️⬇️ NUEVO: Manejar errores del backend ⬇️⬇️⬇️
+        if (todasLasConsultasApi.error) {
+            throw new Error(todasLasConsultasApi.error);
+        }
 
         // Filtrar solo las de hoy
         const ahora = new Date();
@@ -2331,6 +2400,7 @@ async function cargarConsultasDashboard() {
             <div class="error-message-compact">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>No se pudo cargar la agenda.</p>
+                <p><small>${error.message}</small></p>
                 <button class="btn btn-sm" onclick="cargarConsultasDashboard()">Reintentar</button>
             </div>`;
     }
@@ -2369,7 +2439,7 @@ function renderizarConsultasDashboard(consultas, container) {
             actionButton = `<button class="btn btn-sm btn-success" onclick="irAPerfilConsulta(${consulta.id})"><i class="fas fa-video"></i> Unir</button>`;
         } else if (consulta.estado === 'completada') {
             // Botón de ver expediente si ya se completó
-            actionButton = `<button class="btn btn-sm btn-secondary" onclick="irAExpediente(${consulta.paciente_id})"><i class="fas fa-notes-medical"></i> Ver Exp.</button>`;
+            actionButton = `<button class="btn btn-sm btn-secondary" onclick="irAExpediente(${consulta.id_paciente})"><i class="fas fa-notes-medical"></i> Ver Exp.</button>`;
         } else {
             // Botón de ver perfil de consulta por defecto
             actionButton = `<button class="btn btn-sm btn-info" onclick="irAPerfilConsulta(${consulta.id})"><i class="fas fa-eye"></i> Ver</button>`;
@@ -2411,20 +2481,48 @@ function irAPerfilConsulta(idConsulta) {
     // Esperar un momento para que la UI se actualice y cargue las consultas
     setTimeout(() => {
         // Asegurarse de que las consultas estén cargadas
-        if (todasLasConsultas.length === 0) {
+        if (typeof todasLasConsultas === 'undefined' || todasLasConsultas.length === 0) {
             // Si no están cargadas, forzar la carga y luego seleccionar
             cargarConsultas().then(() => {
-                seleccionarConsultaEnLista(idConsulta);
-                mostrarDetallesConsulta(idConsulta);
+                if (typeof seleccionarConsultaEnLista === 'function') {
+                    seleccionarConsultaEnLista(idConsulta);
+                }
+                if (typeof mostrarDetallesConsulta === 'function') {
+                    mostrarDetallesConsulta(idConsulta);
+                }
             });
         } else {
             // Si ya están cargadas, solo seleccionar
-            seleccionarConsultaEnLista(idConsulta);
-            mostrarDetallesConsulta(idConsulta);
+            if (typeof seleccionarConsultaEnLista === 'function') {
+                seleccionarConsultaEnLista(idConsulta);
+            }
+            if (typeof mostrarDetallesConsulta === 'function') {
+                mostrarDetallesConsulta(idConsulta);
+            }
         }
     }, 300); // 300ms de espera
 }
 
+// ⬇️⬇️⬇️ NUEVO: Asegurar que se carguen las consultas del dashboard al iniciar ⬇️⬇️⬇️
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando dashboard...');
+    
+    // Cargar consultas del dashboard después de un pequeño delay
+    setTimeout(() => {
+        if (document.querySelector('#dashboard .appointments-list')) {
+            cargarConsultasDashboard();
+        }
+    }, 500);
+});
+
+// ⬇️⬇️⬇️ NUEVO: Función para recargar el dashboard manualmente ⬇️⬇️⬇️
+function recargarDashboard() {
+    console.log('🔄 Recargando dashboard...');
+    cargarConsultasDashboard();
+    
+    // También puedes agregar aquí la recarga de otros elementos del dashboard
+    // como estadísticas, notificaciones, etc.
+}
 
 // ===== SISTEMA DE CONSULTAS VIRTUALES =====
 
