@@ -1369,7 +1369,6 @@ async function cargarRecetasExistentes(pacienteId = null) {
                 <div class="receta-contenido">
                     ${preview}
                 </div>
-<<<<<<< HEAD
                 <div class="receta-actions">
                     <button class="btn btn-sm btn-info" onclick="verRecetaCompleta(${receta.id_receta_medica})">
                         <i class="fas fa-eye"></i> Ver
@@ -1386,9 +1385,12 @@ async function cargarRecetasExistentes(pacienteId = null) {
 >>>>>>> origin/master
                     </button>
                 </div>
+<<<<<<< HEAD
 =======
                 
 >>>>>>> parent of 4abc280 (Conexión Recetas con Inicio y bd)
+=======
+>>>>>>> parent of 3636aa2 (Reapply "Merge remote-tracking branch 'origin/master'")
             `;
             contenedor.appendChild(item);
         });
@@ -2229,7 +2231,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(cargarNotificaciones, 1000); // Pequeño delay para asegurar que el DOM esté listo
 });
 >>>>>>> origin/master
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 3636aa2 (Reapply "Merge remote-tracking branch 'origin/master'")
 
 // ===============================================
 // ===== LÓGICA DEL DASHBOARD (NUEVO) =====
