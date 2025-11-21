@@ -355,8 +355,81 @@ document.getElementById('code-form').addEventListener('submit', async function(e
         const responseText = await response.text();
         console.log('📄 Respuesta cruda:', responseText);
         
+<<<<<<< HEAD
+        document.getElementById('admin-register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateAdminRegisterForm()) {
+                // Aquí iría la lógica para enviar los datos al servidor
+                alert('Solicitud de registro de administrador enviada (simulación)');
+                window.location.href = 'login.html';
+            }
+        });
+        
+        document.getElementById('forgot-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateForgotForm()) {
+                document.getElementById('forgot-success').style.display = 'block';
+                // Aquí iría la lógica para enviar el correo de recuperación
+            }
+        });
+        
+        function validateLoginForm() {
+            let isValid = true;
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+            
+            // Validar email
+            if (!validateEmail(email)) {
+                showError('login-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('login-email-error');
+            }
+            
+            // Validar contraseña
+            if (password.length < 6) {
+                showError('login-password-error', 'La contraseña debe tener al menos 6 caracteres');
+                isValid = false;
+            } else {
+                hideError('login-password-error');
+            }
+            
+            if (isValid) {
+                // Enviar datos al servidor
+                loginUser(email, password, activeType);
+            }
+            
+            return false; // Prevenir envío normal del formulario
+        }
+
+        function loginUser(email, password, userType) {
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('user_type', userType);
+            
+            fetch('login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                } else {
+                    showError('login-password-error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('login-password-error', 'Error de conexión');
+            });
+=======
         if (!responseText.trim()) {
             throw new Error('El servidor devolvió una respuesta vacía');
+>>>>>>> origin/master
         }
         
         let result;
@@ -382,6 +455,182 @@ document.getElementById('code-form').addEventListener('submit', async function(e
             alert('❌ ' + result.message);
         }
         
+<<<<<<< HEAD
+        function validateAdminRegisterForm() {
+            let isValid = true;
+            
+            // Validar nombre
+            const name = document.getElementById('admin-name').value;
+            if (name.trim().length < 2) {
+                showError('admin-name-error', 'El nombre debe tener al menos 2 caracteres');
+                isValid = false;
+            } else {
+                hideError('admin-name-error');
+            }
+            
+            // Validar email
+            const email = document.getElementById('admin-email').value;
+            if (!validateEmail(email)) {
+                showError('admin-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('admin-email-error');
+            }
+            
+            // Validar teléfono
+            const phone = document.getElementById('admin-phone').value;
+            if (!validatePhone(phone)) {
+                showError('admin-phone-error', 'Por favor ingresa un número de teléfono válido');
+                isValid = false;
+            } else {
+                hideError('admin-phone-error');
+            }
+            
+            // Validar departamento
+            const department = document.getElementById('admin-department').value;
+            if (!department) {
+                showError('admin-department-error', 'Por favor selecciona tu departamento');
+                isValid = false;
+            } else {
+                hideError('admin-department-error');
+            }
+            
+            // Validar código de verificación
+            const code = document.getElementById('admin-code').value;
+            if (!code.trim()) {
+                showError('admin-code-error', 'Por favor ingresa el código de verificación');
+                isValid = false;
+            } else {
+                hideError('admin-code-error');
+            }
+            
+            // Validar contraseña (más estricta para administradores)
+            const password = document.getElementById('admin-password').value;
+            if (!validateAdminPassword(password)) {
+                showError('admin-password-error', 'La contraseña debe tener al menos 10 caracteres, incluyendo una mayúscula, un número y un carácter especial');
+                isValid = false;
+            } else {
+                hideError('admin-password-error');
+            }
+            
+            // Validar confirmación de contraseña
+            const confirmPassword = document.getElementById('admin-confirm-password').value;
+            if (password !== confirmPassword) {
+                showError('admin-confirm-password-error', 'Las contraseñas no coinciden');
+                isValid = false;
+            } else {
+                hideError('admin-confirm-password-error');
+            }
+            
+            return isValid;
+        }
+        
+        function validateForgotForm() {
+            let isValid = true;
+            const email = document.getElementById('forgot-email').value;
+            
+            if (!validateEmail(email)) {
+                showError('forgot-email-error', 'Por favor ingresa un correo electrónico válido');
+                isValid = false;
+            } else {
+                hideError('forgot-email-error');
+            }
+            
+            return isValid;
+        }
+        
+        // Funciones auxiliares de validación
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function validatePhone(phone) {
+            const re = /^[0-9+\-\s()]{10,}$/;
+            return re.test(phone);
+        }
+        
+        function validatePassword(password) {
+            // Al menos 8 caracteres, una mayúscula, un número y un carácter especial
+            const re = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return re.test(password);
+        }
+        
+        function validateAdminPassword(password) {
+            // Al menos 10 caracteres, una mayúscula, un número y un carácter especial (más estricto)
+            const re = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+            return re.test(password);
+        }
+        
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
+        }
+        
+        // Inicializar la interfaz
+        updateLoginUI();
+
+        // En la función updateLoginUI, agregar:
+function updateLoginUI() {
+    const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+    document.getElementById('login-user-type').value = activeType;
+    // ... resto del código
+}
+
+// En la función updateRegisterForm, agregar:
+function updateRegisterForm() {
+    const activeType = document.querySelector('.user-type.active').getAttribute('data-type');
+    // Actualizar los hidden fields en cada formulario
+    document.querySelectorAll('input[name="user_type"]').forEach(input => {
+        input.value = activeType;
+    });
+    // ... resto del código
+}
+
+// Función para manejar registro
+function registerUser(formData, userType) {
+    fetch('register.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response:', data);
+        if (data.success) {
+            alert(data.message);
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión: ' + error.message);
+    });
+}
+
+// En cada formulario de registro, actualiza el event listener:
+document.getElementById('patient-register-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (validatePatientRegisterForm()) {
+        const formData = new FormData(this);
+        registerUser(formData, 'patient');
+    }
+});
+=======
     } catch (error) {
         console.error('💥 Error completo:', error);
         alert('❌ Error: ' + error.message);
@@ -599,3 +848,4 @@ function hideError(elementId) {
 
 // Inicializar la interfaz
 updateLoginUI();
+>>>>>>> origin/master
