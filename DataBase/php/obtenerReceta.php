@@ -10,23 +10,19 @@ try {
 
     $id = intval($_GET['id']);
 
-    // ⬇️⬇️⬇️ MODIFICADO: Usar MySQLi en lugar de PDO y agregar validación de doctor ⬇️⬇️⬇️
     $sql = "SELECT r.*,
-                   u.nombre_completo AS paciente_nombre,
+                   p.nombre_completo AS paciente_nombre,
                    d.nombre_completo AS doctor_nombre,
                    d.especialidad AS doctor_especialidad,
-                   d.numero_licencia AS doctor_cedula
-            FROM receta_medica r
+                   d.cedula AS doctor_cedula
+            FROM recetas_medicas r
             INNER JOIN pacientes p ON r.id_paciente = p.id_paciente
-            INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
             INNER JOIN doctores d ON r.id_doctor = d.id_doctor
             WHERE r.id_receta_medica = ?";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $receta = $result->fetch_assoc();
+    $stmt = $conexion->prepare($sql);
+    $stmt->execute([$id]);
+    $receta = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$receta) {
         echo json_encode(["error" => "Receta no encontrada"]);
@@ -63,6 +59,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(["error" => "Error al obtener la receta: " . $e->getMessage()]);
 }
-
-$conn->close();
-?>
