@@ -5,8 +5,36 @@ header('Access-Control-Allow-Origin: *');
 include 'conexion.php';
 
 try {
-    // ID del doctor fijo
-    $id_doctor = 101;
+    // ⬇️⬇️⬇️ MODIFICADO: Obtener ID del usuario desde el frontend ⬇️⬇️⬇️
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    $id_usuario = $data['id_usuario'] ?? null;
+
+    // Si no se envía por POST, intentar por GET
+    if ($id_usuario === null) {
+        $id_usuario = $_GET['id_usuario'] ?? null;
+    }
+
+    if (!$id_usuario) {
+        echo json_encode(["error" => "Se requiere el ID del usuario"]);
+        exit;
+    }
+
+    // ⬇️⬇️⬇️ NUEVO: Obtener id_doctor del usuario ⬇️⬇️⬇️
+    $sql_doctor = "SELECT id_doctor FROM doctores WHERE id_usuario = ?";
+    $stmt_doctor = $conn->prepare($sql_doctor);
+    $stmt_doctor->bind_param("i", $id_usuario);
+    $stmt_doctor->execute();
+    $result_doctor = $stmt_doctor->get_result();
+    
+    if ($result_doctor->num_rows === 0) {
+        echo json_encode(["error" => "Usuario no es un doctor válido"]);
+        exit;
+    }
+    
+    $doctor = $result_doctor->fetch_assoc();
+    $id_doctor = $doctor['id_doctor'];
+    $stmt_doctor->close();
 
     // Filtrar por paciente si viene en GET
     $paciente_id = isset($_GET['paciente_id']) ? intval($_GET['paciente_id']) : null;
