@@ -14,8 +14,31 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 try {
-    // ID del doctor hardcodeado por ahora
-    $id_doctor_logueado = 101; 
+    // Obtener ID del usuario desde el frontend
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    $id_usuario = $data['id_usuario'] ?? null;
+
+    if (!$id_usuario) {
+        echo json_encode(["error" => "Se requiere el ID del usuario"]);
+        exit;
+    }
+
+    // Obtener id_doctor del usuario
+    $sql_doctor = "SELECT id_doctor FROM doctores WHERE id_usuario = ?";
+    $stmt_doctor = $conn->prepare($sql_doctor);
+    $stmt_doctor->bind_param("i", $id_usuario);
+    $stmt_doctor->execute();
+    $result_doctor = $stmt_doctor->get_result();
+    
+    if ($result_doctor->num_rows === 0) {
+        echo json_encode(["error" => "Usuario no es un doctor válido"]);
+        exit;
+    }
+    
+    $doctor = $result_doctor->fetch_assoc();
+    $id_doctor_logueado = $doctor['id_doctor'];
+    $stmt_doctor->close();
 
     $sql = "SELECT DISTINCT 
                 p.id_paciente, 
